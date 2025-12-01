@@ -5,23 +5,6 @@ This project demonstrates real-world frontend development with modern Angular ar
 
 ---
 
-# ⭐ HR Overview (Non-technical)
-
-**SpotifyClone** is a modern web application that visually and functionally recreates the Spotify homepage.
-
-The project demonstrates:
-
-- Ability to build complex UI layouts  
-- Experience with API integration  
-- Understanding of component-based architecture  
-- Skills in both frontend and backend  
-- Real-world Git workflow (main / dev / feature branches)  
-- Work with modern frameworks and tools  
-
-**What HR should know:**  
-This project shows that I can build real applications, not just simple test tasks.
-
----
 
 # 🧑‍💻 Technical Summary
 
@@ -39,9 +22,6 @@ This project shows that I can build real applications, not just simple test task
 - REST API server (albums.json)  
 - Clean component-service-template structure  
 - Prepared modules for search, login, and player
-
-**Purpose:**  
-Demonstrate production-level Angular architecture and full-stack app design.
 
 ---
 
@@ -154,22 +134,6 @@ Run e2e tests:
 ng e2e
 ```
 
----
-
-# 📌 Why This Project Matters (for Employers)
-
-This project proves the ability to:
-
-- Work with modern Angular architecture  
-- Build scalable and reusable components  
-- Connect frontend and backend  
-- Structure applications the way teams do in real companies  
-- Follow production Git standards  
-- Develop and maintain a real product-like codebase  
-
-This is the type of project expected from **strong juniors** and **early mid-level developers**.
-
----
 
 # 📚 Additional Resources
 
