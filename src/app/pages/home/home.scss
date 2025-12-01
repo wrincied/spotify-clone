@@ -1,0 +1,53 @@
+.spotify__home-container {
+    display: flex;
+    height: 100vh;
+
+    .spotify__home-container_side-bar {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        background-color: black;
+        height: 100vh;
+
+        .spotify__home-container_side-bar-item {
+            width: 100%;
+
+            margin: 10px;
+            padding-left: 18px;
+
+            &>a {
+                font-style: 16px;
+                color: white;
+                text-decoration: none;
+            }
+
+            &>a:hover {
+                cursor: pointer;
+                color: lightgray;
+            }
+        }
+    }
+
+    .spotify__home-container__playlist-container {
+        padding-top: 75px;
+        background-color: #191919;
+        overflow-y: auto;
+    }
+
+    .playlist_card_collections {
+        display: flex;
+        gap: 20px;
+        max-width: 1500px;
+        overflow-x: auto;
+        height: auto;
+        scroll-behavior: smooth;
+        scrollbar-width: none; // Firefox
+        -ms-overflow-style: none; // IE/Edge
+
+        &::-webkit-scrollbar {
+            display: none; // Chrome/Safari
+        }
+    }
+
+}
