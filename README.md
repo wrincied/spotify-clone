@@ -47,7 +47,7 @@ spotify-clone/
 
 ---
 
-# 🌳 Git Workflow (Professional)
+# 🌳 Git Workflow
 
 ```
 main        → production-ready code
