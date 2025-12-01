@@ -23,7 +23,7 @@ This project shows that I can build real applications, not just simple test task
 
 ---
 
-# 🧑‍💻 Technical Summary (for Resume / CV)
+# 🧑‍💻 Technical Summary
 
 **Tech Stack:**  
 - Angular 21 (standalone components, HttpClient, SCSS)  
