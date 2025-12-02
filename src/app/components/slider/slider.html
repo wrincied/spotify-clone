@@ -1,0 +1,24 @@
+<div class="slider-container">
+    <button class="scroll-btn left" (click)="scrollLeft(slider1)">
+        ‹
+    </button>
+
+    <div #slider1 class="playlist_card_collections" 
+    
+    >
+    <!-- (wheel)="scrollHorizontally($event)" -->
+           @for (song of items; track song.title) {
+        <div id="song_card_item" >
+            <app-song-card
+                [playlistThumbnail]="song.thumbnail"
+                [title]="song.title"
+                [description]="song.description">
+            </app-song-card>
+        </div>
+        }   
+    </div>
+           
+    <button class="scroll-btn right" (click)="scrollRight(slider1)">
+        ›
+    </button>
+</div>
