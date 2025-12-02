@@ -1,9 +1,20 @@
 <div class="spotify__song-card">
-    <div class="spotify__song-card_thumbnail">
-        <img [src]="playlistThumbnail" alt="thumbnail">
-    </div>
-    <div class="spotify__song-card_text">
-        <div class="title">{{ title }}</div>
-        <div class="description">{{ description }}</div>
-    </div>
+
+  <div class="spotify__song-card_thumbnail">
+    @if (!isError && playlistThumbnail){
+    <img [src]="playlistThumbnail" alt="thumbnail" (error)="onError()" />
+    }
+
+
+    @if (isError || !playlistThumbnail ) {
+    <div class="error">Image not available</div>
+    }
+
+  </div>
+
+  <div class="spotify__song-card_text">
+    <div class="title">{{ title }}</div>
+    <div class="description">{{ description }}</div>
+  </div>
+
 </div>

@@ -1,0 +1,64 @@
+.slider-container {
+    position: relative;
+
+    .scroll-btn {
+        position: absolute;
+        top: 40%;
+        transform: translateY(-50%);
+        z-index: 10;
+        background-color: rgba(0, 0, 0, 0.6);
+        border: none;
+        color: white;
+        width: 38px;
+        height: 38px;
+        font-size: 24px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.25s ease;
+        pointer-events: none;
+
+        &.left {
+            left: 10px;
+        }
+
+        &.right {
+            right: 10px;
+        }
+    }
+
+    &:hover .scroll-btn {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .playlist_card_collections {
+        display: flex;
+        gap: 20px;
+        /* главное: нельзя скроллить по X руками */
+        overflow-x: hidden;
+        overflow-y: hidden;
+
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+
+        /* тач-жесты только по Y, по X отключаем */
+        touch-action: pan-y;
+
+        /* чтобы занимал доступное пространство */
+        flex: 1;
+
+        &>#song_card_item {
+            scroll-snap-align: start;
+        }
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+
+
+    }
+}
