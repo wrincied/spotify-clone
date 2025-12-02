@@ -1,34 +1,33 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AlbumService } from '../../services/album';
-import { SongCard } from '../../components/song-card/song-card';
 import { TopNav } from '../../components/top-nav/top-nav';
-
+import { Slider } from '../../components/slider/slider';
+import { ApiService } from '../../services/api';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, SongCard, TopNav],
+  imports: [CommonModule, TopNav, Slider],
   templateUrl: './home.html',
   styleUrls: ['./home.scss'],
 })
 export class Home implements OnInit {
+  SongCards: any[] = [];
+  hasError = false;
+  errorMessage = '';
 
-  public SongCards: any[] = [];
-
-  constructor(private albumService: AlbumService) { }
+  constructor(private api: ApiService) { }
 
   ngOnInit(): void {
-    this.albumService.getAlbums().subscribe({
-      next: (albums) => {
-        this.SongCards = albums;
-        console.log("Loaded albums:", albums);
+    this.api.getAlbums().subscribe({
+      next: (data) => {
+        this.SongCards = data;
       },
-      error: (err) => console.error("AlbumService error:", err)
+      error: (err) => {
+        this.hasError = true;
+        this.errorMessage = err.message;
+      }
     });
   }
-  scrollHorizontally(event: WheelEvent) {
-    const container = event.currentTarget as HTMLElement;
-    container.scrollLeft += event.deltaY;
-  }
-
 }
+

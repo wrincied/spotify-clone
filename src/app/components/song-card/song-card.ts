@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -8,11 +8,24 @@ import { CommonModule } from '@angular/common';
   templateUrl: './song-card.html',
   styleUrls: ['./song-card.scss'],
 })
-export class SongCard implements OnInit {
+export class SongCard {
 
-  @Input() playlistThumbnail!: string;
+  @Input() playlistThumbnail: string | null = null;
+
   @Input() title!: string;
   @Input() description!: string;
 
-  ngOnInit(): void { }
+  isError = false;
+
+
+  onError() {
+    this.isError = true;
+  }
+  ngOnChanges() {
+    if (!this.playlistThumbnail) {
+      this.isError = true;
+    }
+  }
+
+
 }

@@ -8,32 +8,63 @@
     flex-direction: column;
 
     .spotify__song-card_thumbnail {
+        position: relative;
         width: 100%;
         padding: 12px;
+        height: 210px;
 
         img {
             width: 100%;
+            height: 100%;
+            object-fit: cover;
             border-radius: 6px;
             display: block;
+            opacity: 1;
+            transition: opacity .2s ease;
+            position: relative;
+            z-index: 2;
         }
+
     }
 
-    .spotify__song-card_text {
-        padding: 0 14px 14px 14px;
+    .error {
+        position: absolute;
+        inset: 12px;
+        background: #333;
+        border-radius: 6px;
         display: flex;
-        flex-direction: column;
-        gap: 4px;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        z-index: 3;
+    }
+}
 
-        .title {
-            font-size: 16px;
-            font-weight: 600;
-            color: white;
+
+.spotify__song-card_text {
+    padding: 0 14px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .title {
+        font-size: 16px;
+        font-weight: 600;
+        color: white;
+
+        &:hover {
+            text-decoration: underline;
         }
 
-        .description {
-            font-size: 14px;
-            line-height: 18px;
-            color: #d0d0d0;
+    }
+
+    .description {
+        font-size: 14px;
+        line-height: 18px;
+        color: #d0d0d0;
+
+        &:hover {
+            text-decoration: underline;
         }
     }
 }
