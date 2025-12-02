@@ -34,7 +34,13 @@
             color: black;
             font-weight: 500;
             width: 110px;
-            text-align: center;
+            text-align: center; 
+            &:hover{
+                cursor: pointer;
+                color: rgb(9, 185, 9);
+                background-color: rgb(33, 33, 33);
+                transition: all 0.3s ;
+            }
         }
     }
 }
