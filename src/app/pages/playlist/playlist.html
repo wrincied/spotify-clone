@@ -1,1 +1,28 @@
-<p>playlist works!</p>
+@if (album) {
+
+<div class="album_page">
+
+    <div class="album_header">
+        <img [src]="album.cover" class="album_cover" />
+
+        <div class="album_info">
+            <h1>{{ album.title }}</h1>
+            <p>{{ album.description }}</p>
+            <p>{{ album.songs.length }} треков</p>
+        </div>
+    </div>
+
+    <div class="songs_list">
+
+        @for (s of album.songs; track $index) {
+            <div class="song">
+                <img [src]="s.thumbnail || album.cover" />
+                <span>{{ s.title }}</span>
+            </div>
+        }
+
+    </div>
+
+</div>
+
+}
