@@ -1,17 +1,12 @@
-import { Component, OnInit, AfterViewInit, OnDestroy, NgZone, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, NgZone, ChangeDetectorRef, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
 import { Subscription, filter, take } from 'rxjs';
-
+import { isPlatformBrowser } from '@angular/common';
 import { TopNav } from '../../components/top-nav/top-nav';
 import { Slider } from '../../components/slider/slider';
 import { ApiService } from '../../services/api';
-
-interface Album {
-  id: number;
-  title: string;
-  artist: string;
-}
+import { AlbumInterface } from '../../interface/models'; // Импорт интерфейса
 
 @Component({
   selector: 'app-home',
@@ -21,25 +16,23 @@ interface Album {
   styleUrls: ['./home.scss'],
 })
 export class Home implements OnInit, AfterViewInit, OnDestroy {
-  SongCards: Album[] = [];
+
+  albums: AlbumInterface[] = [];
   hasError = false;
   errorMessage = '';
-  private routerSubscription: Subscription | undefined;
+  private routerSubscription?: Subscription;
 
   constructor(
     private api: ApiService,
     private ngZone: NgZone,
     private router: Router,
-    private cdr: ChangeDetectorRef // Добавлен для принудительного обновления View при получении данных
-  ) {}
+    private cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) { }
 
   ngOnInit(): void {
-    // 1. Загружаем данные при инициализации компонента
     this.fetchAlbums();
 
-    // 2. Подписываемся на события навигации.
-    // Это критически важно, если компонент не уничтожается при переходе Login -> Home.
-    // ActivatedRoute.params может не сработать, если параметры URL не меняются, поэтому используем глобальный Router.
     this.routerSubscription = this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
       filter((event: NavigationEnd) => event.urlAfterRedirects.includes('/home'))
@@ -49,36 +42,27 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    // Первая попытка инициализации слайдера (на случай, если данные кэшированы и пришли мгновенно)
     this.ensureSliderInit();
   }
 
   ngOnDestroy(): void {
-    if (this.routerSubscription) {
-      this.routerSubscription.unsubscribe();
-    }
+    this.routerSubscription?.unsubscribe();
   }
 
   private fetchAlbums(): void {
-    // Очищаем массив, чтобы сбросить старое состояние
-    this.SongCards = []; 
-    // Принудительно запускаем проверку изменений, чтобы UI отреагировал на очистку
-    this.cdr.detectChanges(); 
+    this.albums = [];
+    this.cdr.detectChanges();
 
-    this.api.getAlbums().pipe(
-      take(1) // Гарантируем завершение потока после одного значения
-    ).subscribe({
-      next: (data) => {
-        this.SongCards = data as Album[];
-        this.hasError = false;
-        
-        // Обновляем UI с новыми данными
+    this.api.getAlbums().pipe(take(1)).subscribe({
+      next: (res) => {
+        this.albums = res;
+
+        console.log("HOME albums:", this.albums);
+
         this.cdr.detectChanges();
-
-        // Инициализируем слайдер с задержкой, чтобы DOM успел построиться
         setTimeout(() => this.initSlider(), 50);
       },
-      error: (err) => {
+      error: (err: any) => {
         this.hasError = true;
         this.errorMessage = err.message || 'Ошибка загрузки данных';
         this.cdr.detectChanges();
@@ -89,26 +73,22 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
 
   private ensureSliderInit(): void {
     setTimeout(() => {
-      if (this.SongCards && this.SongCards.length > 0) {
+      if (this.albums.length > 0) {
         this.initSlider();
       }
     }, 0);
   }
 
   private initSlider(): void {
-    if (!this.SongCards || this.SongCards.length === 0) {
-      return;
-    }
+    if (!isPlatformBrowser(this.platformId)) return;
+    if (!this.albums.length) return;
 
-    // Запускаем инициализацию сторонних библиотек вне зоны Angular,
-    // чтобы избежать проблем с Гидрацией и лишних циклов обнаружения изменений.
     this.ngZone.runOutsideAngular(() => {
-      // Здесь должен быть код инициализации вашей библиотеки слайдера
       const sliderElement = document.querySelector('.swiper-container');
       if (sliderElement) {
-        // new Swiper(...)
-        console.log('Slider initialized via NgZone');
+        console.log("Slider initialized");
       }
     });
   }
+
 }

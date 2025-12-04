@@ -1,0 +1,77 @@
+.album_page {
+    padding: 24px;
+    color: white;
+    font-family: Arial, sans-serif;
+
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+/* Заголовок альбома */
+.album_header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+
+    .album_cover {
+        width: 180px;
+        height: 180px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .album_info {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        p {
+            margin: 0;
+            font-size: 16px;
+            color: #cfcfcf;
+        }
+    }
+}
+
+/* Список треков */
+.songs_list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Карточка трека */
+.song {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    padding: 10px 12px;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.12);
+    }
+
+    img {
+        width: 48px;
+        height: 48px;
+        border-radius: 4px;
+        object-fit: cover;
+    }
+
+    span {
+        font-size: 16px;
+    }
+}

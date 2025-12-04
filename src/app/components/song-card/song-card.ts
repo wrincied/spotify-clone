@@ -1,5 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, input, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-song-card',
@@ -10,21 +11,32 @@ import { CommonModule } from '@angular/common';
 })
 export class SongCard {
 
-  @Input() playlistThumbnail: string | null = null;
-
   @Input() title!: string;
   @Input() description!: string;
+  @Input() playlistThumbnail!: string;
+
+  @Output() select = new EventEmitter<void>();
+
+  onClick() {
+    this.select.emit();
+  }
 
   isError = false;
 
 
-  onError() {
-    this.isError = true;
+  onImageError(event: Event) {
+    const img = event.target as HTMLImageElement;
+    img.src = 'assets/no-image.jpg';
   }
+
   ngOnChanges() {
     if (!this.playlistThumbnail) {
       this.isError = true;
     }
+  }
+  ngOnInit() { }
+  constructor(private router: Router) {
+
   }
 
 }

@@ -1,35 +1,25 @@
-<div class="spotify__home-container">
-    @if(hasError){
-    <div class="fatal-error">
-        Ошибка загрузки: {{ errorMessage }}
-    </div>
+<div class="spotify__home-container__playlist-container">
+    @if (hasError) {
+    <div class="fatal-error">Ошибка загрузки: {{ errorMessage }}</div>
     }
 
-    <div class="spotify__home-container_side-bar">
-        <div class="spotify__home-container_side-bar-item">
-            <img width="150" class="m-3 text-left" src="assets/spotify-logo_light.png" alt="spotify light logo" />
-        </div>
-        <div class="spotify__home-container_side-bar-item"><a>Home</a></div>
-        <div class="spotify__home-container_side-bar-item"><a>Search</a></div>
-        <div class="spotify__home-container_side-bar-item"><a>Your Library</a></div>
-        <div class="spotify__home-container_side-bar-item"><a>Create Playlist</a></div>
+    @if (albums.length > 0) {
+
+    <div class="playlist_card_collections">
+        <h4>Focus</h4>
+
+        <app-slider [items]="albums" name="focus_section">
+        </app-slider>
     </div>
 
-    <div class="spotify__home-container__playlist-container">
-        <app-top-nav></app-top-nav>
+    <div class="playlist_card_collections">
+        <h4>Spotify Playlist</h4>
 
-        <div class="playlist_card_collections">
-            <h4>Focus</h4>
-            <app-slider [items]="SongCards" name="playlist_card_collections">
-
-            </app-slider>
-        </div>
-        <div class="playlist_card_collections">
-            <h4>Spotify Playlist</h4>
-            <app-slider [items]="SongCards" name="playlist_card_collections">
-
-            </app-slider>
-        </div>
-
+        <app-slider [items]="albums" name="spotify_section">
+        </app-slider>
     </div>
+
+    } @else {
+    <div class="loading-placeholder">Загрузка…</div>
+    }
 </div>

@@ -1,51 +1,142 @@
 .spotify__top-nav {
-    width: 100%;
+    width: 80%;
+    /* Занимает 80% ширины (как правая колонка) */
+    left: 20%;
+    /* Сдвигаем вправо на 20% (ширина сайдбара) */
     height: 75px;
     background-color: #0f0f0f;
     position: fixed;
     top: 0;
+    z-index: 100;
+    /* Добавлено, чтобы навбар был поверх контента */
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+
     display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
     align-items: center;
+    justify-content: space-between;
+    /* Распределяет элементы: лево, центр, право */
+    padding: 0 32px;
+    /* Внутренние отступы вместо margin-left */
+    box-sizing: border-box;
+    /* Чтобы padding не увеличивал ширину блока */
+
     color: lightgray;
     font-weight: 500;
     font-size: 18px;
 
+    /* Левая часть: Заголовок */
     &>.spotify__top-nav_focus__title {
-        flex-basis: 753px;
-        margin-left: -200px;
         font-size: 22px;
-
+        font-weight: 700;
+        /* Убираем flex-basis и margin хаки */
+        min-width: 120px;
+        /* Минимальная ширина, чтобы текст не схлопывался */
     }
 
-    .spotify__top-nav_auth {
+    /* Центральная часть: Поиск */
+    .spotify__top-nav_search {
+        flex: 1; 
+        max-width: 500px; 
         display: flex;
-        flex-direction: row;
-        justify-content: space-evenly;
+        justify-content: center;
         align-items: center;
-        gap: 20px;
+        margin: 0 20px;
+        position: relative; /* Важно: родитель relative */
 
-        &>.spotify__top-nav_auth_login {
+        /* Кнопка с иконкой (абсолютное позиционирование) */
+
+        button {
+            position: absolute;
+            left: 12px;  /* Прибиваем влево с отступом 12px */
+            top: 50%;
+            transform: translateY(-50%); /* Центрируем по вертикали */
+            
+            /* Сбрасываем все стили, чтобы была прозрачной */
+            background: transparent;
+            border: none;
+            outline: none;
+            box-shadow: none;
+            padding: 0;
+            margin: 0;
+            
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            z-index: 10; /* Поверх инпута */
+
+            img {
+                width: 24px;
+                height: 24px;
+                opacity: 0.7;
+            }
+            
+            &:hover img {
+                opacity: 1;
+            }
         }
 
-        &>.spotify__top-nav_auth_sigh-up {
+        /* Поле ввода */
+        input {
+            width: 100%;
+            /* Считаем отступ слева (padding-left):
+               12px (отступ иконки от края) + 24px (ширина иконки) + 15px (желаемый отступ текста) 
+               = 51px
+            */
+            padding: 12px 15px 12px 51px;
+            
+            border-radius: 25px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            color: #121212;
             background-color: white;
-            padding: 17px;
-            border-radius: 40px;
-            color: black;
-            font-weight: 500;
-            width: 110px;
-            text-align: center;
+            font-weight: 400;
+
+            &::placeholder {
+                color: #757575;
+            }
+        }
+    }
+
+    /* Правая часть: Авторизация */
+    .spotify__top-nav_auth {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+        /* Используем gap вместо space-evenly для фиксированного расстояния */
+        min-width: 180px;
+        justify-content: flex-end;
+
+        &>.spotify__top-nav_auth_sigh-up {
+            cursor: pointer;
+            color: #a7a7a7;
+            white-space: nowrap;
+            /* Текст не переносится */
 
             &:hover {
-                cursor: pointer;
-                color: rgb(9, 185, 9);
-                background-color: rgb(33, 33, 33);
-                transition: all 0.3s;
+                color: white;
+                transform: scale(1.05);
+                /* Легкая анимация */
+            }
+        }
+
+        &>.spotify__top-nav_auth_login {
+            background-color: white;
+            padding: 12px 32px;
+            /* Более сбалансированные отступы */
+            border-radius: 40px;
+            color: black;
+            font-weight: 700;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+
+            &:hover {
+                background-color: #f0f0f0;
+                transform: scale(1.05);
             }
         }
     }
 }
+
+/* Корректировка контейнера контента, чтобы он не перекрывался навбаром */

@@ -1,58 +1,18 @@
-.spotify__home-container {
-    // display: flex;
-    // height: 100vh;
-    width: 100%;
-    display: flex;
-    overflow-x: hidden;
+/* Правая колонка (Основной контент) */
+.spotify__home-container__playlist-container {
 
-    .spotify__home-container_side-bar {
-        width: 250px;
-        min-width: 250px;
-        max-width: 250px;
-        background-color: black;
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        position: sticky;
-        top: 0;
-        overflow-x: hidden;
-
-        .spotify__home-container_side-bar-item {
-            width: 100%;
-            margin: 10px;
-            padding-left: 18px;
-            overflow-x: hidden;
-
-            &>a {
-                font-style: 16px;
-                color: white;
-                text-decoration: none;
-            }
-
-            &>a:hover {
-                cursor: pointer;
-                color: lightgray;
-                text-decoration: underline;
-            }
-        }
+    h4 {
+        color: white;
+        font-size: 24px;
+        font-weight: 700;
+        margin: 24px 0 16px 0px;
     }
 
-    .spotify__home-container__playlist-container {
-        flex: 1;
-        background-color: #191919;
-        overflow-x: hidden;
-        height: 100vh;
-        padding-top: 75px;
-
-        h4 {
-            color: white;
-        }
-
-        .playlist_card_collections {
-            padding-top: 50px;
-            padding-left: 20px;
-        }
+    .playlist_card_collections {
+        padding: 0 24px 24px 24px;
+        // При открытии в полный экран в "будущем"
+        // display: grid;
+        // grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Адаптивная сетка */
+        gap: 24px;
     }
-
-
 }
