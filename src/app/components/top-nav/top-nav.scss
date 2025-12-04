@@ -27,6 +27,10 @@
         align-items: center;
         gap: 20px;
 
+        &>.spotify__top-nav_auth_login {
+            cursor: pointer;
+        }
+
         &>.spotify__top-nav_auth_sigh-up {
             background-color: white;
             padding: 17px;
@@ -34,12 +38,13 @@
             color: black;
             font-weight: 500;
             width: 110px;
-            text-align: center; 
-            &:hover{
+            text-align: center;
+
+            &:hover {
                 cursor: pointer;
                 color: rgb(9, 185, 9);
                 background-color: rgb(33, 33, 33);
-                transition: all 0.3s ;
+                transition: all 0.3s;
             }
         }
     }
