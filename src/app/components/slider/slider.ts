@@ -1,6 +1,7 @@
 import { Component, HostListener, Input, ElementRef, ViewChild } from '@angular/core';
 import { SongCard } from '../song-card/song-card';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-slider',
@@ -11,7 +12,10 @@ import { CommonModule } from '@angular/common';
 })
 export class Slider {
 
-  @Input() items: any[] = [];
+  constructor(private router: Router) { }
+
+  @Input() items: any[] = [];  // Может быть альбом или песня
+
   @ViewChild('track', { static: true }) track!: ElementRef<HTMLDivElement>;
 
   scrollLeft(container: HTMLElement) {
@@ -27,6 +31,7 @@ export class Slider {
       behavior: 'smooth'
     });
   }
+
   @HostListener('wheel', ['$event'])
   onWheel(e: WheelEvent) {
     if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
@@ -34,9 +39,21 @@ export class Slider {
     }
   }
 
-  // scrollHorizontally(event: WheelEvent) {
-  //   event.preventDefault();
-  //   const el = event.currentTarget as HTMLElement;
-  //   el.scrollLeft += event.deltaY;
-  // }
+  // ЕДИНАЯ функция навигации
+  onNavigate(item: any) {
+    if (item.songs) {
+      // это альбом
+      this.router.navigate(['/album', item.id]);
+    } else {
+      // это песня
+      this.router.navigate(['/song', item.id]);
+    }
+  }
+
+
+  ngOnChanges() {
+    console.log("SLIDER INPUT:", this.items);
+  }
+
+
 }

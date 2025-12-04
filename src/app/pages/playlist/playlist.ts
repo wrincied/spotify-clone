@@ -1,11 +1,32 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
+import { ApiService } from '../../services/api';
+import { AlbumInterface } from '../../interface/models';
 
 @Component({
   selector: 'app-playlist',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './playlist.html',
-  styleUrl: './playlist.scss',
+  styleUrls: ['./playlist.scss']
 })
-export class Playlist {
+export class PlaylistComponent implements OnInit {
 
+  album: AlbumInterface | null = null;
+
+  constructor(
+    private route: ActivatedRoute,
+    private api: ApiService
+  ) { }
+
+  ngOnInit() {
+    const id = this.route.snapshot.paramMap.get('id') ?? '';
+
+    this.api.getPlaylistById(id).subscribe((album: AlbumInterface) => {
+      this.album = album;
+      console.log('ALBUM PAGE:', this.album);
+    });
+  }
 }
+

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+
 @Component({
   selector: 'app-top-nav',
   standalone: true,
@@ -9,8 +10,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./top-nav.scss']
 })
 export class TopNav implements OnInit {
-
-  constructor(private router: Router) { }
+  constructor(private router: Router,) { }
 
   onNagivateToLogin() {
     this.router.navigate(['/','login'])
@@ -18,4 +18,5 @@ export class TopNav implements OnInit {
   ngOnInit(): void {
 
   }
+
 }

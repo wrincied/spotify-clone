@@ -1,110 +1,28 @@
 [
   {
-    "id": "1 ",
-    "title": "Relaxing Music",
-    "description": "Von Beckett",
-    "thumbnail": "https://mosaic.scdn.co/300/ab67616d00001e02237af06eecc9c683d7f52a65ab67616d00001e02d3ecc4ae0df54fce4742f2ebab67616d00001e02e0d746e5aa2b299cbc5ecdffab67616d00001e02ed50c8fe9503fd8d73d82f9f"
-  },
-  {
-    "id": "2 ",
-    "title": "Hurry Up Tommorow",
-    "description": "The Weeknd",
-    "thumbnail": "https://i.scdn.co/image/ab67616d00001e02982320da137d0de34410df61"
-  },
-  {
-    "id": "3 ",
-    "title": "Relaxing Music",
-    "description": "Von Beckett",
-    "thumbnail": "https://i.scdn.co/image/ab67616d00001e02487f90022857e485ecc685eb"
-  },
-  {
-    "id": "4 ",
-    "title": "Бог ненавидит джаз",
-    "description": "Pyrokinesis",
-    "thumbnail": "https://i.scdn.co/image/ab67616d00001e0249b69068ee074cd6c4ee01ad"
-  },
-  {
-    "id": "5 ",
+    "id": "50570ce85ebefea3",
     "title": "mea maxima culpa",
-    "description": "Pyrokinesis",
-    "thumbnail": "https://i.scdn.co/image/ab67616d00001e02591ce0ce2088d7e40e96b846 "
-  },
-  {
-    "id": "6 ",
-    "title": "Pyrokinesis",
-    "description": "Von Beckett",
-    "thumbnail": " "
-  },
-  {
-    "id": "7 ",
-    "title": "Pyrokinesis",
-    "description": "Von Beckett",
-    "thumbnail": " "
-  },
-  {
-    "id": "8 ",
-    "title": "Pyrokinesis",
-    "description": "Von Beckett",
-    "thumbnail": " "
-  },
-  {
-    "id": "9 ",
-    "title": "Pyrokinesis",
-    "description": "Von Beckett",
-    "thumbnail": " "
-  },
-  {
-    "id": "10 ",
-    "title": "Pyrokinesis",
-    "description": "Von Beckett",
-    "thumbnail": " "
-  },
-  {
-    "id": "11 ",
-    "title": "Pyrokinesis",
-    "description": "Von Beckett",
-    "thumbnail": " "
-  },
-  {
-    "id": "12 ",
-    "title": "Pyrokinesis",
-    "description": "Von Beckett",
-    "thumbnail": " "
-  },
-  {
-    "id": "13 ",
-    "title": "Pyrokinesis",
-    "description": "Von Beckett",
-    "thumbnail": " "
-  },
-  {
-    "id": "14 ",
-    "title": "Pyrokinesis",
-    "description": "Von Beckett",
-    "thumbnail": " "
-  },
-  {
-    "id": "15 ",
-    "title": "Pyrokinesis",
-    "description": "Von Beckett",
-    "thumbnail": " "
-  },
-  {
-    "id": "16 ",
-    "title": "Pyrokinesis",
-    "description": "Von Beckett",
-    "thumbnail": " "
-  },
-  {
-    "id": "17 ",
-    "title": "Pyrokinesis",
-    "description": "Von Beckett",
-    "thumbnail": " "
-  },
-  {
-    "id": 1764861546849,
-    "title": "1232",
-    "description": "1232",
-    "thumbnail": "12"
+    "description": "pyrokinesis",
+    "cover": "https://i.scdn.co/image/ab67616d00001e02591ce0ce2088d7e40e96b846",
+    "songs": [
+      "c0deebdbd4ee0b7f",
+      "8a1b7c368eb64d63",
+      "9382fdab10e50305",
+      "036616b3a3327e69",
+      "4ee0d581bb510851",
+      "73f0e423c8418c24",
+      "d8ddf4bc87e22e35",
+      "3b50e3517fa1710b",
+      "413594f59a7ba47f",
+      "cd327883247ada89",
+      "b5a634e5698717de",
+      "751f704869fcffcb",
+      "751f704869fcffcb",
+      "e459473310262ad6",
+      "63734c671d7c876e",
+      "2aa7d8aa946d7b0f",
+      "b4cc806a5a2300a6",
+      "4de17e76e31be25f"
+    ]
   }
 ]
