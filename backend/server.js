@@ -7,6 +7,10 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const DEFAULT_IMAGE = 'https://placehold.co/150/222/fff?text=No+Image';
+const DEFAULT_TITLE = 'N/a';
+const DEFAULT_DES = 'N/a';
+
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -25,18 +29,23 @@ const log = (msg) => {
 
 // root route (html view)
 app.get('/', (req, res) => {
-    const filePath = path.join(__dirname, 'albums.json');
+    const filePath = path.join(__dirname, 'db', 'albums.json');
 
     try {
         const albums = JSON.parse(fs.readFileSync(filePath, 'utf8'));
 
         let html = `<h1>Backend is running</h1><h2>Albums</h2>`;
         albums.forEach(a => {
-            html += `
+
+            const imgSrc = (a.thumbnail && a.thumbnail.trim().length > 0) ? a.thumbnail : DEFAULT_IMAGE;
+            const titleSrc = (a.title && a.title.trim().length > 0) ? a.title: DEFAULT_TITLE ;
+            const desSrc = (a.description && a.description.trim().length > 0) ? a.description: DEFAULT_DES;
+               return html += `
+            
             <div style="margin-bottom:20px;">
-                <img src="${a.thumbnail}" width="120"/>
-                <h3>${a.title}</h3>
-                <p>${a.description}</p>
+                <img src="${imgSrc}" width="120" onerror="DEFAULT_IMAGE"/>
+                <h3>${titleSrc}</h3>
+                <p>${desSrc}</p>
                 <hr/>
             </div>`;
         });
@@ -64,7 +73,7 @@ app.get('/api/logs', (req, res) => {
 
 // /api/albums — основной API
 app.get('/api/albums', (req, res) => {
-    const filePath = path.join(__dirname, 'albums.json');
+    const filePath = path.join(__dirname, 'db', 'albums.json');
 
     fs.readFile(filePath, 'utf8', (err, data) => {
         if (err) {
