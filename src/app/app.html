@@ -1,3 +1,4 @@
+@if(showLayout()){
 <div class="spotify-app">
 
     <!-- ЛЕВАЯ ПАНЕЛЬ -->
@@ -7,7 +8,7 @@
             <img width="150" src="assets/spotify-logo_light.png" />
         </div>
 
-        <div class="spotify-sidebar-item"><a routerLink="/">Home</a></div>
+        <div class="spotify-sidebar-item"><a [routerLink]="'/'">Home</a></div>
         <div class="spotify-sidebar-item"><a>Your Library</a></div>
         <div class="spotify-sidebar-item"><a>Create Playlist</a></div>
 
@@ -25,3 +26,6 @@
     </div>
 
 </div>
+} @else{
+    <router-outlet></router-outlet>
+}

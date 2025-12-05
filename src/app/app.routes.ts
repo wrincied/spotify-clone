@@ -7,7 +7,7 @@ import { PlaylistComponent } from './pages/playlist/playlist';
 
 export const routes: Routes = [
     { path: '', component: Home },
-    { path: 'login', component: Login },
+    { path: 'login', data: { noLayout: true }, component: Login },
     { path: 'album/:id', component: PlaylistComponent },
     { path: 'album/:collectionId/song/:songId', component: SongComponent },
 ];
