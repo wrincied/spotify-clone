@@ -1,35 +1,23 @@
 <div class="slider-container">
+  @if(showButtons){
+  <button class="scroll-btn left" (click)="scrollLeft(slider)">‹</button>
+  }
 
-    <button class="scroll-btn left" (click)="scrollLeft(slider)">
-        ‹
-    </button>
+  <div #slider class="playlist_card_collections">
+    @for (item of items; track item.id) {
 
-    <div #slider class="playlist_card_collections">
-
-        @for (item of items; track item.id) {
-
-            <div class="song-card-wrapper" (click)="onNavigate(item)">
-
-                <app-song-card
-                    [title]="item.title"
-                    [description]="item.description"
-
-                    [playlistThumbnail]="
-                        item.thumbnail?.trim()
-                        || item.cover?.trim()
-                        || 'assets/no-image.jpg'
-                    "
-                >
-                </app-song-card>
-
-            </div>
-
-        }
-
+    <div class="song-card-wrapper" (click)="onNavigate(item)">
+      <app-song-card
+        [title]="item.title"
+        [description]="item.description"
+        [playlistThumbnail]="item.thumbnail?.trim() || item.cover?.trim() || 'assets/no-image.jpg'"
+      >
+      </app-song-card>
     </div>
 
-    <button class="scroll-btn right" (click)="scrollRight(slider)">
-        ›
-    </button>
-
+    }
+  </div>
+  @if(showButtons){
+  <button class="scroll-btn right" (click)="scrollRight(slider)">›</button>
+  }
 </div>
