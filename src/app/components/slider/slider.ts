@@ -1,7 +1,16 @@
-import { Component, HostListener, Input, ElementRef, ViewChild } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  Input,
+  ElementRef,
+  ViewChild,
+  AfterViewInit,
+  OnChanges
+} from '@angular/core';
 import { SongCard } from '../song-card/song-card';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { AlbumInterface } from '../../interface/models';
 
 @Component({
   selector: 'app-slider',
@@ -10,13 +19,30 @@ import { Router } from '@angular/router';
   templateUrl: './slider.html',
   styleUrls: ['./slider.scss'],
 })
-export class Slider {
+export class Slider implements AfterViewInit, OnChanges {
 
-  constructor(private router: Router) { }
+  constructor(private router: Router) {}
 
-  @Input() items: any[] = [];  // Может быть альбом или песня
+  @Input() items: AlbumInterface[] = [];
 
-  @ViewChild('track', { static: true }) track!: ElementRef<HTMLDivElement>;
+  @ViewChild('slider', { static: false }) slider!: ElementRef<HTMLDivElement>;
+
+  showButtons = false;
+
+  ngAfterViewInit() {
+    setTimeout(() => this.checkOverflow(), 0);
+  }
+
+  ngOnChanges() {
+    setTimeout(() => this.checkOverflow(), 0);
+  }
+
+  private checkOverflow() {
+    if (!this.slider) return;
+
+    const el = this.slider.nativeElement;
+    this.showButtons = el.scrollWidth > el.clientWidth;
+  }
 
   scrollLeft(container: HTMLElement) {
     container.scrollTo({
@@ -34,26 +60,11 @@ export class Slider {
 
   @HostListener('wheel', ['$event'])
   onWheel(e: WheelEvent) {
-    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-      e.preventDefault();
-    }
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) e.preventDefault();
   }
 
-  // ЕДИНАЯ функция навигации
   onNavigate(item: any) {
-    if (item.songs) {
-      // это альбом
-      this.router.navigate(['/album', item.id]);
-    } else {
-      // это песня
-      this.router.navigate(['/song', item.id]);
-    }
+    if (item.songs) this.router.navigate(['/album', item.id]);
+    else this.router.navigate(['/song', item.id]);
   }
-
-
-  ngOnChanges() {
-    console.log("SLIDER INPUT:", this.items);
-  }
-
-
 }
