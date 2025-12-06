@@ -1,41 +1,46 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
 import { ApiService } from '../ApiService/api';
-import { AlbumInterface } from '../../interface/models';
+import { AlbumInterface, CategoryInterface } from '../../interface/models';
+import { HttpClient } from '@angular/common/http';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class MusicStoreService {
-  // Хранилище состояния
+ // Адрес твоего локального бэкенда
+  private apiUrl = 'http://localhost:3000/api';
+
   private albumsSubject = new BehaviorSubject<AlbumInterface[]>([]);
   public albums$ = this.albumsSubject.asObservable();
 
-  private loadingSubject = new BehaviorSubject<boolean>(false);
-  public loading$ = this.loadingSubject.asObservable();
-
-  constructor(private api: ApiService) {}
-
-  // Метод вызывается один раз в App или принудительно для обновления
-  loadAlbums(): void {
-    if (this.loadingSubject.value) return; // Защита от дублирования
-
-    this.loadingSubject.next(true);
-    
-    this.api.getAlbums().subscribe({
-      next: (data: AlbumInterface[]) => {
-        this.albumsSubject.next(data);
-        this.loadingSubject.next(false);
-      },
-      error: (err: any) => {
-        console.error('Global Store Error:', err);
-        this.loadingSubject.next(false);
-      }
-    });
+  constructor(private http: HttpClient) {
+    this.loadAlbums();
   }
 
-  // Получить текущее значение синхронно (если нужно)
-  get currentAlbums(): AlbumInterface[] {
+  // Геттер для получения текущего значения (snapshot) данных
+  get currentAlbums() {
     return this.albumsSubject.value;
+  }
+
+  loadAlbums() {
+    // Делаем запрос к твоему серверу
+    this.http.get<{ error: boolean, data: AlbumInterface[] }>(`${this.apiUrl}/albums`)
+      .pipe(
+        // Твой бэкенд возвращает { error: false, data: [...] }, нам нужен массив из data
+        map(response => {
+          if (response.error) {
+            throw new Error('Backend returned error');
+          }
+          return response.data || [];
+        })
+      )
+      .subscribe({
+        next: (albums) => {
+          console.log('✅ ALBUMS LOADED FROM BACKEND:', albums);
+          this.albumsSubject.next(albums);
+        },
+        error: (err) => {
+          console.error('❌ ERROR LOADING ALBUMS:', err);
+        }
+      });
   }
 }

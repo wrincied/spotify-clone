@@ -1,1 +1,56 @@
-<p>search works!</p>
+<div class="search-page">
+  <div class="search-container">
+    <!-- SONG RESULTS -->
+    @if (filteredTracks.length > 0) {
+    <div class="section-title">Songs</div>
+
+    <div class="track-list">
+      @for (track of filteredTracks; track track.id) {
+      <div class="track-row">
+        <div class="track-image-wrap">
+          <img [src]="track.thumbnail" alt="" />
+          <div class="track-play">▶</div>
+        </div>
+
+        <div class="track-info">
+          <div class="track-title">{{ track.title }}</div>
+          <div class="track-artist">{{ track.artist }}</div>
+        </div>
+      </div>
+      }
+    </div>
+    }
+
+    <!-- ALBUM RESULTS -->
+    @if (filteredAlbums.length > 0) {
+    <div class="section-title">Albums</div>
+
+    <div class="results-grid">
+      @for (album of filteredAlbums; track album.id) {
+      <div class="search-card" [routerLink]="['/playlist', album.id]">
+        <div class="card-image">
+          <img [src]="album.cover" />
+          <div class="play-button">▶</div>
+        </div>
+
+        <div class="card-content">
+          <h3>{{ album.title }}</h3>
+          <p>{{ album.description }}</p>
+        </div>
+      </div>
+      }
+    </div>
+    }
+
+    <!-- EMPTY STATES -->
+    @if (filteredAlbums.length === 0 && filteredTracks.length === 0) {
+    <div class="empty-state">
+      @if(query){
+      <p>По запросу «{{ query }}» ничего не найдено.</p>
+      } @else {
+      <p>Введите запрос, чтобы найти музыку.</p>
+      }
+    </div>
+    }
+  </div>
+</div>

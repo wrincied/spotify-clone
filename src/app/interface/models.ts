@@ -1,5 +1,5 @@
 export interface SongInterface {
-thumbnail: any;
+  thumbnail: string | null;
   id: string;
   title: string;
   duration: number;
@@ -8,9 +8,18 @@ thumbnail: any;
 }
 
 export interface AlbumInterface {
+  thumbnail: any;
   id: string;
   title: string;
   description: string;
-  cover: string;
+  cover: string | null;
   songs: SongInterface[]; // Строгая типизация вместо any[]
+}
+export interface CategoryInterface {
+  name: string;
+  id: string;
+  color: string;
+  albums?: string[]; // ids of albums
+  songs?: string[]; // ids of songs
+  playlists?: string[]; // future
 }
