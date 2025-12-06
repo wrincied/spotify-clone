@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AlbumInterface, SongInterface } from '../../interface/models';
-import { ApiService } from '../../services/api';
+import { ApiService } from '../../services/ApiService/api';
 
 @Component({
   selector: 'app-song',

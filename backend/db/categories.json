@@ -1,0 +1,27 @@
+[
+  {
+    "id": "cat01",
+    "name": "Pop",
+    "color": "#ff4d4d"
+  },
+  {
+    "id": "cat02",
+    "name": "Hip-Hop",
+    "color": "#4d79ff"
+  },
+  {
+    "id": "cat03",
+    "name": "R&B",
+    "color": "#a64dff"
+  },
+  {
+    "id": "cat04",
+    "name": "Indie",
+    "color": "#4dffa6"
+  },
+  {
+    "id": "cat05",
+    "name": "Lo-Fi",
+    "color": "#ffaa4d"
+  }
+]
