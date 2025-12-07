@@ -1,11 +1,15 @@
-import { Component, Input, OnChanges, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 
 import { MusicStoreService } from '../../services/music-store/music-store';
-import { AlbumInterface, CategoryInterface, SongInterface } from '../../interface/models';
+import { AlbumInterface, SongInterface } from '../../interface/models';
 
-type TrackView = SongInterface & { albumId: string; cover?: string };
+// Представление трека в поиске: SongInterface + id альбома + обложка альбома
+type TrackView = SongInterface & {
+  albumId: string;
+  coverFromAlbum: string | null;
+};
 
 @Component({
   selector: 'app-search',
@@ -14,45 +18,75 @@ type TrackView = SongInterface & { albumId: string; cover?: string };
   templateUrl: './search.html',
   styleUrls: ['./search.scss'],
 })
-export class SearchComponent implements OnChanges, OnInit {
+export class SearchComponent implements OnInit, OnChanges {
   @Input() query = '';
+
   filteredAlbums: AlbumInterface[] = [];
-  filteredTracks: any[] = [];
+  filteredTracks: TrackView[] = []; // ← больше не any
 
   constructor(private route: ActivatedRoute, private musicStore: MusicStoreService) {}
 
-  ngOnInit() {
-    this.musicStore.albums$.subscribe(albums => { this.runFilter(albums); });
+  ngOnInit(): void {
+    // Если нужно, подтягиваем q из URL
+    this.route.queryParams.subscribe((params) => {
+      const q = (params['q'] ?? '').toString();
+      if (q !== this.query) {
+        this.query = q;
+        this.runFilter();
+      }
+    });
+
+    // Как только пришли альбомы — фильтруем
+    this.musicStore.albums$.subscribe((albums) => {
+      this.runFilter(albums);
+    });
   }
 
-  ngOnChanges() {
-    this.runFilter();
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['query']) {
+      this.runFilter();
+    }
   }
 
-  private runFilter(albums?: AlbumInterface[]) {
+  private runFilter(albums?: AlbumInterface[]): void {
     const list = albums ?? this.musicStore.currentAlbums;
-    if (!list || list.length === 0 || !this.query) {
+
+    // Если нет данных или пустой запрос — чистим результаты
+    if (!list || list.length === 0) {
       this.filteredAlbums = [];
       this.filteredTracks = [];
       return;
     }
 
-    const term = this.query.trim().toLowerCase();
-    
-    // Альбомы
-    this.filteredAlbums = list.filter(a => 
-      a.title.toLowerCase().includes(term) || a.description.toLowerCase().includes(term)
-    );
+    const term = (this.query || '').trim().toLowerCase();
+    if (!term) {
+      this.filteredAlbums = [];
+      this.filteredTracks = [];
+      return;
+    }
 
-    // Песни
+    // ───── Альбомы ─────
+    this.filteredAlbums = list.filter((album) => {
+      const title = (album.title || '').toLowerCase();
+      const desc = (album.description || '').toLowerCase();
+      return title.includes(term) || desc.includes(term);
+    });
+
+    // ───── Песни (первые 5) ─────
     this.filteredTracks = list
-      .flatMap(album => (album.songs || []).map(song => ({
+      .flatMap<TrackView>((album) =>
+        (album.songs || []).map((song) => ({
+          // разворачиваем SongInterface на верхнем уровне
           ...song,
-          cover: album.cover,
-          _titleLc: song.title.toLowerCase(),
-          _artistLc: song.artist.toLowerCase()
-      })))
-      .filter(s => s._titleLc.includes(term) || s._artistLc.includes(term))
+          albumId: album.id,
+          coverFromAlbum: album.cover ?? null,
+        }))
+      )
+      .filter((track) => {
+        const title = (track.title || '').toLowerCase();
+        const artist = (track.artist || '').toLowerCase();
+        return title.includes(term) || artist.includes(term);
+      })
       .slice(0, 5);
   }
 }
