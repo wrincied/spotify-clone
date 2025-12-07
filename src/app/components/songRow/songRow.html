@@ -1,9 +1,13 @@
 <div class="songRow__container">
   <div class="row__info">
-    <div class="index">
-      <span>
-        {{ index }}
-      </span>
+   <div class="index-col">
+      @if(thumbnailUrl) {
+        <img [src]="thumbnailUrl" class="row-thumbnail" />
+      } @else {
+        <span class="index-number">
+          {{ index }}
+        </span>
+      }
     </div>
     <div class="row__text">
       <div class="title">

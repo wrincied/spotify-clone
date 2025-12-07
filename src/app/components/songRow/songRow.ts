@@ -11,4 +11,5 @@ import { FormatTimePipe } from '../../pipes/format-time-pipe';
 export class SongRow {
   @Input({ required: true }) song!: SongInterface;
   @Input() index: number = 0;
+  @Input() thumbnailUrl?: string | null;
 }
