@@ -8,8 +8,8 @@
       @for (track of filteredTracks; track track.id) {
       <div class="track-row">
         <div class="track-image-wrap">
-          <img [src]="track.thumbnail" alt="" />
-          <div class="track-play">▶</div>
+          <img [src]="track.thumbnail || track.coverFromAlbum" alt="" />
+          <!-- <div class="track-play">▶</div> -->
         </div>
 
         <div class="track-info">
@@ -30,7 +30,7 @@
       <div class="search-card" [routerLink]="['/playlist', album.id]">
         <div class="card-image">
           <img [src]="album.cover" />
-          <div class="play-button">▶</div>
+          <!-- <div class="play-button">▶</div> -->
         </div>
 
         <div class="card-content">

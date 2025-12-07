@@ -102,7 +102,7 @@ const loadCategories = () => {
 
 // ───────────────────────────
 // HTML ADMIN (root) — аккуратная тёмная панель
-// ───────────────────────────
+-// ───────────────────────────
 app.get('/', (req, res) => {
   try {
     const albums = loadAlbums();
