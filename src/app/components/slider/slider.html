@@ -6,13 +6,14 @@
   <div #slider class="playlist_card_collections">
     @for (item of items; track item.id) {
 
-    <div class="song-card-wrapper" (click)="onNavigate(item)">
-      <app-song-card
+    <div class="album-card-wrapper" (click)="onNavigate(item)">
+      <app-albumCard
         [title]="item.title"
         [description]="item.description"
         [playlistThumbnail]="item.thumbnail?.trim() || item.cover?.trim() || 'assets/no-image.jpg'"
+        [id]="item.id"
       >
-      </app-song-card>
+      </app-albumCard>
     </div>
 
     }

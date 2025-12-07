@@ -5,18 +5,20 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
+import { parseFile } from 'music-metadata';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // DEFAULTS
 const DEFAULT_IMAGE = 'https://placehold.co/150/222/fff?text=No+Image';
-const DEFAULT_TITLE = 'N/A';
-const DEFAULT_DES = 'N/A';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Раздача статики (mp3)
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 let logs = [];
 const log = (msg) => {
@@ -26,7 +28,7 @@ const log = (msg) => {
   logs.push(entry);
 };
 
-// ───── MOCK CATEGORIES (начальные данные, пишем в JSON если его нет) ─────
+// ───── MOCK CATEGORIES ─────
 const mockCategories = [
   { id: 'cat01', name: 'Pop', color: '#ff4d4d' },
   { id: 'cat02', name: 'Hip-Hop', color: '#4d79ff' },
@@ -38,8 +40,14 @@ const mockCategories = [
 // ───── JSON HELPERS ─────
 const dbPath = (file) => path.join(__dirname, 'db', file);
 
-const loadJsonRaw = (file) =>
-  JSON.parse(fs.readFileSync(dbPath(file), 'utf8'));
+if (!fs.existsSync(path.join(__dirname, 'db'))) {
+    fs.mkdirSync(path.join(__dirname, 'db'));
+}
+
+const loadJsonRaw = (file) => {
+  if (!fs.existsSync(dbPath(file))) return [];
+  return JSON.parse(fs.readFileSync(dbPath(file), 'utf8'));
+};
 
 const saveJson = (file, data) => {
   fs.writeFileSync(dbPath(file), JSON.stringify(data, null, 2), 'utf8');
@@ -57,6 +65,28 @@ const ensureIds = (items) => {
   });
   return updated;
 };
+
+// Расчет длительности
+async function getAudioDuration(relativeUrl) {
+    if (!relativeUrl) return 0;
+    try {
+        const cleanPath = relativeUrl.startsWith('/') ? relativeUrl.slice(1) : relativeUrl;
+        const filePath = path.join(__dirname, cleanPath);
+        
+        if (fs.existsSync(filePath)) {
+            const metadata = await parseFile(filePath);
+            const duration = Math.round(metadata.format.duration || 0);
+            log(`[AUDIO] Calculated duration for ${cleanPath}: ${duration}s`);
+            return duration;
+        } else {
+            log(`[AUDIO] File not found: ${filePath}`);
+            return 0;
+        }
+    } catch (error) {
+        log(`[AUDIO] Error parsing file: ${error.message}`);
+        return 0;
+    }
+}
 
 const loadSongs = () => {
   const songs = loadJsonRaw('songs.json');
@@ -78,732 +108,148 @@ const loadAlbums = () => {
 
 const loadCategories = () => {
   const file = 'categories.json';
-
-  // Если файла нет — создаём его из mockCategories
   if (!fs.existsSync(dbPath(file))) {
     saveJson(file, mockCategories);
     log('[INIT] categories.json created from mockCategories');
   }
-
   let categories = loadJsonRaw(file);
-
-  if (!Array.isArray(categories)) {
-    categories = [];
-  }
-
+  if (!Array.isArray(categories)) categories = [];
   if (ensureIds(categories)) {
     saveJson(file, categories);
     log('[AUTO] Category IDs generated');
   }
-
   return categories;
 };
 
 
 // ───────────────────────────
-// HTML ADMIN (root) — аккуратная тёмная панель
--// ───────────────────────────
+// HTML ADMIN (root)
+// ───────────────────────────
 app.get('/', (req, res) => {
   try {
     const albums = loadAlbums();
     const songs = loadSongs();
-    const categories = loadCategories();
-
-    const findSong = (id) =>
-      songs.find((s) => String(s.id) === String(id));
+    
+    // <--- 1. Генерируем опции для выпадающего списка альбомов
+    const albumOptions = albums.map(a => `<option value="${a.id}">${a.title}</option>`).join('');
 
     let html = `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Spotify Clone Backend Admin</title>
+  <title>Admin Spotify</title>
+  <link rel="shortcut icon" href="/public/logo.png" type="image/png">
   <style>
-    :root {
-      --bg: #020617;
-      --bg-elevated: #050816;
-      --bg-soft: #0b1020;
-      --border-subtle: #1f2937;
-      --accent: #22c55e;
-      --accent-soft: rgba(34, 197, 94, 0.12);
-      --danger: #ef4444;
-      --danger-soft: rgba(239, 68, 68, 0.14);
-      --text-main: #f9fafb;
-      --text-muted: #9ca3af;
-      --radius-lg: 14px;
-      --radius-sm: 8px;
-      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.85);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #111827 0, #020617 45%, #000000 100%);
-      color: var(--text-main);
-      min-height: 100vh;
-    }
-
-    body {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      backdrop-filter: blur(16px);
-      background: linear-gradient(to right, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.98));
-      border-bottom: 1px solid rgba(148, 163, 184, 0.16);
-      padding: 16px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .topbar-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 18px;
-      letter-spacing: 0.03em;
-    }
-
-    .topbar-badge {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      padding: 3px 7px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      color: var(--text-muted);
-    }
-
-    .topbar-nav {
-      display: flex;
-      gap: 12px;
-      font-size: 13px;
-    }
-
-    .topbar-link {
-      padding: 6px 11px;
-      border-radius: 999px;
-      color: var(--text-muted);
-      text-decoration: none;
-      border: 1px solid transparent;
-      transition: all 0.18s ease;
-    }
-
-    .topbar-link:hover {
-      color: var(--text-main);
-      border-color: rgba(148, 163, 184, 0.45);
-      background: radial-gradient(circle at top, rgba(34, 197, 94, 0.12), transparent 60%);
-    }
-
-    main.layout {
-      padding: 24px;
-      max-width: 1200px;
-      width: 100%;
-      margin: 0 auto 40px auto;
-      display: grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr);
-      gap: 24px;
-    }
-
-    @media (max-width: 960px) {
-      main.layout {
-        grid-template-columns: minmax(0, 1fr);
-      }
-    }
-
-    .column {
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-
-    .section-title-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 4px;
-    }
-
-    .section-title {
-      font-size: 16px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-    }
-
-    .section-sub {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .pill {
-      font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      color: var(--text-muted);
-    }
-
-    .card {
-      border-radius: var(--radius-lg);
-      background: radial-gradient(circle at top left, rgba(34, 197, 94, 0.08), transparent 55%), var(--bg-elevated);
-      border: 1px solid var(--border-subtle);
-      box-shadow: var(--shadow-soft);
-      padding: 16px 16px 14px 16px;
-    }
-
-    .card-muted {
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid rgba(30, 64, 175, 0.5);
-    }
-
-    .card-header {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      margin-bottom: 10px;
-    }
-
-    .card-title {
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .card-caption {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 6px;
-    }
-
-    label {
-      font-size: 12px;
-      color: var(--text-muted);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    input, textarea {
-      border-radius: var(--radius-sm);
-      border: 1px solid rgba(55, 65, 81, 0.95);
-      background: rgba(15, 23, 42, 0.95);
-      color: var(--text-main);
-      font-size: 13px;
-      padding: 7px 9px;
-      outline: none;
-      transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
-    }
-
-    input::placeholder, textarea::placeholder {
-      color: rgba(156, 163, 175, 0.8);
-    }
-
-    input:focus, textarea:focus {
-      border-color: rgba(34, 197, 94, 0.8);
-      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.5);
-      background: #020617;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 58px;
-      max-height: 180px;
-    }
-
-    .field-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .field-row > * {
-      flex: 1;
-    }
-
-    .color-picker-input {
-      padding: 0;
-      width: 38px;
-      min-width: 38px;
-      max-width: 38px;
-      height: 32px;
-      border-radius: 999px;
-      overflow: hidden;
-      border: 1px solid rgba(148, 163, 184, 0.65);
-      background: transparent;
-    }
-
-    .btn {
-      cursor: pointer;
-      border-radius: 999px;
-      border: 1px solid transparent;
-      padding: 7px 14px;
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-      background: var(--accent);
-      color: #020617;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: background 0.16s ease, transform 0.06s ease, box-shadow 0.16s ease, border-color 0.16s ease;
-      box-shadow: 0 10px 25px rgba(34, 197, 94, 0.45);
-    }
-
-    .btn:hover {
-      background: #16a34a;
-      box-shadow: 0 18px 35px rgba(22, 163, 74, 0.55);
-      transform: translateY(-1px);
-    }
-
-    .btn:active {
-      transform: translateY(0);
-      box-shadow: 0 6px 16px rgba(22, 163, 74, 0.5);
-    }
-
-    .btn-secondary {
-      background: rgba(15, 23, 42, 0.9);
-      color: var(--text-main);
-      border-color: rgba(148, 163, 184, 0.5);
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.6);
-    }
-
-    .btn-secondary:hover {
-      background: rgba(15, 23, 42, 1);
-      border-color: rgba(148, 163, 184, 0.9);
-    }
-
-    .btn-danger {
-      background: var(--danger-soft);
-      color: #fecaca;
-      border-color: rgba(248, 113, 113, 0.6);
-      box-shadow: 0 8px 20px rgba(127, 29, 29, 0.7);
-    }
-
-    .btn-danger:hover {
-      background: rgba(127, 29, 29, 0.85);
-      color: #fee2e2;
-    }
-
-    .grid-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 12px;
-    }
-
-    .item-card {
-      border-radius: var(--radius-lg);
-      background: var(--bg-soft);
-      border: 1px solid rgba(55, 65, 81, 0.9);
-      padding: 10px 11px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .item-row {
-      display: flex;
-      gap: 10px;
-    }
-
-    .thumb {
-      width: 64px;
-      height: 64px;
-      border-radius: 12px;
-      object-fit: cover;
-      background: #020617;
-      border: 1px solid rgba(31, 41, 55, 0.9);
-    }
-
-    .item-main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .item-title {
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    .item-meta {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .badge-id {
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.5);
-      color: var(--text-muted);
-      display: inline-block;
-      margin-top: 2px;
-    }
-
-    .tag {
-      font-size: 11px;
-      border-radius: 999px;
-      padding: 2px 7px;
-      background: rgba(15, 23, 42, 0.95);
-      border: 1px solid rgba(55, 65, 81, 0.9);
-      color: var(--text-muted);
-      display: inline-block;
-    }
-
-    .item-actions {
-      display: flex;
-      gap: 6px;
-      margin-top: 6px;
-    }
-
-    .item-actions .btn {
-      flex: 1;
-      padding-inline: 10px;
-      font-size: 10px;
-      letter-spacing: 0.09em;
-      text-transform: uppercase;
-    }
-
-    .song-list {
-      margin-top: 4px;
-      padding-left: 12px;
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .song-list li {
-      margin-bottom: 2px;
-    }
-
-    .cat-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 8px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid rgba(55, 65, 81, 0.95);
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .cat-swatch {
-      width: 14px;
-      height: 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(15, 23, 42, 0.95);
-      box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.7);
-    }
-
-    .logs-card {
-      margin-top: 10px;
-      font-size: 11px;
-      color: var(--text-muted);
-      background: rgba(2, 6, 23, 0.9);
-      border-radius: var(--radius-lg);
-      border: 1px solid rgba(31, 41, 55, 0.9);
-      padding: 10px 12px;
-      max-height: 180px;
-      overflow: auto;
-    }
-
-    .logs-card pre {
-      margin: 0;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
+    :root { --bg: #020617; --bg-el: #050816; --bg-soft: #0b1020; --border: #1f2937; --accent: #22c55e; --text: #f9fafb; --muted: #9ca3af; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
+    .topbar { position: sticky; top: 0; z-index: 20; background: rgba(2,6,23,0.95); border-bottom: 1px solid rgba(148,163,184,0.16); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px); }
+    main { padding: 24px; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1.5fr; gap: 24px; }
+    @media (max-width: 960px) { main { grid-template-columns: 1fr; } }
+    .card { background: var(--bg-el); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 20px; }
+    .card-title { font-weight: 600; margin-bottom: 15px; color: var(--accent); }
+    input, textarea, select { width: 100%; background: var(--bg-soft); border: 1px solid var(--border); color: white; padding: 8px 12px; border-radius: 8px; margin-bottom: 10px; font-family: inherit; }
+    label { font-size: 0.8rem; color: var(--muted); display: block; margin-bottom: 4px; }
+    .btn { background: var(--accent); color: black; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 600; cursor: pointer; text-transform: uppercase; font-size: 0.75rem; }
+    .btn:hover { filter: brightness(1.1); }
+    .btn-danger { background: #ef4444; color: white; }
+    .btn-secondary { background: #334155; color: white; }
+    .list-item { background: var(--bg-soft); border: 1px solid var(--border); padding: 10px; border-radius: 8px; display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+    .thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; background: #333; }
+    .info { flex: 1; }
+    .info h4 { margin: 0 0 4px 0; font-size: 0.95rem; }
+    .info p { margin: 0; font-size: 0.8rem; color: var(--muted); }
+    .actions { display: flex; gap: 5px; }
+    pre { font-size: 0.75rem; color: #888; white-space: pre-wrap; margin: 0; }
   </style>
 </head>
 <body>
   <header class="topbar">
-    <div class="topbar-title">
-      <span>Spotify Clone Backend</span>
-      <span class="topbar-badge">Admin</span>
-    </div>
-    <nav class="topbar-nav">
-      <a href="#forms" class="topbar-link">Forms</a>
-      <a href="#albums" class="topbar-link">Albums</a>
-      <a href="#songs" class="topbar-link">Songs</a>
-      <a href="#categories" class="topbar-link">Categories</a>
-      <a href="#logs" class="topbar-link">Logs</a>
+    <div style="font-weight:700;">Spotify Backend v2.1</div>
+    <nav style="display:flex; gap:15px; font-size:0.9rem;">
+      <a href="/" style="color:var(--text); text-decoration:none;">Refresh</a>
     </nav>
   </header>
 
-  <main class="layout">
+  <main>
+    <section>
+      <div class="card">
+        <div class="card-title">Create Song</div>
+        <form id="create-song-form">
+          <label>Title</label>
+          <input name="title" required placeholder="Track Name" />
+          
+          <label>MP3 Path (e.g. public/music/song.mp3)</label>
+          <input name="url" placeholder="public/music/..." />
 
-    <!-- ЛЕВАЯ КОЛОНКА: формы -->
-    <section class="column" id="forms">
-      <div class="section-title-row">
-        <div>
-          <div class="section-title">Create & Edit</div>
-          <div class="section-sub">Управление сущностями: песни, альбомы и категории</div>
-        </div>
+          <label>Thumbnail URL</label>
+          <input name="thumbnail" placeholder="https://..." />
+          
+          <label>Description (Artist)</label>
+          <input name="description" placeholder="Artist name" />
+
+          <label>Add to Album (Optional)</label>
+          <select name="albumId">
+             <option value="">-- Select Album --</option>
+             ${albumOptions}
+          </select>
+
+          <button type="submit" class="btn">Add Song</button>
+        </form>
       </div>
 
-      <!-- SONG FORM -->
-      <article class="card card-muted">
-        <div class="card-header">
-          <div>
-            <div class="card-title">Create song</div>
-            <div class="card-caption">Быстрое добавление трека с базовыми полями</div>
-          </div>
-          <span class="pill">Song</span>
-        </div>
-
-        <form id="create-song-form">
-          <label>
-            Title
-            <input name="title" required placeholder="Song title" />
-          </label>
-          <label>
-            Description
-            <input name="description" placeholder="Optional description" />
-          </label>
-          <label>
-            Thumbnail URL
-            <input name="thumbnail" placeholder="https://…" />
-          </label>
-          <button type="submit" class="btn">
-            <span>Create song</span>
-          </button>
-        </form>
-      </article>
-
-      <!-- ALBUM FORM -->
-      <article class="card card-muted">
-        <div class="card-header">
-          <div>
-            <div class="card-title">Create album</div>
-            <div class="card-caption">Связывает существующие песни в альбом</div>
-          </div>
-          <span class="pill">Album</span>
-        </div>
-
+      <div class="card">
+        <div class="card-title">Create Album</div>
         <form id="create-album-form">
-          <label>
-            Title
-            <input name="title" required placeholder="Album title" />
-          </label>
-          <label>
-            Description
-            <input name="description" placeholder="Album description" />
-          </label>
-          <label>
-            Cover URL
-            <input name="cover" placeholder="https://…" />
-          </label>
-          <label>
-            Song IDs (comma-separated)
-            <input name="songs" placeholder="id1,id2,id3" />
-          </label>
-          <button type="submit" class="btn">
-            <span>Create album</span>
-          </button>
+          <label>Title</label>
+          <input name="title" required placeholder="Album Name" />
+          <label>Cover URL</label>
+          <input name="cover" placeholder="https://..." />
+          <label>Description</label>
+          <input name="description" placeholder="EP • Artist • Year" />
+          <label>Song IDs (comma separated)</label>
+          <input name="songs" placeholder="id1, id2..." />
+          <button type="submit" class="btn">Create Album</button>
         </form>
-      </article>
+      </div>
 
-      <!-- CATEGORY FORM -->
-      <article class="card card-muted">
-        <div class="card-header">
-          <div>
-            <div class="card-title">Create category</div>
-            <div class="card-caption">Категории для группировки альбомов, треков, плейлистов</div>
-          </div>
-          <span class="pill">Category</span>
-        </div>
-
+       <div class="card">
+        <div class="card-title">Create Category</div>
         <form id="create-category-form">
-          <label>
-            Name
-            <input name="name" required placeholder="Chill, Focus, Workout…" />
-          </label>
-          <label>
-            Color
-            <div class="field-row">
-              <input
-                id="category-color-hex"
-                name="color"
-                placeholder="#22c55e"
-                value="#22c55e"
-              />
-              <input
-                id="category-color-picker"
-                type="color"
-                class="color-picker-input"
-                value="#22c55e"
-              />
-            </div>
-          </label>
-          <button type="submit" class="btn">
-            <span>Create category</span>
-          </button>
+          <label>Name</label>
+          <input name="name" required placeholder="Name" />
+          <label>Color</label>
+          <input name="color" type="color" value="#22c55e" style="height:40px; padding:2px;" />
+          <button type="submit" class="btn">Create Category</button>
         </form>
-      </article>
+      </div>
     </section>
 
-    <!-- ПРАВАЯ КОЛОНКА: списки -->
-    <section class="column">
-
-      <!-- ALBUMS -->
-      <section id="albums">
-        <div class="section-title-row">
-          <div>
-            <div class="section-title">Albums</div>
-            <div class="section-sub">С существующими треками по ID</div>
-          </div>
-          <span class="pill">${albums.length} total</span>
-        </div>
-
-        <div class="grid-list">
-    `;
-
-    // альбомы
-    albums.forEach((album) => {
-      const cover = album.cover && album.cover.trim()
-        ? album.cover.trim()
-        : DEFAULT_IMAGE;
-
-      html += `
-          <article class="item-card">
-            <div class="item-row">
-              <img src="${cover}" class="thumb" onerror="this.src='${DEFAULT_IMAGE}'" />
-              <div class="item-main">
-                <div class="item-title">${album.title || DEFAULT_TITLE}</div>
-                <div class="item-meta">${album.description || DEFAULT_DES}</div>
-                <span class="badge-id">ID: ${album.id}</span>
+    <section>
+      <div class="card">
+        <div class="card-title">Songs (${songs.length})</div>
+        <div>
+          ${songs.map(s => `
+            <div class="list-item">
+              <img src="${s.thumbnail || DEFAULT_IMAGE}" class="thumb" onerror="this.src='${DEFAULT_IMAGE}'">
+              <div class="info">
+                <h4>${s.title}</h4>
+                <p>${s.description || ''}</p>
+                <p style="font-size:0.7rem;">ID: ${s.id} | ${s.duration || 0}s</p>
+              </div>
+              <div class="actions">
+                <button class="btn btn-secondary" onclick="editSong('${s.id}')">E</button>
+                <button class="btn btn-danger" onclick="deleteSong('${s.id}')">X</button>
               </div>
             </div>
-            <ul class="song-list">
-              ${(album.songs || [])
-                .map((sid) => {
-                  const s = findSong(sid);
-                  if (!s) return `<li>Missing song: ${sid}</li>`;
-                  return `<li>${s.title} <span style="opacity:.7">(${s.id})</span></li>`;
-                })
-                .join('')}
-            </ul>
-            <div class="item-actions">
-              <button class="btn btn-secondary" onclick="editAlbum('${album.id}')">Edit</button>
-              <button class="btn btn-danger" onclick="deleteAlbum('${album.id}')">Delete</button>
-            </div>
-          </article>
-      `;
-    });
-
-    html += `
+          `).join('')}
         </div>
-      </section>
-
-      <!-- SONGS -->
-      <section id="songs" style="margin-top:20px;">
-        <div class="section-title-row">
-          <div>
-            <div class="section-title">Songs</div>
-            <div class="section-sub">Все треки из базы</div>
-          </div>
-          <span class="pill">${songs.length} total</span>
-        </div>
-
-        <div class="grid-list">
-    `;
-
-    songs.forEach((s) => {
-      const thumb = s.thumbnail && s.thumbnail.trim()
-        ? s.thumbnail.trim()
-        : DEFAULT_IMAGE;
-      html += `
-          <article class="item-card">
-            <div class="item-row">
-              <img src="${thumb}" class="thumb" onerror="this.src='${DEFAULT_IMAGE}'" />
-              <div class="item-main">
-                <div class="item-title">${s.title}</div>
-                <div class="item-meta">${s.description || DEFAULT_DES}</div>
-                <span class="badge-id">ID: ${s.id}</span>
-              </div>
-            </div>
-            <div class="item-actions">
-              <button class="btn btn-secondary" onclick="editSong('${s.id}')">Edit</button>
-              <button class="btn btn-danger" onclick="deleteSong('${s.id}')">Delete</button>
-            </div>
-          </article>
-      `;
-    });
-
-    html += `
-        </div>
-      </section>
-
-      <!-- CATEGORIES -->
-      <section id="categories" style="margin-top:20px;">
-        <div class="section-title-row">
-          <div>
-            <div class="section-title">Categories</div>
-            <div class="section-sub">Список категорий из categories.json</div>
-          </div>
-          <span class="pill">${categories.length} total</span>
-        </div>
-
-        <div class="grid-list">
-    `;
-
-    categories.forEach((c) => {
-      const color = c.color || '#22c55e';
-      html += `
-          <article class="item-card">
-            <div class="item-row">
-              <div class="item-main">
-                <div class="item-title">${c.name}</div>
-                <div class="item-meta">
-                  <span class="cat-chip">
-                    <span class="cat-swatch" style="background:${color};"></span>
-                    <span>${color}</span>
-                  </span>
-                </div>
-                <span class="badge-id">ID: ${c.id}</span>
-              </div>
-            </div>
-            <div class="item-actions">
-              <button class="btn btn-secondary" onclick="editCategory('${c.id}')">Edit</button>
-              <button class="btn btn-danger" onclick="deleteCategory('${c.id}')">Delete</button>
-            </div>
-          </article>
-      `;
-    });
-
-    html += `
-        </div>
-      </section>
-
-      <!-- LOGS -->
-      <section id="logs">
-        <div class="section-title-row" style="margin-top:20px;">
-          <div>
-            <div class="section-title">Logs</div>
-            <div class="section-sub">Последние события сервера</div>
-          </div>
-        </div>
-        <div class="logs-card">
-          <pre>${logs.join('\n')}</pre>
-        </div>
-      </section>
-
+      </div>
+      
+       <div class="card" id="logs">
+         <div class="card-title">Server Logs</div>
+         <pre>${logs.slice(-10).join('\n')}</pre>
+      </div>
     </section>
   </main>
 
@@ -812,561 +258,226 @@ app.get('/', (req, res) => {
       const opts = { method, headers: { 'Content-Type': 'application/json' } };
       if (body) opts.body = JSON.stringify(body);
       const res = await fetch(url, opts);
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || data.error) {
-        alert('Error: ' + (data.message || res.statusText));
-        throw new Error(data.message || res.statusText);
-      }
+      const data = await res.json();
+      if (data.error) { alert(data.message); throw new Error(data.message); }
       return data;
     }
 
-    // SYNC COLOR PICKER <-> HEX INPUT
-    (function initCategoryColorSync() {
-      const hexInput = document.getElementById('category-color-hex');
-      const picker = document.getElementById('category-color-picker');
-      if (!hexInput || !picker) return;
-
-      picker.addEventListener('input', (e) => {
-        hexInput.value = e.target.value;
-      });
-
-      hexInput.addEventListener('input', (e) => {
-        const value = e.target.value.trim();
-        const hexRegex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
-        if (hexRegex.test(value)) {
-          picker.value = value;
-        }
-      });
-    })();
-
-    // Создание песни
+    // CREATE SONG + ADD TO ALBUM
     document.getElementById('create-song-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const form = e.target;
-      const title = form.title.value;
-      const description = form.description.value;
-      const thumbnail = form.thumbnail.value;
-      await api('/api/songs', 'POST', { title, description, thumbnail });
+      const f = e.target;
+      await api('/api/songs', 'POST', { 
+          title: f.title.value, 
+          description: f.description.value, 
+          thumbnail: f.thumbnail.value,
+          url: f.url.value,
+          albumId: f.albumId.value // Передаем ID выбранного альбома
+      });
       location.reload();
     });
 
-    // Создание альбома
     document.getElementById('create-album-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const form = e.target;
-      const title = form.title.value;
-      const description = form.description.value;
-      const cover = form.cover.value;
-      const songsStr = form.songs.value;
-      const songs = songsStr
-        .split(',')
-        .map(s => s.trim())
-        .filter(Boolean);
-      if (songs.length === 0) {
-        alert('Укажи хотя бы один ID песни');
-        return;
-      }
-      await api('/api/albums', 'POST', { title, description, cover, songs });
+      const f = e.target;
+      const songs = f.songs.value.split(',').map(s => s.trim()).filter(Boolean);
+      await api('/api/albums', 'POST', { 
+          title: f.title.value, 
+          description: f.description.value, 
+          cover: f.cover.value, 
+          songs 
+      });
       location.reload();
     });
 
-    // Создание категории
     document.getElementById('create-category-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const form = e.target;
-      const name = form.name.value;
-      const color = form.color.value || '#22c55e';
-      await api('/api/categories', 'POST', { name, color });
+      const f = e.target;
+      await api('/api/categories', 'POST', { name: f.name.value, color: f.color.value });
       location.reload();
     });
 
-    // SONG actions
-    async function deleteSong(id) {
-      if (!confirm('Delete song ' + id + '?')) return;
-      await api('/api/songs/' + id, 'DELETE');
-      location.reload();
-    }
-
+    async function deleteSong(id) { if(confirm('Del?')) { await api('/api/songs/'+id, 'DELETE'); location.reload(); } }
     async function editSong(id) {
-      const current = await api('/api/songs/' + id, 'GET');
-      const song = current.data || current;
-      const title = prompt('New title (leave empty to keep)', song.title || '');
-      const description = prompt('New description (leave empty to keep)', song.description || '');
-      const thumbnail = prompt('New thumbnail URL (leave empty to keep)', song.thumbnail || '');
-      await api('/api/songs/' + id, 'PUT', { title, description, thumbnail });
-      location.reload();
-    }
-
-    // ALBUM actions
-    async function deleteAlbum(id) {
-      if (!confirm('Delete album ' + id + '?')) return;
-      await api('/api/albums/' + id, 'DELETE');
-      location.reload();
-    }
-
-    async function editAlbum(id) {
-      const current = await api('/api/albums/' + id, 'GET');
-      const album = current.data || current;
-      const title = prompt('New album title (leave empty to keep)', album.title || '');
-      const description = prompt('New description (leave empty to keep)', album.description || '');
-      const cover = prompt('New cover URL (leave empty to keep)', album.cover || '');
-      const songsStr = prompt(
-        'New song IDs comma-separated (leave empty to keep)',
-        (album.songs || []).map(s => s.id || s).join(',')
-      );
-      const body = { title, description, cover };
-      if (songsStr && songsStr.trim().length > 0) {
-        body.songs = songsStr.split(',').map(s => s.trim()).filter(Boolean);
-      }
-      await api('/api/albums/' + id, 'PUT', body);
-      location.reload();
-    }
-
-    // CATEGORY actions
-    async function deleteCategory(id) {
-      if (!confirm('Delete category ' + id + '?')) return;
-      await api('/api/categories/' + id, 'DELETE');
-      location.reload();
-    }
-
-    async function editCategory(id) {
-      const current = await api('/api/categories/' + id, 'GET');
-      const cat = current.data || current;
-      const name = prompt('New category name (leave empty to keep)', cat.name || '');
-      const color = prompt('New HEX color (leave empty to keep)', cat.color || '#22c55e');
-      await api('/api/categories/' + id, 'PUT', { name, color });
-      location.reload();
+       const title = prompt('New Title:');
+       const url = prompt('New MP3 Path:');
+       if(title) await api('/api/songs/'+id, 'PUT', { title, url });
+       location.reload();
     }
   </script>
 </body>
-</html>
-`;
-
+</html>`;
     res.send(html);
   } catch (e) {
-    res.status(500).send(`
-      <h1>Error loading data</h1>
-      <pre>${e.message}</pre>
-    `);
+    res.status(500).send(e.message);
   }
 });
 
 // ───────────────────────────
-// API: CATEGORIES (JSON + CRUD)
+// API ROUTES
 // ───────────────────────────
-app.get('/api/categories', (req, res) => {
-  try {
-    const categories = loadCategories();
-    res.json({ error: false, data: categories });
-  } catch (err) {
-    res.status(500).json({ error: true, message: err.message });
-  }
-});
 
-app.get('/api/categories/:id', (req, res) => {
-  try {
-    const categories = loadCategories();
-    const cat = categories.find((c) => String(c.id) === req.params.id);
-    if (!cat) {
-      return res.status(404).json({ error: true, message: 'Category not found' });
-    }
-    res.json({ error: false, data: cat });
-  } catch (err) {
-    res.status(500).json({ error: true, message: err.message });
-  }
-});
-
+// CATEGORIES
+app.get('/api/categories', (req, res) => res.json({ error: false, data: loadCategories() }));
 app.post('/api/categories', (req, res) => {
-  try {
-    const categories = loadCategories();
-    const { name, color } = req.body;
-
-    if (!name || !name.trim()) {
-      return res.status(400).json({ error: true, message: 'Category name is required' });
-    }
-
-    const newCategory = {
-      id: generateId(),
-      name: name.trim(),
-      color: (color || '#22c55e').trim()
-    };
-
-    categories.push(newCategory);
-    saveJson('categories.json', categories);
-    log(`[API] Created new category: ${newCategory.id}`);
-
-    res.json({ error: false, data: newCategory });
-  } catch (err) {
-    res.status(500).json({ error: true, message: err.message });
-  }
+    try {
+        const cats = loadCategories();
+        const { name, color } = req.body;
+        const newItem = { id: generateId(), name, color: color || '#22c55e' };
+        cats.push(newItem);
+        saveJson('categories.json', cats);
+        res.json({ error: false, data: newItem });
+    } catch(e) { res.status(500).json({error:true, message:e.message}); }
 });
 
-app.put('/api/categories/:id', (req, res) => {
-  try {
-    const categories = loadCategories();
-    const idx = categories.findIndex((c) => String(c.id) === req.params.id);
-    if (idx === -1) {
-      return res.status(404).json({ error: true, message: 'Category not found' });
-    }
-
-    const { name, color } = req.body;
-    if (name && name.trim()) categories[idx].name = name.trim();
-    if (color && color.trim()) categories[idx].color = color.trim();
-
-    saveJson('categories.json', categories);
-    log(`[API] Updated category: ${categories[idx].id}`);
-
-    res.json({ error: false, data: categories[idx] });
-  } catch (err) {
-    res.status(500).json({ error: true, message: err.message });
-  }
-});
-
-app.delete('/api/categories/:id', (req, res) => {
-  try {
-    const categories = loadCategories();
-    const idx = categories.findIndex((c) => String(c.id) === req.params.id);
-    if (idx === -1) {
-      return res.status(404).json({ error: true, message: 'Category not found' });
-    }
-
-    const [removed] = categories.splice(idx, 1);
-    saveJson('categories.json', categories);
-    log(`[API] Deleted category: ${removed.id}`);
-
-    res.json({ error: false, data: removed });
-  } catch (err) {
-    res.status(500).json({ error: true, message: err.message });
-  }
-});
-
-// ───────────────────────────
-// API: SEARCH (альбомы + треки + категории из JSON)
-// ───────────────────────────
+// SEARCH
 app.get('/api/search', (req, res) => {
-  try {
-    const q = (req.query.q || '').toString().trim().toLowerCase();
+    const q = (req.query.q || '').toString().toLowerCase();
     const songs = loadSongs();
-    const albumsRaw = loadAlbums();
-    const categories = loadCategories();
+    const albums = loadAlbums();
+    const cats = loadCategories();
+    
+    const richAlbums = albums.map(a => ({
+        ...a,
+        songs: (a.songs || []).map(id => {
+            const s = songs.find(x => x.id === id);
+            return s ? { ...s, thumbnail: s.thumbnail || a.cover } : null;
+        }).filter(Boolean)
+    }));
+    
+    const allTracks = richAlbums.flatMap(a => a.songs.map(s => ({ ...s, albumId: a.id })));
 
-    // обогащаем альбомы объектами песен, как в /api/albums
-    const albums = albumsRaw.map((album) => {
-      const cover =
-        album.cover && album.cover.trim()
-          ? album.cover.trim()
-          : DEFAULT_IMAGE;
+    if(!q) return res.json({ error:false, data: { albums: richAlbums, tracks: allTracks, categories: cats }});
 
-      const songObjects = (album.songs || [])
-        .map((sid) => {
-          const s = songs.find((song) => String(song.id) === String(sid));
-          if (!s) return null;
-          if (!s.thumbnail || !s.thumbnail.trim()) {
-            s.thumbnail = cover;
-          }
-          return s;
-        })
-        .filter(Boolean);
+    const fAlbums = richAlbums.filter(a => a.title.toLowerCase().includes(q));
+    const fTracks = allTracks.filter(t => t.title.toLowerCase().includes(q) || t.artist?.toLowerCase().includes(q));
+    const fCats = cats.filter(c => c.name.toLowerCase().includes(q));
 
-      return { ...album, cover, songs: songObjects };
-    });
+    res.json({ error: false, data: { albums: fAlbums, tracks: fTracks, categories: fCats } });
+});
 
-    const allTracks = albums.flatMap((album) =>
-      (album.songs || []).map((song) => ({
-        ...song,
-        albumId: album.id,
-        cover: album.cover || DEFAULT_IMAGE
-      }))
-    );
+// SONGS
+app.get('/api/songs', (req, res) => res.json({ error: false, data: loadSongs() }));
 
-    // пустой запрос — вернуть всё
-    if (!q) {
-      return res.json({
-        error: false,
-        data: {
-          albums,
-          tracks: allTracks,
-          categories
+// POST SONG (Logic Updated)
+app.post('/api/songs', async (req, res) => {
+    try {
+        const songs = loadSongs();
+        const { title, description, thumbnail, url, albumId } = req.body; // Получаем albumId
+        
+        const duration = await getAudioDuration(url);
+
+        const newSong = {
+            id: generateId(),
+            title,
+            description,
+            thumbnail,
+            url,
+            duration
+        };
+        
+        songs.push(newSong);
+        saveJson('songs.json', songs);
+        log(`[API] Created song ${newSong.id}`);
+
+        // 3. Если передан albumId, добавляем песню в альбом
+        if (albumId) {
+            const albums = loadAlbums();
+            const album = albums.find(a => a.id === albumId);
+            if (album) {
+                album.songs = album.songs || [];
+                album.songs.push(newSong.id);
+                saveJson('albums.json', albums);
+                log(`[API] Added song ${newSong.id} to album ${album.title}`);
+            }
         }
-      });
-    }
 
-    const albumsMatched = albums.filter(
-      (a) =>
-        (a.title || '').toString().toLowerCase().includes(q) ||
-        (a.description || '').toString().toLowerCase().includes(q)
-    );
-
-    const tracksMatched = allTracks.filter(
-      (t) =>
-        (t.title || '').toString().toLowerCase().includes(q) ||
-        (t.artist || '').toString().toLowerCase().includes(q)
-    );
-
-    const categoriesMatched = categories.filter((c) =>
-      (c.name || '').toString().toLowerCase().includes(q)
-    );
-
-    res.json({
-      error: false,
-      data: {
-        albums: albumsMatched,
-        tracks: tracksMatched.slice(0, 50),
-        categories: categoriesMatched
-      }
-    });
-  } catch (err) {
-    res.status(500).json({ error: true, message: err.message });
-  }
+        res.json({ error: false, data: newSong });
+    } catch(e) { res.status(500).json({error:true, message:e.message}); }
 });
 
-// ───────────────────────────
-// API: SONGS
-// ───────────────────────────
+// PUT SONG
+app.put('/api/songs/:id', async (req, res) => {
+    try {
+        const songs = loadSongs();
+        const song = songs.find(s => s.id === req.params.id);
+        if(!song) return res.status(404).json({error:true, message:'Not found'});
+        
+        const { title, description, thumbnail, url } = req.body;
+        if(title) song.title = title;
+        if(description) song.description = description;
+        if(thumbnail) song.thumbnail = thumbnail;
+        
+        if(url && url !== song.url) {
+            song.url = url;
+            song.duration = await getAudioDuration(url);
+        }
 
-// все песни
-app.get('/api/songs', (req, res) => {
-  try {
-    const songs = loadSongs();
-    res.json({ error: false, data: songs });
-  } catch (err) {
-    res.status(500).json({ error: true, message: err.message });
-  }
+        saveJson('songs.json', songs);
+        res.json({ error: false, data: song });
+    } catch(e) { res.status(500).json({error:true, message:e.message}); }
 });
 
-// одна песня
-app.get('/api/songs/:id', (req, res) => {
-  try {
-    const songs = loadSongs();
-    const song = songs.find((s) => String(s.id) === req.params.id);
-    if (!song) return res.status(404).json({ error: true, message: 'Song not found' });
-    res.json({ error: false, data: song });
-  } catch (err) {
-    res.status(500).json({ error: true, message: err.message });
-  }
-});
-
-// создать песню
-app.post('/api/songs', (req, res) => {
-  try {
-    const songs = loadSongs();
-    const { title, description, thumbnail } = req.body;
-    if (!title || !title.trim()) {
-      return res.status(400).json({ error: true, message: 'Song title is required' });
-    }
-    const newSong = {
-      id: generateId(),
-      title: title.trim(),
-      description: (description || '').trim(),
-      thumbnail: (thumbnail || '').trim()
-    };
-    songs.push(newSong);
-    saveJson('songs.json', songs);
-    log(`[API] Created new song: ${newSong.id}`);
-    res.json({ error: false, data: newSong });
-  } catch (err) {
-    res.status(500).json({ error: true, message: err.message });
-  }
-});
-
-// обновить песню
-app.put('/api/songs/:id', (req, res) => {
-  try {
-    const songs = loadSongs();
-    const song = songs.find((s) => String(s.id) === req.params.id);
-    if (!song) return res.status(404).json({ error: true, message: 'Song not found' });
-
-    const { title, description, thumbnail } = req.body;
-
-    if (title && title.trim()) song.title = title.trim();
-    if (description !== undefined) song.description = (description || '').trim();
-    if (thumbnail !== undefined) song.thumbnail = (thumbnail || '').trim();
-
-    saveJson('songs.json', songs);
-    log(`[API] Updated song: ${song.id}`);
-    res.json({ error: false, data: song });
-  } catch (err) {
-    res.status(500).json({ error: true, message: err.message });
-  }
-});
-
-// удалить песню
 app.delete('/api/songs/:id', (req, res) => {
-  try {
     const songs = loadSongs();
-    const albums = loadAlbums();
-    const id = req.params.id;
-
-    const idx = songs.findIndex((s) => String(s.id) === id);
-    if (idx === -1) return res.status(404).json({ error: true, message: 'Song not found' });
-
-    const [removed] = songs.splice(idx, 1);
+    const idx = songs.findIndex(s => s.id === req.params.id);
+    if(idx === -1) return res.status(404).json({error:true});
+    songs.splice(idx, 1);
     saveJson('songs.json', songs);
-
-    // убрать песню из альбомов
-    albums.forEach(album => {
-      album.songs = (album.songs || []).filter(sid => String(sid) !== id);
-    });
-    saveJson('albums.json', albums);
-
-    log(`[API] Deleted song: ${removed.id}`);
-    res.json({ error: false, data: removed });
-
-  } catch (err) {
-    res.status(500).json({ error: true, message: err.message });
-  }
+    res.json({error:false});
 });
 
-// ───────────────────────────
-// API: ALBUMS
-// ───────────────────────────
-
-// все альбомы
+// ALBUMS
 app.get('/api/albums', (req, res) => {
-  try {
     const albums = loadAlbums();
     const songs = loadSongs();
-
-    const result = albums.map(album => {
-      const cover =
-        album.cover && album.cover.trim()
-          ? album.cover.trim()
-          : DEFAULT_IMAGE;
-
-      const songObjects = (album.songs || [])
-        .map(sid => {
-          const s = songs.find(s => String(s.id) === String(sid));
-          if (!s) return null;
-          if (!s.thumbnail || !s.thumbnail.trim()) {
-            s.thumbnail = cover;
-          }
-          return s;
-        })
-        .filter(Boolean);
-
-      return { ...album, songs: songObjects };
-    });
-
-    res.json({ error: false, data: result });
-
-  } catch (err) {
-    res.status(500).json({ error: true, message: err.message });
-  }
+    const data = albums.map(a => ({
+        ...a,
+        songs: (a.songs||[]).map(id => songs.find(s=>s.id === id)).filter(Boolean)
+    }));
+    res.json({error:false, data});
 });
 
-// один альбом
 app.get('/api/albums/:id', (req, res) => {
-  try {
     const albums = loadAlbums();
     const songs = loadSongs();
-
-    const album = albums.find(a => String(a.id) === req.params.id);
-    if (!album) {
-      return res.status(404).json({ error: true, message: 'Album not found' });
-    }
-
-    const cover = album.cover?.trim() || DEFAULT_IMAGE;
-
-    const songObjects = (album.songs || [])
-      .map(sid => {
-        const s = songs.find(s => String(s.id) === String(sid));
-        if (!s) return null;
-        if (!s.thumbnail?.trim()) s.thumbnail = cover;
-        return s;
-      })
-      .filter(Boolean);
-
-    res.json({ error: false, data: { ...album, songs: songObjects } });
-
-  } catch (err) {
-    res.status(500).json({ error: true, message: err.message });
-  }
+    const a = albums.find(x => x.id === req.params.id);
+    if(!a) return res.status(404).json({error:true});
+    
+    const enriched = {
+        ...a,
+        songs: (a.songs||[]).map(id => {
+             const s = songs.find(x => x.id === id);
+             return s ? { ...s, thumbnail: s.thumbnail || a.cover } : null;
+        }).filter(Boolean)
+    };
+    res.json({error:false, data: enriched});
 });
 
-// создать альбом
 app.post('/api/albums', (req, res) => {
-  try {
     const albums = loadAlbums();
     const { title, description, cover, songs } = req.body;
-
-    if (!title || !title.trim()) {
-      return res.status(400).json({ error: true, message: 'Album title is required' });
-    }
-    if (!Array.isArray(songs) || songs.length === 0) {
-      return res.status(400).json({ error: true, message: 'Album must contain at least one song ID' });
-    }
-
-    const newAlbum = {
-      id: generateId(),
-      title: title.trim(),
-      description: (description || '').trim(),
-      cover: (cover || '').trim(),
-      songs: songs.map(s => String(s).trim())
-    };
-
+    const newAlbum = { id: generateId(), title, description, cover, songs: songs || [] };
     albums.push(newAlbum);
     saveJson('albums.json', albums);
-
-    log(`[API] Created new album: ${newAlbum.id}`);
-    res.json({ error: false, data: newAlbum });
-
-  } catch (err) {
-    res.status(500).json({ error: true, message: err.message });
-  }
+    res.json({error:false, data: newAlbum});
 });
 
-// обновить альбом
 app.put('/api/albums/:id', (req, res) => {
-  try {
     const albums = loadAlbums();
-    const album = albums.find(a => String(a.id) === req.params.id);
-    if (!album) return res.status(404).json({ error: true, message: 'Album not found' });
-
-    const { title, description, cover, songs } = req.body;
-
-    if (title?.trim()) album.title = title.trim();
-    if (description !== undefined) album.description = (description || '').trim();
-    if (cover !== undefined) album.cover = (cover || '').trim();
-    if (Array.isArray(songs)) {
-      album.songs = songs.map(s => String(s).trim());
-    }
-
+    const a = albums.find(x => x.id === req.params.id);
+    if(!a) return res.status(404).json({error:true});
+    Object.assign(a, req.body);
     saveJson('albums.json', albums);
-
-    log(`[API] Updated album: ${album.id}`);
-    res.json({ error: false, data: album });
-
-  } catch (err) {
-    res.status(500).json({ error: true, message: err.message });
-  }
+    res.json({error:false, data: a});
 });
 
-// удалить альбом
 app.delete('/api/albums/:id', (req, res) => {
-  try {
     const albums = loadAlbums();
-    const idx = albums.findIndex(a => String(a.id) === req.params.id);
-
-    if (idx === -1) {
-      return res.status(404).json({ error: true, message: 'Album not found' });
-    }
-
-    const [removed] = albums.splice(idx, 1);
+    const idx = albums.findIndex(x => x.id === req.params.id);
+    if(idx !== -1) albums.splice(idx, 1);
     saveJson('albums.json', albums);
-
-    log(`[API] Deleted album: ${removed.id}`);
-    res.json({ error: false, data: removed });
-
-  } catch (err) {
-    res.status(500).json({ error: true, message: err.message });
-  }
+    res.json({error:false});
 });
 
-// ───── ERROR HANDLER ─────
-app.use((err, req, res, next) => {
-  log(`[SERVER ERROR] ${err.message}`);
-  res.status(500).json({ error: true, message: err.message });
-});
-
-// ───── START ─────
-app.listen(3000, () => log('[SERVER] running on http://localhost:3000'));
+app.listen(3000, () => log('SERVER RUNNING ON PORT 3000'));
