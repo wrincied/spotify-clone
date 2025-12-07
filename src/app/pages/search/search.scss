@@ -1,87 +1,56 @@
+.search-container {
+    padding: 24px;
+    color: white;
+    padding-bottom: 100px; /* Отступ под плеер */
+}
 
-  .search-container{
-    display: flex;
-  }
+/* --- СЕТКА ДЛЯ ВЕРХНЕЙ ЧАСТИ (Top Result + Songs) --- */
+.top-section-grid {
+    display: grid;
+    /* Две колонки: 40% и 60% (примерно) */
+    grid-template-columns: minmax(300px, 400px) 1fr; 
+    gap: 24px;
+    margin-bottom: 40px;
 
-  
-  
-  // .search-page {
-  //   display: flex;
-  //   padding: 30px;
-  //   color: white;
+    h2 {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 16px;
+    }
 
-  //   h2 {
-  //     font-size: 28px;
-  //     margin-bottom: 20px;
-  //     font-weight: 600;
-  //   }
+    .top-result-column {
+        /* Первая колонка */
+    }
 
-  //   .section {
-  //     margin-bottom: 50px;
-  //   }
+    .songs-column {
+        /* Вторая колонка */
+        .track-list {
+            display: flex;
+            flex-direction: column;
+            /* Песни идут списком */
+        }
+    }
+}
 
-  //   /* SONGS GRID */
-  //   .tracks {
-  //     display: grid;
-  //     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  //     gap: 25px;
-  //   }
+/* --- ОБЫЧНАЯ СЕТКА АЛЬБОМОВ --- */
+.results-section {
+    h2 {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 16px;
+    }
 
-  //   .track-item {
-  //     cursor: pointer;
-  //     transition: transform 0.2s ease, opacity 0.2s ease;
+    .results-grid {
+        display: grid;
+        /* Адаптивные колонки, мин. ширина карточки 180px */
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 24px;
+    }
+}
 
-  //     &:hover {
-  //       transform: scale(1.03);
-  //       opacity: 0.9;
-  //     }
-
-  //     img {
-  //       width: 100%;
-  //       height: 260px;
-  //       object-fit: cover;
-  //       border-radius: 10px;
-  //     }
-
-  //     .track-title {
-  //       margin-top: 10px;
-  //       font-size: 16px;
-  //       opacity: 0.9;
-  //     }
-  //   }
-
-  //   /* ALBUM LIST */
-  //   .albums {
-  //     .album-item {
-  //       display: flex;
-  //       align-items: center;
-  //       gap: 20px;
-  //       margin-bottom: 25px;
-  //       cursor: pointer;
-  //       transition: opacity 0.2s ease;
-
-  //       &:hover {
-  //         opacity: 0.8;
-  //       }
-
-  //       img {
-  //         width: 120px;
-  //         height: 120px;
-  //         border-radius: 8px;
-  //         object-fit: cover;
-  //       }
-
-  //       .album-info {
-  //         .album-title {
-  //           font-size: 20px;
-  //           font-weight: 500;
-  //         }
-
-  //         .album-desc {
-  //           margin-top: 5px;
-  //           opacity: 0.7;
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+/* Адаптив для мобилок */
+@media (max-width: 900px) {
+    .top-section-grid {
+        grid-template-columns: 1fr; /* Одна колонка на узких экранах */
+    }
+}
