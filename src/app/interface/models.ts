@@ -23,3 +23,12 @@ export interface CategoryInterface {
   songs?: string[]; // ids of songs
   playlists?: string[]; // future
 }
+
+export interface CardItemInterface {
+  id: string;
+  title: string;        // Сюда попадет Album.title или Category.name
+  subtitle?: string;    // Сюда Album.description или "Rock Mix"
+  image?: string;       // Сюда Album.cover или Song.thumbnail
+  color?: string;       // Сюда Category.color (для полоски снизу)
+  type: 'album' | 'playlist' | 'category' | 'focus'; // Чтобы понимать, куда кликать
+}

@@ -2,103 +2,111 @@
   {
     "id": "c0deebdbd4ee0b7f",
     "title": "похвала бичам",
-    "description": "похвала бичам",
+    "artist": "pyrokinesis",
     "thumbnail": "https://i.scdn.co/image/ab67616d00001e02591ce0ce2088d7e40e96b846"
   },
   {
     "id": "8a1b7c368eb64d63",
     "title": "молчаливое согласие небес",
-    "description": "pyrokinesis",
+    "artist": "pyrokinesis",
     "thumbnail": "https://i.scdn.co/image/ab67616d00001e02591ce0ce2088d7e40e96b846"
   },
   {
     "id": "9382fdab10e50305",
     "title": "моя великая вина",
-    "description": "pyrokinesis",
+    "artist": "pyrokinesis",
     "thumbnail": "https://i.scdn.co/image/ab67616d00001e02591ce0ce2088d7e40e96b846"
   },
   {
     "id": "036616b3a3327e69",
     "title": "её влюбленные глаза",
-    "description": "pyrokinesis",
+    "artist": "pyrokinesis",
     "thumbnail": "https://i.scdn.co/image/ab67616d00001e02591ce0ce2088d7e40e96b846"
   },
   {
     "id": "4ee0d581bb510851",
     "title": "дъявол в деталях",
-    "description": "pyrokinesis",
+    "artist": "pyrokinesis",
     "thumbnail": "https://i.scdn.co/image/ab67616d00001e02591ce0ce2088d7e40e96b846"
   },
   {
     "id": "73f0e423c8418c24",
     "title": "мы попадем с тобою в ад",
-    "description": "pyrokinesis",
+    "artist": "pyrokinesis",
     "thumbnail": "https://i.scdn.co/image/ab67616d00001e02591ce0ce2088d7e40e96b846"
   },
   {
     "id": "d8ddf4bc87e22e35",
     "title": "трупный синод",
-    "description": "pyrokinesis",
+    "artist": "pyrokinesis",
     "thumbnail": "https://i.scdn.co/image/ab67616d00001e02591ce0ce2088d7e40e96b846"
   },
   {
     "id": "3b50e3517fa1710b",
     "title": "mea maxima culpa",
-    "description": "pyrokinesis",
+    "artist": "pyrokinesis",
     "thumbnail": "https://i.scdn.co/image/ab67616d00001e02591ce0ce2088d7e40e96b846"
   },
   {
     "id": "413594f59a7ba47f",
     "title": "день рождение наоборот",
-    "description": "pyrokinesis",
+    "artist": "pyrokinesis",
     "thumbnail": "https://i.scdn.co/image/ab67616d00001e02591ce0ce2088d7e40e96b846"
   },
   {
     "id": "cd327883247ada89",
     "title": "50 на 50",
-    "description": "pyrokinesis",
+    "artist": "pyrokinesis",
     "thumbnail": "https://i.scdn.co/image/ab67616d00001e02591ce0ce2088d7e40e96b846"
   },
   {
     "id": "b5a634e5698717de",
     "title": "точки мои опор",
-    "description": "pyrokinesis",
+    "artist": "pyrokinesis",
     "thumbnail": "https://i.scdn.co/image/ab67616d00001e02591ce0ce2088d7e40e96b846"
   },
   {
     "id": "751f704869fcffcb",
     "title": "клятвы",
-    "description": "pyrokinesis",
+    "artist": "pyrokinesis",
     "thumbnail": "https://i.scdn.co/image/ab67616d00001e02591ce0ce2088d7e40e96b846"
   },
   {
     "id": "e459473310262ad6",
     "title": "яблоки в карамели",
-    "description": "pyrokinesis",
+    "artist": "pyrokinesis",
     "thumbnail": "https://i.scdn.co/image/ab67616d00001e02591ce0ce2088d7e40e96b846"
   },
   {
     "id": "63734c671d7c876e",
     "title": "тёмная сторона Бога",
-    "description": "pyrokinesis",
+    "artist": "pyrokinesis",
     "thumbnail": "https://i.scdn.co/image/ab67616d00001e02591ce0ce2088d7e40e96b846"
   },
   {
     "id": "2aa7d8aa946d7b0f",
     "title": "Апокалипсис Андрея",
-    "description": "pyrokinesis",
+    "artist": "pyrokinesis",
     "thumbnail": "https://i.scdn.co/image/ab67616d00001e02591ce0ce2088d7e40e96b846"
   },
   {
     "id": "b4cc806a5a2300a6",
     "title": "трансгрессивный переход",
-    "description": "pyrokinesis",
+    "artist": "pyrokinesis",
     "thumbnail": "https://i.scdn.co/image/ab67616d00001e02591ce0ce2088d7e40e96b846"
   },
   {
     "id": "4de17e76e31be25f",
     "title": "сшитые имена",
-    "description": "pyrokinesis",
+    "artist": "pyrokinesis",
     "thumbnail": ""
+  },
+  {
+    "id": "97707c709671587e",
+    "title": "test",
+    "description": "test",
+    "thumbnail": "https://i.scdn.co/image/ab67616d00001e02591ce0ce2088d7e40e96b846",
+    "url": "public/music/1.mp3",
+    "duration": 160
   }
 ]

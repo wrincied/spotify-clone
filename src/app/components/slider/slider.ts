@@ -7,7 +7,7 @@ import {
   AfterViewInit,
   OnChanges
 } from '@angular/core';
-import { SongCard } from '../song-card/song-card';
+import { albumCard } from '../albumCard/albumCard';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AlbumInterface } from '../../interface/models';
@@ -15,7 +15,7 @@ import { AlbumInterface } from '../../interface/models';
 @Component({
   selector: 'app-slider',
   standalone: true,
-  imports: [SongCard, CommonModule],
+  imports: [albumCard, CommonModule],
   templateUrl: './slider.html',
   styleUrls: ['./slider.scss'],
 })
