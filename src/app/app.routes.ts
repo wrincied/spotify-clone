@@ -4,7 +4,7 @@ import { Login } from './pages/Auth/login/login';
 import { SongComponent } from './pages/song/song';
 import { PlaylistComponent } from './pages/playlist/playlist';
 import { SearchComponent } from './pages/search/search';
-import { Library } from './pages/library/library';
+import { Library } from './pages/home/library/library';
 import { CreatePlaylist } from './pages/create-playlist/create-playlist';
 
 export const routes: Routes = [

@@ -1,0 +1,45 @@
+.songRow__container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--row-height);
+  .row__info {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: 15px;
+    padding: 10px;
+    font-variant: tabular-nums;
+    inset-inline-end: 0.25em;
+    img {
+      max-width: 60px;
+    }
+    .index {
+      width: 30px;
+      min-width: 30px;
+
+      // 2. Выравниваем цифру (обычно по центру или вправо)
+      text-align: center;
+
+      // 3. Запрещаем блоку сжиматься, если места мало
+      flex-shrink: 0;
+
+      // Опционально: цвет номера обычно серый
+      color: #b3b3b3;
+    }
+    & .title,
+    .artist {
+      cursor: pointer;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+  .row__duration {
+  }
+  &:hover {
+    background-color: hsla(0, 0%, 100%, 0.3);
+  }
+}
