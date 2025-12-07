@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './pages/home/home';
-import { Login } from './pages/login/login';
+import { Login } from './pages/Auth/login/login';
 import { SongComponent } from './pages/song/song';
 import { PlaylistComponent } from './pages/playlist/playlist';
 import { SearchComponent } from './pages/search/search';
@@ -14,6 +14,7 @@ export const routes: Routes = [
   { path: 'search', component: SearchComponent },
   { path: 'album/:id', component: PlaylistComponent },
   { path: 'album/:collectionId/song/:songId', component: SongComponent },
-  { path: 'login', component: Login },
+  { path: 'login', component: Login, data: { noLayout: true } },
+
   { path: '**', redirectTo: '' },
 ];
