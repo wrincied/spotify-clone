@@ -14,6 +14,7 @@ export class albumCard {
   @Input() title!: string;
   @Input() description!: string;
   @Input() playlistThumbnail: string | null = null;
+  @Input() isTopResult: boolean = false;
 
   @Output() select = new EventEmitter<void>();
 

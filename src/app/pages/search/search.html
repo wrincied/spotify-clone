@@ -1,48 +1,58 @@
 <div class="search-container">
-  <!-- ALBUM RESULTS -->
-  @if (filteredAlbums.length > 0) {
 
-<!-- Для поиска альбома -->
-  <div class="results-grid">
-    @for (album of filteredAlbums; track album.id) {
-    <div class="search-card" [routerLink]="['/playlist', album.id]">
-      <div class="card-image">
-        <img [src]="album.cover" />
-      </div>
+    @if (filteredAlbums.length > 0 || filteredTracks.length > 0) {
+        
+        <div class="top-section-grid">
+            
+            <div class="top-result-column">
+                <h2>Top result</h2>
+                @if (filteredAlbums.length > 0) {
+                    <app-albumCard
+                        [title]="filteredAlbums[0].title"
+                        [description]="filteredAlbums[0].description"
+                        [playlistThumbnail]="filteredAlbums[0].cover"
+                        [routerLink]="['/playlist', filteredAlbums[0].id]"
+                        [isTopResult]="true"
+                    ></app-albumCard>
+                }
+            </div>
 
-      <div class="card-content">
-        <h3>{{ album.title }}</h3>
-        <p>{{ album.description }}</p>
-      </div>
-    </div>
-    }
-  </div>
-  }
- <!-- Для поиска песни -->
-  @if (filteredTracks.length > 0) {
+            <div class="songs-column">
+                <h2>Songs</h2>
+                <div class="track-list">
+                    @for (track of filteredTracks.slice(0, 4); track track.id) {
+                        <app-songRow [song]="track" [thumbnailUrl]="track.coverFromAlbum"></app-songRow>
+                    }
+                    @if (filteredTracks.length < 4) {
+                        @for (track of topAlbumSongs.slice(0, 4 - filteredTracks.length); track track.id) {
+                            <app-songRow [song]="track" [thumbnailUrl]="track.coverFromAlbum"></app-songRow>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
 
+        <!-- @if (filteredAlbums.length > 1) {
+            <div class="results-section">
+                <h2>Albums</h2>
+                <div class="results-grid">
+                    @for (album of filteredAlbums.slice(1); track album.id) {
+                        <app-albumCard
+                            [title]="album.title"
+                            [description]="album.description"
+                            [playlistThumbnail]="album.cover"
+                            [routerLink]="['/playlist', album.id]"
+                            [isTopResult]="false"
+                        ></app-albumCard>
+                    }
+                </div>
+            </div>
+        } -->
 
-  <div class="track-list">
-    
-    @for (track of filteredTracks; track track.id) {
-
-    <app-albumCard
-      [title]="track.title"
-      [description]="track.artist"
-      [playlistThumbnail]="track.thumbnail || track.coverFromAlbum"
-    ></app-albumCard>
-    }
-  </div>
-  }
-
-  <!-- EMPTY STATES -->
-  @if (filteredAlbums.length === 0 && filteredTracks.length === 0) {
-  <div class="empty-state">
-    @if(query){
-    <p>По запросу «{{ query }}» ничего не найдено.</p>
     } @else {
-    <p>Введите запрос, чтобы найти музыку.</p>
+        <div class="empty-state">
+            @if(query){ <p>No results found for "{{ query }}"</p> } 
+            @else { <p>Please search for something</p> }
+        </div>
     }
-  </div>
-  }
 </div>
