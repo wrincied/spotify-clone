@@ -1,11 +1,15 @@
-<div class="spotify-app">
-  <app-spotify-sidebar></app-spotify-sidebar>
+@if (isNoLayout) {
+  <router-outlet />
+} @else {
+  <div class="spotify-app">
+    <app-spotify-sidebar />
 
-  <div class="spotify-main">
-    <app-top-nav></app-top-nav>
+    <div class="spotify-main">
+      <app-top-nav />
 
-    <div class="spotify-content-scroll">
-      <router-outlet></router-outlet>
+      <div class="spotify-content-scroll">
+        <router-outlet />
+      </div>
     </div>
   </div>
-</div>
+}
