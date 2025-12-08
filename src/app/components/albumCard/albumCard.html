@@ -4,12 +4,11 @@
     [class.fixed-width]="fixedSize"
 >
     <a [routerLink]="link">
-        <div class="spotify__albumCard_thumbnail">
+        <div
+            class="spotify__albumCard_thumbnail"
+            [style.background-color]="backgroundColor"
+        >
             <img
-                [src]="
-                    playlistThumbnail ||
-                    'https://placehold.co/600x400/png'
-                "
                 (error)="onImageError($event)"
             />
         </div>
