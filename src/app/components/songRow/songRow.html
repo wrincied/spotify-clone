@@ -1,24 +1,30 @@
-<div class="songRow__container">
-  <div class="row__info">
-   <div class="index-col">
-      @if(thumbnailUrl) {
-        <img [src]="thumbnailUrl" class="row-thumbnail" />
-      } @else {
-        <span class="index-number">
-          {{ index }}
-        </span>
-      }
+<div
+    class="songRow__container"
+    [class.search-mode]="isSearchMode"
+>
+    <div class="row__info">
+        <div class="index-col">
+            @if (thumbnailUrl) {
+                <img
+                    [src]="thumbnailUrl"
+                    class="row-thumbnail"
+                />
+            } @else {
+                <span class="index-number">
+                    {{ index }}
+                </span>
+            }
+        </div>
+        <div class="row__text">
+            <div class="title">
+                <span>{{ song.title }}</span>
+            </div>
+            <div class="artist">
+                <span>{{ song.artist }}</span>
+            </div>
+        </div>
     </div>
-    <div class="row__text">
-      <div class="title">
-        <span>{{ song.title }}</span>
-      </div>
-      <div class="artist">
-        <span>{{ song.artist }}</span>
-      </div>
+    <div class="row__duration">
+        <span>{{ song.duration | formatTime }}</span>
     </div>
-  </div>
-  <div class="row__duration">
-    <span>{{ song.duration | formatTime }}</span>
-  </div>
 </div>

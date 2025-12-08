@@ -1,48 +1,70 @@
 @if (album) {
-<div class="album_page">
+    <div class="album_page">
+        <div
+            class="gradient-background"
+            [style.background]="gradientColor"
+        ></div>
 
-  <div class="gradient-background" 
-       [style.background]="gradientColor">
-  </div>
+        <div
+            class="sticky-header"
+            [class.visible]="isSticky"
+            [style.background-color]="mainColor"
+        >
+            <div class="sticky-content">
+                <button class="play-btn">
+                    <div class="play-icon">▶</div>
+                </button>
+                <div class="sticky-text">
+                    <h2>{{ album.title }}</h2>
+                </div>
+            </div>
+        </div>
 
-  <div class="sticky-header" 
-       [class.visible]="isSticky" 
-       [style.background-color]="mainColor">
-    <div class="sticky-content">
-      <button class="play-btn">
-         <div class="play-icon">▶</div>
-      </button>
-      <div class="sticky-text">
-         <h2>{{ album.title }}</h2>
-      </div>
+        <div
+            class="album_header"
+            #albumHeaderRef
+        >
+            <div class="album-heade__inside">
+                <img
+                    [src]="album.cover"
+                    class="album_cover"
+                />
+                <div class="album_info">
+                    <h1>{{ album.title }}</h1>
+                    <p class="active">{{
+                        album.description
+                    }}</p>
+                    <p>{{ album.songs.length }} songs</p>
+                </div>
+            </div>
+        </div>
+
+        <div
+            class="table-header"
+            [style.background-color]="
+                isSticky ? '#1f1f1f' : 'transparent'
+            "
+            [style.box-shadow]="
+                '0 4px 10px rgba(0, 0, 0, 0.5);'
+            "
+        >
+            <span class="col-index">#</span>
+            <span class="col-title">Titel</span>
+            <div class="col-duration">
+                <img
+                    src="assets/icons8-uhr.svg"
+                    alt="time"
+                />
+            </div>
+        </div>
+
+        <div class="songs_list">
+            @for (s of album.songs; track $index) {
+                <app-songRow
+                    [song]="s"
+                    [index]="$index + 1"
+                ></app-songRow>
+            }
+        </div>
     </div>
-  </div>
-
-  <div class="album_header" #albumHeaderRef>
-    <div class="album-heade__inside">
-      <img [src]="album.cover" class="album_cover" />
-      <div class="album_info">
-        <h1>{{ album.title }}</h1>
-        <p class="active">{{ album.description }}</p>
-        <p>{{ album.songs.length }} songs</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="table-header" 
-       [style.background-color]="isSticky ? '#1f1f1f' : 'transparent'" [style.box-shadow]="'0 4px 10px rgba(0, 0, 0, 0.5);'">
-       
-    <span class="col-index">#</span>
-    <span class="col-title">Titel</span>
-    <div class="col-duration">
-      <img src="assets/icons8-uhr.svg" alt="time" />
-    </div>
-  </div>
-
-  <div class="songs_list">
-    @for (s of album.songs; track $index) {
-      <app-songRow [song]="s" [index]="$index + 1"></app-songRow>
-    }
-  </div>
-</div>
 }

@@ -1,25 +1,30 @@
 <div class="spotify__home-container__playlist-container">
     @if (hasError) {
-    <div class="fatal-error">Ошибка загрузки: {{ errorMessage }}</div>
+        <div class="fatal-error"
+            >Ошибка загрузки: {{ errorMessage }}</div
+        >
     }
-
     @if (albums.length > 0) {
+        <div class="playlist_card_collections">
+            <h4>For You</h4>
 
-    <div class="playlist_card_collections">
-        <h4>Focus</h4>
+            <app-slider
+                [categItem]="categories"
+                name="focus_section"
+            >
+            </app-slider>
+        </div>
 
-        <app-slider [items]="albums" name="focus_section">
-        </app-slider>
-    </div>
+        <div class="playlist_card_collections">
+            <h4>Spotify Playlist</h4>
 
-    <div class="playlist_card_collections">
-        <h4>Spotify Playlist</h4>
-
-        <app-slider [items]="albums" name="spotify_section">
-        </app-slider>
-    </div>
-
+            <app-slider
+                [albumItem]="albums"
+                name="spotify_section"
+            >
+            </app-slider>
+        </div>
     } @else {
-    <div class="loading-placeholder">Загрузка…</div>
+        <div class="loading-placeholder">Загрузка…</div>
     }
 </div>

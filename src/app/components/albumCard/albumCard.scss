@@ -1,19 +1,24 @@
 .spotify__albumCard {
-    width: 100%;
+    max-width: 100%;
     background-color: #181818;
     border-radius: 6px;
     padding: 16px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    
+    border-radius: 4px;
+
     /* Стандартный Vertical Layout */
     display: flex;
     flex-direction: column;
-    gap: 16px;
     min-height: 260px; /* Высота обычной карточки */
 
     &:hover {
-        background-color: #282828;
+
+           background-color: #282828;
+    }
+    a {
+        text-decoration: none;
+        color: inherit;
     }
 
     /* --- 1. КАРТИНКА --- */
@@ -22,8 +27,8 @@
         aspect-ratio: 1/1;
         border-radius: 4px;
         overflow: hidden;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-        
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+
         img {
             width: 100%;
             height: 100%;
@@ -37,6 +42,7 @@
         flex-direction: column;
         gap: 4px;
         min-height: 60px;
+        margin-top: 15px;
 
         .title {
             font-size: 16px;
@@ -58,15 +64,17 @@
             display: none; /* Скрыт в обычной карточке */
         }
     }
-    
-    .play-button-overlay { display: none; } /* Скрыт по дефолту */
+
+    .play-button-overlay {
+        display: none;
+    } /* Скрыт по дефолту */
 
     /* ============================================= */
     /* MODIFIER: TOP RESULT (Большая карточка)  */
     /* ============================================= */
     &.top-result-mode {
         grid-column: 1 / -1; /* Если вдруг попадет в грид */
-        min-height: 240px;   /* Высота блока */
+        min-height: 240px; /* Высота блока */
         gap: 20px;
         justify-content: center;
         align-items: flex-start;
@@ -75,7 +83,7 @@
 
         /* Картинка становится меньше и слева (или сверху, как у Spotify) */
         .spotify__albumCard_thumbnail {
-            width: 92px; 
+            width: 92px;
             height: 92px;
             flex-shrink: 0;
         }
@@ -83,58 +91,68 @@
         .spotify__albumCard_text {
             .title {
                 font-size: 32px; /* Огромный заголовок */
-                font-weight: 800;
+                font-weight: 700;
                 white-space: normal; /* Перенос текста */
             }
-            
+
             .meta-row {
                 display: flex;
                 gap: 8px;
                 align-items: center;
             }
 
-            .type-badge {
-                display: inline-block;
-                background-color: #121212;
-                color: white;
-                font-size: 12px;
-                font-weight: 700;
-                padding: 4px 12px;
-                border-radius: 50px;
-            }
-            
+            // .type-badge {
+            //   display: inline-block;
+            //   background-color: #121212;
+            //   color: white;
+            //   font-size: 12px;
+            //   font-weight: 700;
+            //   padding: 4px 12px;
+            //   border-radius: 50px;
+            // }
+
             .description {
-                font-weight: 700;
+                // font-weight: 700;
                 color: white;
             }
         }
-        
+
         /* Зеленая кнопка Play справа внизу */
-        .play-button-overlay {
-            display: flex; /* Показываем */
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            opacity: 0;
-            transition: all 0.3s ease;
-            transform: translateY(8px);
-            
-            button {
-                width: 48px; height: 48px;
-                border-radius: 50%;
-                background: #1db954;
-                border: none;
-                font-size: 20px;
-                display: flex; align-items: center; justify-content: center;
-                box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-                cursor: pointer;
-                &:hover { transform: scale(1.05); }
-            }
-        }
-        
-        &:hover .play-button-overlay {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        // .play-button-overlay {
+        //   display: flex; /* Показываем */
+        //   position: absolute;
+        //   bottom: 20px;
+        //   right: 20px;
+        //   opacity: 0;
+        //   transition: all 0.3s ease;
+        //   transform: translateY(8px);
+
+        //   button {
+        //     width: 48px;
+        //     height: 48px;
+        //     border-radius: 50%;
+        //     background: #1db954;
+        //     border: none;
+        //     font-size: 20px;
+        //     display: flex;
+        //     align-items: center;
+        //     justify-content: center;
+        //     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        //     cursor: pointer;
+        //     &:hover {
+        //       transform: scale(1.05);
+        //     }
+        //   }
+        // }
+
+        // &:hover .play-button-overlay {
+        //   opacity: 1;
+        //   transform: translateY(0);
+        // }
+    }
+    &.fixed-width {
+        width: 210px; /* Жесткая ширина */
+        min-width: 210px; /* Запрещаем сжиматься */
+        flex-shrink: 0; /* Чтобы не сплющивало в flex-контейнере */
     }
 }

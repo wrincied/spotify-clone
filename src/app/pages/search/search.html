@@ -1,18 +1,29 @@
 <div class="search-container">
-
-    @if (filteredAlbums.length > 0 || filteredTracks.length > 0) {
-        
+    @if (
+        filteredAlbums.length > 0 ||
+        filteredTracks.length > 0
+    ) {
         <div class="top-section-grid">
-            
             <div class="top-result-column">
                 <h2>Top result</h2>
-                @if (filteredAlbums.length > 0) {
+                @if (
+                    filteredAlbums.length > 0 &&
+                    filteredAlbums[0]?.id
+                ) {
                     <app-albumCard
                         [title]="filteredAlbums[0].title"
-                        [description]="filteredAlbums[0].description"
-                        [playlistThumbnail]="filteredAlbums[0].cover"
-                        [routerLink]="['/playlist', filteredAlbums[0].id]"
+                        [description]="
+                            filteredAlbums[0].description
+                        "
+                        [playlistThumbnail]="
+                            filteredAlbums[0].cover
+                        "
+                        [link]="[
+                            '/album',
+                            filteredAlbums[0].id,
+                        ]"
                         [isTopResult]="true"
+                        [fixedSize]="false"
                     ></app-albumCard>
                 }
             </div>
@@ -20,39 +31,43 @@
             <div class="songs-column">
                 <h2>Songs</h2>
                 <div class="track-list">
-                    @for (track of filteredTracks.slice(0, 4); track track.id) {
-                        <app-songRow [song]="track" [thumbnailUrl]="track.coverFromAlbum"></app-songRow>
+                    @for (
+                        track of filteredTracks.slice(0, 4);
+                        track track.id
+                    ) {
+                        <app-songRow
+                            [song]="track"
+                            [thumbnailUrl]="
+                                track.coverFromAlbum
+                            "
+                        ></app-songRow>
                     }
                     @if (filteredTracks.length < 4) {
-                        @for (track of topAlbumSongs.slice(0, 4 - filteredTracks.length); track track.id) {
-                            <app-songRow [song]="track" [thumbnailUrl]="track.coverFromAlbum"></app-songRow>
+                        @for (
+                            track of topAlbumSongs.slice(
+                                0,
+                                4 - filteredTracks.length
+                            );
+                            track track.id
+                        ) {
+                            <app-songRow
+                                [song]="track"
+                                [thumbnailUrl]="
+                                    track.coverFromAlbum
+                                "
+                            ></app-songRow>
                         }
                     }
                 </div>
             </div>
         </div>
-
-        <!-- @if (filteredAlbums.length > 1) {
-            <div class="results-section">
-                <h2>Albums</h2>
-                <div class="results-grid">
-                    @for (album of filteredAlbums.slice(1); track album.id) {
-                        <app-albumCard
-                            [title]="album.title"
-                            [description]="album.description"
-                            [playlistThumbnail]="album.cover"
-                            [routerLink]="['/playlist', album.id]"
-                            [isTopResult]="false"
-                        ></app-albumCard>
-                    }
-                </div>
-            </div>
-        } -->
-
     } @else {
         <div class="empty-state">
-            @if(query){ <p>No results found for "{{ query }}"</p> } 
-            @else { <p>Please search for something</p> }
+            @if (query) {
+                <p>No results found for "{{ query }}"</p>
+            } @else {
+                <p>Please search for something</p>
+            }
         </div>
     }
 </div>
