@@ -1,141 +1,127 @@
 # SpotifyClone — Portfolio Project
 
-A full-stack recreation of the Spotify homepage built with **Angular 21** and a **Node.js REST API**.  
-This project demonstrates real-world frontend development with modern Angular architecture, reusable components, backend integration, and production-style Git workflow.
+A full-stack recreation of the Spotify interface and music library management system, built with Angular (Standalone Architecture) and a Node.js REST API.  
+This project demonstrates real-world frontend engineering, backend integration, UI/UX architecture, component composition, and full CRUD data management through a custom Admin Panel.
 
 ---
 
+## Technical Summary
 
-# 🧑‍💻 Technical Summary
-
-**Tech Stack:**  
-- Angular 21 (standalone components, HttpClient, SCSS)  
-- Node.js + Express backend  
-- TypeScript  
-- RxJS  
-- Git (main / dev / feature workflow)
-
-**Key Features:**  
-- Full Spotify-style homepage UI  
-- Reusable SongCard component  
-- Dynamic playlist loading from backend  
-- REST API server (albums.json)  
-- Clean component-service-template structure  
-- Prepared modules for search, login, and player
+### Tech Stack
+- Frontend: Angular (Standalone Components), TypeScript, RxJS, SCSS
+- Backend: Node.js, Express
+- Database: Local JSON (albums.json, songs.json, categories.json)
 
 ---
 
-# 📁 Project Structure
+## Key Features
 
-```
+### Backend and Admin Panel
+- Full internal Admin UI for managing Songs, Albums, Categories
+- CRUD operations for all entities
+- Automatic relation cleanup:
+  - Removing an album removes all references to its songs
+  - Removing a song removes it from all albums
+  - Removing a category detaches it from all related entities
+- Smart MP3 upload using music-metadata:
+  - Automatic duration extraction
+  - Automatic ID generation
+- Static serving of audio and UI assets
+
+### Frontend (Angular)
+- Unified AlbumCard component supporting multiple modes (standard, fixedSize, Top Result)
+- Search page:
+  - Live filtering with reactive updates
+  - Top Result algorithm
+  - Display of top 4 matching tracks
+  - Grid layout replicating Spotify’s design
+- Playlist page:
+  - Sticky dynamic header
+  - Scroll-based behavior via IntersectionObserver
+  - Automatic average-color background generation
+- Central MusicStore for reactive caching and state handling
+- Declarative navigation via routerLink
+
+---
+
+## Project Structure
 spotify-clone/
+
 │
-├── frontend/                     Angular application
-│   ├── src/app/
-│   │   ├── components/          Reusable UI components
-│   │   ├── pages/               Page-level views
-│   │   └── services/            API service layer
-│   └── assets/
-│
-├── backend/                      Node.js REST API
+├── backend/
 │   ├── server.js
-│   ├── albums.json
-│   └── .env (ignored)
+│   ├── db/
+│   │   ├── albums.json
+│   │   ├── songs.json
+│   │   └── categories.json
+│   └── public/
+│
+├── src/app/
+│   ├── components/
+│   │   ├── albumCard/
+│   │   ├── songRow/
+│   │   ├── slider/
+│   │   └── ...
+│   ├── pages/
+│   │   ├── home/
+│   │   ├── search/
+│   │   ├── playlist/
+│   │   └── ...
+│   ├── services/
+│   │   ├── ApiService/
+│   │   └── music-store/
+│   └── interface/
 │
 └── README.md
-```
 
 ---
 
-# 🌳 Git Workflow
+## Git Workflow
+main        → stable production-ready code
 
-```
-main        → production-ready code
 dev         → integrated development branch
-feature/*   → isolated branches for individual tasks
-```
 
-Example:
-
-```bash
-git checkout dev
-git checkout -b feature/homepage
-git commit -m "Build homepage UI"
-git push origin feature/homepage
-```
-
-After completion:
-
-```bash
-git merge feature/homepage
-```
+feature/* → isolated feature branches
 
 ---
 
-# ▶ Frontend Development
+## Development Setup
 
-Start Angular dev server:
-
-```bash
-ng serve
-```
-
-Navigate to:
-
-```
-http://localhost:4200/
-```
-
----
-
-# ▶ Backend Development
-
-Start Node.js server:
-
-```bash
+### Start Backend
 node backend/server.js
-```
 
-Backend endpoint:
+API: http://localhost:3000/api  
+Admin Panel: http://localhost:3000/
 
-```
-http://localhost:3000/api/albums
-```
+### Start Angular
+ng serve
+
+Application: http://localhost:4200/
 
 ---
 
-# 🏗 Building the Project
-
-Build frontend:
-
-```bash
+## Production Build
 ng build
-```
 
-Artifacts are stored in:
 
-```
-dist/
-```
+Output in:
+dist/spotify-clone/
+
 
 ---
 
-# 🧪 Tests
-
-Run unit tests (Vitest):
-
-```bash
+## Testing
 ng test
-```
 
-Run e2e tests:
-
-```bash
 ng e2e
-```
 
+---
 
-# 📚 Additional Resources
+## Project Status
 
-Angular CLI documentation:  
-https://angular.dev/tools/cli
+Active portfolio project demonstrating:
+- Modern Angular architecture
+- Full-stack API + UI integration
+- Reactive state management
+- UI/UX engineering
+- Maintainable and scalable component structure
