@@ -1,12 +1,68 @@
 /* You can add global styles to this file, and also import other style files */
+@font-face {
+    font-family: 'SpotifyMix';
+    src:
+        url('/assets/fonts/SpotifyMix/SpotifyMix-Regular.woff2')
+            format('woff2'),
+        url('/assets/fonts/SpotifyMix/SpotifyMix-Regular.woff')
+            format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SpotifyMix';
+    src:
+        url('/assets/fonts/SpotifyMix/SpotifyMix-Medium.woff2')
+            format('woff2'),
+        url('/assets/fonts/SpotifyMix/SpotifyMix-Medium.woff')
+            format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SpotifyMix';
+    src:
+        url('/assets/fonts/SpotifyMix/SpotifyMix-Bold.woff2')
+            format('woff2'),
+        url('/assets/fonts/SpotifyMix/SpotifyMix-Bold.woff')
+            format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'SpotifyMix';
+    src:
+        url('/assets/fonts/SpotifyMix/SpotifyMix-Black.woff2')
+            format('woff2'),
+        url('/assets/fonts/SpotifyMix/SpotifyMix-Black.woff')
+            format('woff');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
+
 :root {
-  --top-nav-height: 64px; /* Высота вашего top-nav */
-   --sidebar-width: 20%; // Ширина Sidebar
+    --top-nav-height: 64px; /* Высота вашего top-nav */
+    --sidebar-width: 20%; // Ширина Sidebar
+}
+
+body {
+    font-family: 'SpotifyMix', sans-serif;
 }
 
 .spotify-main {
-  /* Устанавливаем высоту, чтобы контент занимал оставшееся место */
-  height: calc(100vh - var(--player-height) - var(--top-nav-height)); 
-  margin-top: var(--top-nav-height); /* Сдвигаем контент вниз на высоту top-nav */
-  overflow-y: auto; /* Делаем контейнер прокручиваемым */
+    /* Устанавливаем высоту, чтобы контент занимал оставшееся место */
+    height: calc(
+        100vh - var(--player-height) - var(--top-nav-height)
+    );
+    margin-top: var(
+        --top-nav-height
+    ); /* Сдвигаем контент вниз на высоту top-nav */
+    overflow-y: auto; /* Делаем контейнер прокручиваемым */
 }

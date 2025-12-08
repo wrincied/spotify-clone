@@ -12,4 +12,5 @@ export class SongRow {
   @Input({ required: true }) song!: SongInterface;
   @Input() index: number = 0;
   @Input() thumbnailUrl?: string | null;
+  @Input() isSearchMode : boolean = false;;
 }

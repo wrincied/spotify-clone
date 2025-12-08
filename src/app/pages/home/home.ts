@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { TopNavComponent } from '../../components/top-nav/top-nav';
 import { Slider } from '../../components/slider/slider';
 import { MusicStoreService } from '../../services/music-store/music-store'; // Убедитесь в правильности пути
-import { AlbumInterface } from '../../interface/models';
+import { AlbumInterface, CategoryInterface } from '../../interface/models';
 
 @Component({
   selector: 'app-home',
@@ -15,6 +15,7 @@ import { AlbumInterface } from '../../interface/models';
 })
 export class HomeComponent implements OnInit, OnDestroy {
   albums: AlbumInterface[] = [];
+  categories: CategoryInterface[] = [];
   hasError = false;
   errorMessage = '';
   private dataSubscription?: Subscription;
@@ -29,6 +30,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.dataSubscription = this.musicStore.albums$.subscribe({
       next: (albums) => {
         this.albums = albums;
+        this.categories = this.musicStore.currentCategories; // Или подписка на categories$
         this.hasError = false;
         this.cdr.detectChanges();
       },

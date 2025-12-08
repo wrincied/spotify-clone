@@ -1,43 +1,50 @@
-import { Component, EventEmitter, input, Input, Output } from '@angular/core';
+import {
+    Component,
+    EventEmitter,
+    input,
+    Input,
+    Output,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { AlbumInterface, CategoryInterface } from '../../interface/models';
 
 @Component({
-  selector: 'app-albumCard',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './albumCard.html',
-  styleUrls: ['./albumCard.scss'],
+    selector: 'app-albumCard',
+    standalone: true,
+    imports: [CommonModule, RouterLink],
+    templateUrl: './albumCard.html',
+    styleUrls: ['./albumCard.scss'],
 })
 export class albumCard {
+    constructor(private router: Router) {}
 
-  @Input() title!: string;
-  @Input() description!: string;
-  @Input() playlistThumbnail: string | null = null;
-  @Input() isTopResult: boolean = false;
+    @Input() title!: string;
+    @Input() description!: string;
+    @Input() playlistThumbnail: string | null = null;
+    @Input() isTopResult: boolean = false;
+    // НОВЫЙ ИНПУТ: Если true, ширина будет 210px. Если false — 100%.
+    @Input() fixedSize: boolean = false;
 
-  @Output() select = new EventEmitter<void>();
+    @Output() select = new EventEmitter<void>();
+    @Input() items: AlbumInterface[] = [];
+    @Input() link!: string | any[];
 
-  onClick() {
-    this.select.emit();
-  }
-
-  isError = false;
-
-
-  onImageError(event: Event) {
-    const img = event.target as HTMLImageElement;
-    img.src = 'assets/no-image.jpg';
-  }
-
-  ngOnChanges() {
-    if (!this.playlistThumbnail) {
-      this.isError = true;
+    onClick() {
+        this.select.emit();
     }
-  }
-  ngOnInit() { }
-  constructor(private router: Router) {
 
-  }
+    isError = false;
 
+    onImageError(event: Event) {
+        const img = event.target as HTMLImageElement;
+        img.src = 'https://placehold.co/600x400/png';
+    }
+
+    ngOnChanges() {
+        if (!this.playlistThumbnail) {
+            this.isError = true;
+        }
+    }
+    ngOnInit() {}
 }

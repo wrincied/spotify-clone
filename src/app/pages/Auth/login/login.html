@@ -1,34 +1,72 @@
 <div class="container">
-    <form [formGroup]="userForm" (ngSubmit)="submit()">
+    <form
+        [formGroup]="userForm"
+        (ngSubmit)="submit()"
+    >
         <div class="login__container">
-            <img width="300" src="assets/spotify-logo_green.png" alt="spotify light logo" />
+            <img
+                width="300"
+                src="assets/spotify-logo_green.png"
+                alt="spotify light logo"
+            />
             <hr />
             <div>
-                <label><strong>Email adress or username</strong> </label> <br />
-                <input [formControl]="userNameFormControl" type="text" placeholder="Email adress or username">
+                <label
+                    ><strong
+                        >Email adress or username</strong
+                    >
+                </label>
+                <br />
+                <input
+                    [formControl]="userNameFormControl"
+                    type="text"
+                    placeholder="Email adress or username"
+                />
             </div>
             <div>
-                <label><strong>Password</strong></label><br />
-                <input [formControl]="passwordFormControl" type="password" placeholder="Password"><br />
+                <label><strong>Password</strong></label
+                ><br />
+                <input
+                    [formControl]="passwordFormControl"
+                    type="password"
+                    placeholder="Password"
+                /><br />
                 <label class="mt-2">
-                    <a [style.textDecoration]="'underline'"><b>Forgot your Password ?</b> </a>
+                    <a [style.textDecoration]="'underline'"
+                        ><b>Forgot your Password ?</b>
+                    </a>
                 </label>
             </div>
             <div class="login-under__container">
-                <span [style.display]="'flex'" [style.justifyContent]="'flex-start'" [style.alighItems]="'stretch'"
-                    [style.gap]="'5px'">
-                    <input type="checkbox" name="" id="remember_me">
-                    <label for="remember_me"><span><strong>Remember Me</strong> </span></label>
+                <span
+                    [style.display]="'flex'"
+                    [style.justifyContent]="'flex-start'"
+                    [style.alighItems]="'stretch'"
+                    [style.gap]="'5px'"
+                >
+                    <input
+                        type="checkbox"
+                        name=""
+                        id="remember_me"
+                    />
+                    <label for="remember_me"
+                        ><span
+                            ><strong>Remember Me</strong>
+                        </span></label
+                    >
                 </span>
 
                 <div>
-                    <button class="login__btn">LOG IN</button>
+                    <button class="login__btn"
+                        >LOG IN</button
+                    >
                 </div>
             </div>
             <hr [style.width]="'30%'" />
             <h5><strong>Don't have a account ?</strong></h5>
-            <button class="signup__btn">SIGN UP FOR SPOTIFY</button>
+            <button class="signup__btn"
+                >SIGN UP FOR SPOTIFY</button
+            >
         </div>
-
     </form>
 </div>

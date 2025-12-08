@@ -1,56 +1,56 @@
 .search-container {
-    padding: 24px;
-    color: white;
-    padding-bottom: 100px; /* Отступ под плеер */
+  padding: 24px;
+  color: white;
+  padding-bottom: 100px; /* Отступ под плеер */
 }
 
 /* --- СЕТКА ДЛЯ ВЕРХНЕЙ ЧАСТИ (Top Result + Songs) --- */
 .top-section-grid {
-    display: grid;
-    /* Две колонки: 40% и 60% (примерно) */
-    grid-template-columns: minmax(300px, 400px) 1fr; 
-    gap: 24px;
-    margin-bottom: 40px;
+  display: grid;
+  /* Две колонки: 40% и 60% (примерно) */
+  grid-template-columns: minmax(300px, 400px) 1fr;
+  gap: 24px;
+  margin-bottom: 40px;
 
-    h2 {
-        font-size: 24px;
-        font-weight: 700;
-        margin-bottom: 16px;
-    }
+  h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
 
-    .top-result-column {
-        /* Первая колонка */
-    }
+  .top-result-column {
+    /* Первая колонка */
+  }
 
-    .songs-column {
-        /* Вторая колонка */
-        .track-list {
-            display: flex;
-            flex-direction: column;
-            /* Песни идут списком */
-        }
+  .songs-column {
+    /* Вторая колонка */
+    .track-list {
+      display: flex;
+      flex-direction: column;
+      /* Песни идут списком */
     }
+  }
 }
 
 /* --- ОБЫЧНАЯ СЕТКА АЛЬБОМОВ --- */
 .results-section {
-    h2 {
-        font-size: 24px;
-        font-weight: 700;
-        margin-bottom: 16px;
-    }
+  h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
 
-    .results-grid {
-        display: grid;
-        /* Адаптивные колонки, мин. ширина карточки 180px */
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 24px;
-    }
+  .results-grid {
+    display: grid;
+    /* Адаптивные колонки, мин. ширина карточки 180px */
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 24px;
+  }
 }
 
 /* Адаптив для мобилок */
 @media (max-width: 900px) {
-    .top-section-grid {
-        grid-template-columns: 1fr; /* Одна колонка на узких экранах */
-    }
+  .top-section-grid {
+    grid-template-columns: 1fr; /* Одна колонка на узких экранах */
+  }
 }
