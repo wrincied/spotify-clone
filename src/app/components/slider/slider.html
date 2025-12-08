@@ -1,24 +1,60 @@
 <div class="slider-container">
-  @if(showButtons){
-  <button class="scroll-btn left" (click)="scrollLeft(slider)">‹</button>
-  }
+    @if (showButtons) {
+        <button
+            class="scroll-btn left"
+            (click)="scrollLeft(slider)"
+            >‹</button
+        >
+    }
 
-  <div #slider class="playlist_card_collections">
-    @for (item of items; track item.id) {
-
-    <div class="album-card-wrapper" (click)="onNavigate(item)">
-      <app-albumCard
-        [title]="item.title"
-        [description]="item.description"
-        [playlistThumbnail]="item.thumbnail?.trim() || item.cover?.trim() || 'assets/no-image.jpg'"
-        [id]="item.id"
-      >
-      </app-albumCard>
+    <div
+        #slider
+        class="playlist_card_collections"
+    >
+        @if (albumItem.length > 0) {
+            @for (item of albumItem; track item.id) {
+                <div class="album-card-wrapper">
+                    <app-albumCard
+                        [title]="item.title"
+                        [description]="item.description"
+                        [playlistThumbnail]="
+                            item.thumbnail?.trim() ||
+                            item.cover?.trim() ||
+                            'https://placehold.co/600x400/png'
+                        "
+                        [id]="item.id"
+                        [fixedSize]="true"
+                        [link]="
+                            item.songs
+                                ? ['/album', item.id]
+                                : ['/song', item.id]
+                        "
+                    >
+                    </app-albumCard>
+                </div>
+            }
+        } @else if (categItem.length > 0) {
+            @for (item of categItem; track item.id) {
+                <div class="album-card-wrapper">
+                    <app-albumCard
+                        [title]="item.name"
+                        [description]="'Категория'"
+                        [playlistThumbnail]="item.color"
+                        [id]="item.id"
+                        [fixedSize]="true"
+                        [link]="['/category', item.id]"
+                    >
+                    </app-albumCard>
+                </div>
+            }
+        }
     </div>
 
+    @if (showButtons) {
+        <button
+            class="scroll-btn right"
+            (click)="scrollRight(slider)"
+            >›</button
+        >
     }
-  </div>
-  @if(showButtons){
-  <button class="scroll-btn right" (click)="scrollRight(slider)">›</button>
-  }
 </div>

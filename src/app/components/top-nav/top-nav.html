@@ -1,27 +1,40 @@
 <header class="spotify-top-nav">
-  <div class="spotify-top-nav__history">
-    <button (click)="goBack()">&lt;</button>
-    <button (click)="goForward()">&gt;</button>
-  </div>
-
-  <div class="spotify-top-nav__search">
-    <div class="spotify-top-nav__search-icon">
-      <img src="assets/search.svg" alt="search-btn" />
+    <div class="spotify-top-nav__history">
+        <button (click)="goBack()">&lt;</button>
+        <button (click)="goForward()">&gt;</button>
     </div>
-    <input
-      class="spotify-top-nav__search-input"
-      type="search"
-      placeholder="What do you want to listen to?"
-      [ngModel]="query"
-      (ngModelChange)="onInput($event)"
-    />
-    @if(query){
-    <div class="spotify-top-nav__search-clear" (click)="onInput('')">✕</div>
-    }
-  </div>
 
-  <div class="spotify-top-nav__auth">
-    <div class="spotify-top-nav__auth-signup">Sign Up</div>
-    <button class="spotify-top-nav__auth-btn" (click)="onNagivateToLogin()">Log In</button>
-  </div>
+    <div class="spotify-top-nav__search">
+        <div class="spotify-top-nav__search-icon">
+            <img
+                src="assets/search.svg"
+                alt="search-btn"
+            />
+        </div>
+        <input
+            class="spotify-top-nav__search-input"
+            type="search"
+            placeholder="What do you want to listen to?"
+            [ngModel]="query"
+            (ngModelChange)="onInput($event)"
+        />
+        @if (query) {
+            <div
+                class="spotify-top-nav__search-clear"
+                (click)="onInput('')"
+                >✕</div
+            >
+        }
+    </div>
+
+    <div class="spotify-top-nav__auth">
+        <div class="spotify-top-nav__auth-signup"
+            >Sign Up</div
+        >
+        <button
+            class="spotify-top-nav__auth-btn"
+            (click)="onNagivateToLogin()"
+            >Log In</button
+        >
+    </div>
 </header>

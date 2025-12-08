@@ -1,45 +1,55 @@
 .songRow__container {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  height: var(--row-height);
-  .row__info {
     display: flex;
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
-    justify-content: start;
-    gap: 15px;
-    padding: 10px;
-    font-variant: tabular-nums;
-    inset-inline-end: 0.25em;
-    img {
-      max-width: 60px;
+    height: var(--row-height);
+    border-radius: 3px;
+    &.search-mode {
+        height: 60px; /* Фиксируем под высоту Top Result */
+        padding: 0 8px; /* Чуть меньше отступов по бокам */
+        border-radius: 4px;
+        .row__info {
+            .index-col {
+                img {
+                    width: 40px;
+                    max-width: 40px;
+                }
+            }
+        }
     }
-    .index {
-      width: 30px;
-      min-width: 30px;
+    .row__info {
+        display: flex;
+        align-items: center;
+        justify-content: start;
+        gap: 15px;
+        padding: 10px;
+        font-variant: tabular-nums;
+        inset-inline-end: 0.25em;
+        
+        .index-col {
+            width: 30px;
+            max-width: 30px;
+            text-align: center;
+            flex-shrink: 0;
+            color: #b3b3b3;
+            img {
+            border-radius: 2px;
+            max-width:40px;
+        }
+        }
+        & .title,
+        .artist {
+            cursor: pointer;
 
-      // 2. Выравниваем цифру (обычно по центру или вправо)
-      text-align: center;
-
-      // 3. Запрещаем блоку сжиматься, если места мало
-      flex-shrink: 0;
-
-      // Опционально: цвет номера обычно серый
-      color: #b3b3b3;
+            &:hover {
+                text-decoration: underline;
+            }
+        }
     }
-    & .title,
-    .artist {
-      cursor: pointer;
-
-      &:hover {
-        text-decoration: underline;
-      }
+    .row__duration {
     }
-  }
-  .row__duration {
-  }
-  &:hover {
-    background-color: hsla(0, 0%, 100%, 0.3);
-  }
+    &:hover {
+        background-color: hsla(0, 0%, 100%, 0.3);
+    }
 }
