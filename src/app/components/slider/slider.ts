@@ -35,12 +35,10 @@ export class Slider implements AfterViewInit, OnChanges {
 
     ngAfterViewInit() {
         setTimeout(() => this.checkOverflow(), 0);
-        console.log(this.checkOverflow);
     }
 
     ngOnChanges() {
         setTimeout(() => this.checkOverflow(), 0);
-        console.log(this.checkOverflow);
     }
 
     private checkOverflow() {

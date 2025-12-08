@@ -22,6 +22,7 @@ export class albumCard {
     @Input() title!: string;
     @Input() description!: string;
     @Input() playlistThumbnail: string | null = null;
+    @Input() backgroundColor?: string;
     @Input() isTopResult: boolean = false;
     // НОВЫЙ ИНПУТ: Если true, ширина будет 210px. Если false — 100%.
     @Input() fixedSize: boolean = false;
