@@ -39,26 +39,39 @@
         display: flex;
         gap: 20px;
         /* главное: нельзя скроллить по X руками */
-        overflow-x: hidden;
+        overflow-x: auto;
         overflow-y: hidden;
 
         scroll-snap-type: x mandatory;
         scroll-behavior: smooth;
 
         /* тач-жесты только по Y, по X отключаем */
-        touch-action: pan-y;
 
         /* чтобы занимал доступное пространство */
         flex: 1;
 
-        &>#song_card_item {
+        & > #song_card_item {
             scroll-snap-align: start;
         }
 
         &::-webkit-scrollbar {
             display: none;
         }
+    }
+    /* --- Медиазапросы для мобильных устройств --- */
 
+    @media (max-width: 768px) {
+        /* 1. Скрываем кнопки на телефоне (потому что используется свайп) */
+        .scroll-btn {
+            display: none;
+            opacity: 0;
+            pointer-events: none;
+        }
 
+        /* 2. Отключаем hover эффект, который показывает кнопки */
+        &:hover .scroll-btn {
+            opacity: 0;
+            pointer-events: none;
+        }
     }
 }

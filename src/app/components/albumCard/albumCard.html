@@ -1,22 +1,31 @@
-<div class="spotify__albumCard" [class.top-result-mode]="isTopResult" (click)="onClick()">
-  <div class="spotify__albumCard_thumbnail">
-    <img [src]="playlistThumbnail || 'assets/no-image.jpg'" (error)="onImageError($event)" />
-  </div>
+<div
+    class="spotify__albumCard"
+    [class.top-result-mode]="isTopResult"
+    [class.fixed-width]="fixedSize"
+>
+    <a [routerLink]="link">
+        <div class="spotify__albumCard_thumbnail">
+            <img
+                [src]="
+                    playlistThumbnail ||
+                    'https://placehold.co/600x400/png'
+                "
+                (error)="onImageError($event)"
+            />
+        </div>
 
-  <div class="spotify__albumCard_text">
-    <p class="title">{{ title }}</p>
+        <div class="spotify__albumCard_text">
+            <p class="title">{{ title }}</p>
 
-    <div class="meta-row">
-      @if(isTopResult){
-      <span class="type-badge">Album</span>
-      <p class="description">{{ description }}</p>
-      }
-    </div>
-  </div>
+            <div class="meta-row">
+                <p class="description">{{ description }}</p>
+            </div>
+        </div>
 
-  @if (isTopResult) {
-  <div class="play-button-overlay">
-    <button>▶</button>
-  </div>
-  }
+        @if (isTopResult) {
+            <div class="play-button-overlay">
+                <button>▶</button>
+            </div>
+        }
+    </a>
 </div>
