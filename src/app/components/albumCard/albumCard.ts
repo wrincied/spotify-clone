@@ -29,6 +29,7 @@ export class albumCard {
 
     @Output() select = new EventEmitter<void>();
     @Input() items: AlbumInterface[] = [];
+    @Input() itemCtgr: CategoryInterface[]=[];
     @Input() link!: string | any[];
 
     onClick() {
