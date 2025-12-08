@@ -17,6 +17,7 @@ export interface AlbumInterface {
 }
 export interface CategoryInterface {
   name: string;
+  description: string;
   id: string;
   color: string;
   albums?: string[]; // ids of albums

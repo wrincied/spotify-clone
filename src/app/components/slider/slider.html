@@ -38,9 +38,9 @@
                 <div class="album-card-wrapper">
                     <app-albumCard
                         [title]="item.name"
-                        [description]="'Категория'"
-                        [playlistThumbnail]="item.color"
-                        [style.background-color]="item.color"
+                        [description]="item.description"
+                        [playlistThumbnail]="null"
+                        [backgroundColor]="item.color"
                         [id]="item.id"
                         [fixedSize]="true"
                         [link]="['/category', item.id]"
