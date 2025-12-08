@@ -4,23 +4,30 @@
     [class.fixed-width]="fixedSize"
 >
     <a [routerLink]="link">
-        <div class="spotify__albumCard_thumbnail">
-            <img
-                [src]="
-                    playlistThumbnail ||
-                    'https://placehold.co/600x400/png'
-                "
-                (error)="onImageError($event)"
-            />
+        <div
+            class="spotify__albumCard_thumbnail"
+            [style.background-color]="backgroundColor"
+        >
+            @if (playlistThumbnail) {
+                <img
+                    [src]="playlistThumbnail"
+                    (error)="onImageError($event)"
+                    loading="lazy"
+                />
+            }
+            @if (!playlistThumbnail && backgroundColor) {
+                <div class="category-title-overlay">
+                    {{ title }}
+                </div>
+            }
         </div>
 
-        <div class="spotify__albumCard_text">
-            <p class="title">{{ title }}</p>
-
-            <div class="meta-row">
+        @if (playlistThumbnail) {
+            <div class="spotify__albumCard_text">
+                <p class="title">{{ title }}</p>
                 <p class="description">{{ description }}</p>
             </div>
-        </div>
+        }
 
         @if (isTopResult) {
             <div class="play-button-overlay">

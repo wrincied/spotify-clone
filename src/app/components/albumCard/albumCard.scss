@@ -13,8 +13,7 @@
     min-height: 260px; /* Высота обычной карточки */
 
     &:hover {
-
-           background-color: #282828;
+        background-color: #282828;
     }
     a {
         text-decoration: none;
@@ -28,6 +27,16 @@
         border-radius: 4px;
         overflow: hidden;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        position: relative; // Чтобы цвет заливал блок
+        display: flex;
+        align-items: end;
+        .category-title-overlay {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            padding: 16px;
+            word-break: break-word; /* Перенос слов */
+        }
 
         img {
             width: 100%;
