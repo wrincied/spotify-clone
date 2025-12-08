@@ -9,139 +9,118 @@ import { parseFile } from 'music-metadata';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DEFAULT_IMAGE =
-    'https://placehold.co/150/222/fff?text=No+Image';
+const DEFAULT_IMAGE = 'https://placehold.co/150/222/fff?text=No+Image';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use(
-    '/public',
-    express.static(path.join(__dirname, 'public')),
-);
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 let logs = [];
 const log = (msg) => {
-    const time = new Date().toISOString();
-    const entry = `[${time}] ${msg}`;
-    console.log(entry);
-    logs.push(entry);
+  const time = new Date().toISOString();
+  const entry = `[${time}] ${msg}`;
+  console.log(entry);
+  logs.push(entry);
 };
 
 // ───── JSON HELPERS ─────
 const dbPath = (file) => path.join(__dirname, 'db', file);
 
 if (!fs.existsSync(path.join(__dirname, 'db'))) {
-    fs.mkdirSync(path.join(__dirname, 'db'));
+  fs.mkdirSync(path.join(__dirname, 'db'));
 }
 
 const loadJsonRaw = (file) => {
-    if (!fs.existsSync(dbPath(file))) return [];
-    try {
-        const data = fs.readFileSync(dbPath(file), 'utf8');
-        return data ? JSON.parse(data) : [];
-    } catch (e) {
-        log(`[ERROR] Failed to read ${file}: ${e.message}`);
-        return [];
-    }
+  if (!fs.existsSync(dbPath(file))) return [];
+  try {
+    const data = fs.readFileSync(dbPath(file), 'utf8');
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    log(`[ERROR] Failed to read ${file}: ${e.message}`);
+    return [];
+  }
 };
 
 const saveJson = (file, data) => {
-    fs.writeFileSync(
-        dbPath(file),
-        JSON.stringify(data, null, 2),
-        'utf8',
-    );
+  fs.writeFileSync(dbPath(file), JSON.stringify(data, null, 2), 'utf8');
 };
 
-const generateId = () =>
-    crypto.randomBytes(8).toString('hex');
+const generateId = () => crypto.randomBytes(8).toString('hex');
 
 const ensureIds = (items) => {
-    let updated = false;
-    items.forEach((item) => {
-        if (!item.id || String(item.id).trim() === '') {
-            item.id = generateId();
-            updated = true;
-        }
-    });
-    return updated;
+  let updated = false;
+  items.forEach((item) => {
+    if (!item.id || String(item.id).trim() === '') {
+      item.id = generateId();
+      updated = true;
+    }
+  });
+  return updated;
 };
 
 // Расчет длительности
 async function getAudioDuration(relativeUrl) {
-    if (!relativeUrl) return 0;
-    try {
-        const cleanPath = relativeUrl.startsWith('/')
-            ? relativeUrl.slice(1)
-            : relativeUrl;
-        const filePath = path.join(__dirname, cleanPath);
-        if (fs.existsSync(filePath)) {
-            const metadata = await parseFile(filePath);
-            return Math.round(
-                metadata.format.duration || 0,
-            );
-        }
-        return 0;
-    } catch (error) {
-        return 0;
+  if (!relativeUrl) return 0;
+  try {
+    const cleanPath = relativeUrl.startsWith('/') ? relativeUrl.slice(1) : relativeUrl;
+    const filePath = path.join(__dirname, cleanPath);
+    if (fs.existsSync(filePath)) {
+      const metadata = await parseFile(filePath);
+      return Math.round(metadata.format.duration || 0);
     }
+    return 0;
+  } catch (error) {
+    return 0;
+  }
 }
 
 // Загрузчики
 const loadSongs = () => {
-    const songs = loadJsonRaw('songs.json');
-    if (ensureIds(songs)) saveJson('songs.json', songs);
-    return songs;
+  const songs = loadJsonRaw('songs.json');
+  if (ensureIds(songs)) saveJson('songs.json', songs);
+  return songs;
 };
 
 const loadAlbums = () => {
-    const albums = loadJsonRaw('albums.json');
-    if (ensureIds(albums)) saveJson('albums.json', albums);
-    return albums;
+  const albums = loadJsonRaw('albums.json');
+  if (ensureIds(albums)) saveJson('albums.json', albums);
+  return albums;
 };
 
 const loadCategories = () => {
-    const file = 'categories.json';
-    if (!fs.existsSync(dbPath(file))) {
-        saveJson(file, []);
-        log('[INIT] categories.json created (empty)');
-    }
-    let categories = loadJsonRaw(file);
-    if (!Array.isArray(categories)) categories = [];
-    if (ensureIds(categories)) saveJson(file, categories);
-    return categories;
+  const file = 'categories.json';
+  if (!fs.existsSync(dbPath(file))) {
+    saveJson(file, []);
+    log('[INIT] categories.json created (empty)');
+  }
+  let categories = loadJsonRaw(file);
+  if (!Array.isArray(categories)) categories = [];
+  if (ensureIds(categories)) saveJson(file, categories);
+  return categories;
 };
 
 // ───────────────────────────
 // HTML ADMIN UI
 // ───────────────────────────
 app.get('/', (req, res) => {
-    try {
-        const albums = loadAlbums();
-        const songs = loadSongs();
-        const categories = loadCategories();
+  try {
+    const albums = loadAlbums();
+    const songs = loadSongs();
+    const categories = loadCategories();
 
-        const albumOptions = albums
-            .map(
-                (a) =>
-                    `<option value="${a.id}">${a.title}</option>`,
-            )
-            .join('');
-        const categoryOptions = categories
-            .map(
-                (c) =>
-                    `<option value="${c.id}">${c.name}</option>`,
-            )
-            .join('');
+    const albumOptions = albums
+      .map((a) => `<option value="${a.id}">${a.title}</option>`)
+      .join('');
+    
+    const categoryOptions = categories
+      .map((c) => `<option value="${c.id}">${c.name}</option>`)
+      .join('');
 
-        res.setHeader(
-            'Content-Type',
-            'text/html; charset=utf-8',
-        );
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
 
-        let html = `<!doctype html>
+    let html = `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -294,6 +273,7 @@ app.get('/', (req, res) => {
         <form id="create-category-form">
           <label>Name</label> <input name="name" required />
           <label>Color</label> <input name="color" type="color" value="#22c55e" style="height:40px;padding:2px;" />
+          <label>Description</label> <input name="description" placeholder="Optional description for category" />
           <button type="submit" class="btn">Create Category</button>
         </form>
       </div>
@@ -307,32 +287,26 @@ app.get('/', (req, res) => {
           <span class="badge">${categories.length} total</span>
         </div>
         <div class="list-grid">
-          ${categories
-              .map(
-                  (c) => `
+          ${categories.map((c) => `
             <div class="item-card">
               <div class="item-color" style="background-color: ${c.color}">ID</div>
               <div class="item-content">
                 <div class="item-title">${c.name}</div>
-                <div class="item-meta">${c.color}</div>
+                  <div class="item-meta">${c.description || c.color}</div>
               </div>
               <div class="item-actions">
                 <button class="btn-sm" onclick="openEditCategoryModal('${c.id}')">EDIT</button>
                 <button class="btn-sm danger" onclick="deleteCategory('${c.id}')">DEL</button>
               </div>
             </div>
-          `,
-              )
-              .join('')}
+          `).join('')}
         </div>
       </div>
 
       <div class="card">
         <div class="card-header"><span class="card-title">Songs</span><span class="badge">${songs.length} total</span></div>
         <div class="list-grid">
-          ${songs
-              .map(
-                  (s) => `
+          ${songs.map((s) => `
             <div class="item-card">
               <img src="${s.thumbnail || DEFAULT_IMAGE}" class="item-thumb" onerror="this.src='${DEFAULT_IMAGE}'">
               <div class="item-content">
@@ -344,18 +318,14 @@ app.get('/', (req, res) => {
                 <button class="btn-sm danger" onclick="deleteSong('${s.id}')">DEL</button>
               </div>
             </div>
-          `,
-              )
-              .join('')}
+          `).join('')}
         </div>
       </div>
 
       <div class="card">
         <div class="card-header"><span class="card-title">Albums</span><span class="badge">${albums.length} total</span></div>
         <div class="list-grid">
-          ${albums
-              .map(
-                  (a) => `
+          ${albums.map((a) => `
             <div class="item-card">
               <img src="${a.cover || DEFAULT_IMAGE}" class="item-thumb" onerror="this.src='${DEFAULT_IMAGE}'">
               <div class="item-content">
@@ -366,19 +336,17 @@ app.get('/', (req, res) => {
                 <button class="btn-sm" onclick="openEditAlbumModal('${a.id}')">EDIT</button>
                 <button class="btn-sm danger" onclick="deleteAlbum('${a.id}')">DEL</button>
               </div>
-            </div>
-          `,
-              )
-              .join('')}
+              </div>
+          `).join('')}
         </div>
       </div>
 
       <div class="card">
         <div class="card-header"><span class="card-title">Logs</span></div>
         <div class="logs">${logs.slice(-10).join('<br>')}</div>
-      </div>
-    </section>
-  </main>
+        </div>
+      </section>
+    </main>
 
   <div id="edit-song-modal" class="modal-overlay">
     <div class="modal">
@@ -424,6 +392,7 @@ app.get('/', (req, res) => {
         <input type="hidden" name="id">
         <label>Name</label> <input name="name" required />
         <label>Color</label> <input name="color" type="color" style="height:40px;" />
+        <label>Description</label> <input name="description" />
         <div class="modal-actions">
           <button type="button" class="btn btn-cancel" onclick="closeModal('edit-category-modal')">Cancel</button>
           <button type="submit" class="btn">Save</button>
@@ -496,7 +465,6 @@ app.get('/', (req, res) => {
       form.title.value = album.title;
       form.description.value = album.description || '';
       form.cover.value = album.cover || '';
-      // Для альбомов API возвращает populated categories, нам нужно вытащить ID
       const catId = (album.categories && album.categories.length) ? album.categories[0].id : '';
       form.categoryId.value = catId;
       document.getElementById('edit-album-modal').classList.add('open');
@@ -505,7 +473,7 @@ app.get('/', (req, res) => {
       e.preventDefault(); const data = Object.fromEntries(new FormData(e.target)); await api(API + '/albums/'+data.id, 'PUT', data); location.reload();
     });
 
-    // EDIT CATEGORY (НОВАЯ ФУНКЦИЯ)
+    // EDIT CATEGORY
     async function openEditCategoryModal(id) {
         const data = await api(API + '/categories');
         const cat = data.data.find(c => c.id === id);
@@ -513,6 +481,7 @@ app.get('/', (req, res) => {
         const form = document.getElementById('edit-category-form');
         form.id.value = cat.id;
         form.name.value = cat.name;
+        form.description.value = cat.description || '';
         form.color.value = cat.color;
         document.getElementById('edit-category-modal').classList.add('open');
     }
@@ -526,10 +495,10 @@ app.get('/', (req, res) => {
   </script>
 </body>
 </html>`;
-        res.send(html);
-    } catch (e) {
-        res.status(500).send(e.message);
-    }
+    res.send(html);
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
 });
 
 // ───────────────────────────
@@ -537,410 +506,286 @@ app.get('/', (req, res) => {
 // ───────────────────────────
 
 // --- CATEGORIES ROUTES ---
-app.get('/api/categories', (req, res) =>
-    res.json({ error: false, data: loadCategories() }),
-);
+app.get('/api/categories', (req, res) => res.json({ error: false, data: loadCategories() }));
 
 app.post('/api/categories', (req, res) => {
-    try {
-        const cats = loadCategories();
-        const { name, color } = req.body;
-        const newItem = {
-            id: generateId(),
-            name,
-            color: color || '#22c55e',
-        };
-        cats.push(newItem);
-        saveJson('categories.json', cats);
-        res.json({ error: false, data: newItem });
-    } catch (e) {
-        res.status(500).json({
-            error: true,
-            message: e.message,
-        });
-    }
+  try {
+    const cats = loadCategories();
+    const { name, color, description } = req.body;
+    const newItem = {
+      id: generateId(),
+      name,
+      color: color || '#22c55e',
+      description: description || ''
+    };
+    cats.push(newItem);
+    saveJson('categories.json', cats);
+    res.json({ error: false, data: newItem });
+  } catch (e) {
+    res.status(500).json({ error: true, message: e.message });
+  }
 });
 
 app.put('/api/categories/:id', (req, res) => {
-    try {
-        const cats = loadCategories();
-        const cat = cats.find(
-            (c) => c.id === req.params.id,
-        );
-        if (!cat)
-            return res
-                .status(404)
-                .json({
-                    error: true,
-                    message: 'Category not found',
-                });
+  try {
+    const cats = loadCategories();
+    const cat = cats.find((c) => c.id === req.params.id);
+    if (!cat) return res.status(404).json({ error: true, message: 'Category not found' });
+    
+    if (req.body.name) cat.name = req.body.name;
+    if (req.body.color) cat.color = req.body.color;
+    if (req.body.description) cat.description = req.body.description;
 
-        if (req.body.name) cat.name = req.body.name;
-        if (req.body.color) cat.color = req.body.color;
-
-        saveJson('categories.json', cats);
-        res.json({ error: false, data: cat });
-    } catch (e) {
-        res.status(500).json({
-            error: true,
-            message: e.message,
-        });
-    }
+    saveJson('categories.json', cats);
+    res.json({ error: false, data: cat });
+  } catch (e) {
+    res.status(500).json({ error: true, message: e.message });
+  }
 });
 
 app.delete('/api/categories/:id', (req, res) => {
-    try {
-        const cats = loadCategories();
-        const idx = cats.findIndex(
-            (c) => c.id === req.params.id,
-        );
-        if (idx === -1)
-            return res.status(404).json({ error: true });
+  try {
+    const cats = loadCategories();
+    const idx = cats.findIndex((c) => c.id === req.params.id);
+    if (idx === -1) return res.status(404).json({ error: true });
 
-        // Удаляем категорию из списка
-        cats.splice(idx, 1);
-        saveJson('categories.json', cats);
+    cats.splice(idx, 1);
+    saveJson('categories.json', cats);
 
-        // ОЧИСТКА: Удаляем ID категории из всех альбомов и песен
-        const albums = loadAlbums();
-        let albumsChanged = false;
-        albums.forEach((a) => {
-            if (
-                a.categories &&
-                a.categories.includes(req.params.id)
-            ) {
-                a.categories = a.categories.filter(
-                    (id) => id !== req.params.id,
-                );
-                albumsChanged = true;
-            }
-        });
-        if (albumsChanged) saveJson('albums.json', albums);
+    const albums = loadAlbums();
+    let albumsChanged = false;
+    albums.forEach((a) => {
+      if (a.categories && a.categories.includes(req.params.id)) {
+        a.categories = a.categories.filter((id) => id !== req.params.id);
+        albumsChanged = true;
+      }
+    });
+    if (albumsChanged) saveJson('albums.json', albums);
 
-        const songs = loadSongs();
-        let songsChanged = false;
-        songs.forEach((s) => {
-            if (
-                s.categories &&
-                s.categories.includes(req.params.id)
-            ) {
-                s.categories = s.categories.filter(
-                    (id) => id !== req.params.id,
-                );
-                songsChanged = true;
-            }
-        });
-        if (songsChanged) saveJson('songs.json', songs);
+    const songs = loadSongs();
+    let songsChanged = false;
+    songs.forEach((s) => {
+      if (s.categories && s.categories.includes(req.params.id)) {
+        s.categories = s.categories.filter((id) => id !== req.params.id);
+        songsChanged = true;
+      }
+    });
+    if (songsChanged) saveJson('songs.json', songs);
 
-        res.json({ error: false });
-    } catch (e) {
-        res.status(500).json({
-            error: true,
-            message: e.message,
-        });
-    }
+    res.json({ error: false });
+  } catch (e) {
+    res.status(500).json({ error: true, message: e.message });
+  }
 });
 
 // --- SEARCH ---
 app.get('/api/search', (req, res) => {
-    const q = (req.query.q || '').toString().toLowerCase();
-    const songs = loadSongs();
-    const albums = loadAlbums();
-    const cats = loadCategories();
+  const q = (req.query.q || '').toString().toLowerCase();
+  const songs = loadSongs();
+  const albums = loadAlbums();
+  const cats = loadCategories();
 
-    const richAlbums = albums.map((a) => ({
-        ...a,
-        categories: (a.categories || [])
-            .map((cid) => cats.find((c) => c.id === cid))
-            .filter(Boolean),
-        songs: (a.songs || [])
-            .map((id) => {
-                const s = songs.find((x) => x.id === id);
-                return s
-                    ? {
-                          ...s,
-                          thumbnail: s.thumbnail || a.cover,
-                      }
-                    : null;
-            })
-            .filter(Boolean),
-    }));
+  const richAlbums = albums.map((a) => ({
+    ...a,
+    categories: (a.categories || []).map((cid) => cats.find((c) => c.id === cid)).filter(Boolean),
+    songs: (a.songs || []).map((id) => {
+      const s = songs.find((x) => x.id === id);
+      return s ? { ...s, thumbnail: s.thumbnail || a.cover } : null;
+    }).filter(Boolean),
+  }));
 
-    const allTracks = richAlbums.flatMap((a) =>
-        a.songs.map((s) => ({ ...s, albumId: a.id })),
-    );
+  const allTracks = richAlbums.flatMap((a) => a.songs.map((s) => ({ ...s, albumId: a.id })));
 
-    if (!q)
-        return res.json({
-            error: false,
-            data: {
-                albums: richAlbums,
-                tracks: allTracks,
-                categories: cats,
-            },
-        });
-
-    const fAlbums = richAlbums.filter((a) =>
-        a.title.toLowerCase().includes(q),
-    );
-    const fTracks = allTracks.filter(
-        (t) =>
-            t.title.toLowerCase().includes(q) ||
-            t.artist?.toLowerCase().includes(q),
-    );
-    const fCats = cats.filter((c) =>
-        c.name.toLowerCase().includes(q),
-    );
-
-    res.json({
-        error: false,
-        data: {
-            albums: fAlbums,
-            tracks: fTracks,
-            categories: fCats,
-        },
+  if (!q) {
+    return res.json({
+      error: false,
+      data: { albums: richAlbums, tracks: allTracks, categories: cats },
     });
+  }
+
+  const fAlbums = richAlbums.filter((a) => a.title.toLowerCase().includes(q));
+  const fTracks = allTracks.filter((t) => t.title.toLowerCase().includes(q) || t.artist?.toLowerCase().includes(q));
+  const fCats = cats.filter((c) => c.name.toLowerCase().includes(q));
+
+  res.json({
+    error: false,
+    data: { albums: fAlbums, tracks: fTracks, categories: fCats },
+  });
 });
 
 // --- SONGS ---
-app.get('/api/songs', (req, res) =>
-    res.json({ error: false, data: loadSongs() }),
-);
+app.get('/api/songs', (req, res) => res.json({ error: false, data: loadSongs() }));
 
 app.post('/api/songs', async (req, res) => {
-    try {
-        const songs = loadSongs();
-        const {
-            title,
-            description,
-            thumbnail,
-            url,
-            albumId,
-            categoryId,
-        } = req.body;
-        const duration = await getAudioDuration(url);
+  try {
+    const songs = loadSongs();
+    const { title, description, thumbnail, url, albumId, categoryId } = req.body;
+    const duration = await getAudioDuration(url);
 
-        const newSong = {
-            id: generateId(),
-            title,
-            description,
-            thumbnail,
-            url,
-            duration,
-            categories: categoryId ? [categoryId] : [],
-        };
+    const newSong = {
+      id: generateId(),
+      title,
+      description,
+      thumbnail,
+      url,
+      duration,
+      categories: categoryId ? [categoryId] : [],
+    };
 
-        songs.push(newSong);
-        saveJson('songs.json', songs);
+    songs.push(newSong);
+    saveJson('songs.json', songs);
 
-        if (albumId) {
-            const albums = loadAlbums();
-            const album = albums.find(
-                (a) => a.id === albumId,
-            );
-            if (album) {
-                album.songs = album.songs || [];
-                album.songs.push(newSong.id);
-                saveJson('albums.json', albums);
-            }
-        }
-        if (categoryId) {
-            const categories = loadCategories();
-            const category = categories.find(
-                (c) => c.id === categoryId,
-            );
-            if (category) {
-                category.songs = category.songs || [];
-                category.songs.push(newSong.id);
-                saveJson('categories.json', categories);
-            }
-        }
-        res.json({ error: false, data: newSong });
-    } catch (e) {
-        res.status(500).json({
-            error: true,
-            message: e.message,
-        });
+    if (albumId) {
+      const albums = loadAlbums();
+      const album = albums.find((a) => a.id === albumId);
+      if (album) {
+        album.songs = album.songs || [];
+        album.songs.push(newSong.id);
+        saveJson('albums.json', albums);
+      }
     }
+    if (categoryId) {
+      const categories = loadCategories();
+      const category = categories.find((c) => c.id === categoryId);
+      if (category) {
+        category.songs = category.songs || [];
+        category.songs.push(newSong.id);
+        saveJson('categories.json', categories);
+      }
+    }
+    res.json({ error: false, data: newSong });
+  } catch (e) {
+    res.status(500).json({ error: true, message: e.message });
+  }
 });
 
 app.put('/api/songs/:id', async (req, res) => {
-    try {
-        const songs = loadSongs();
-        const song = songs.find(
-            (s) => s.id === req.params.id,
-        );
-        if (!song)
-            return res
-                .status(404)
-                .json({
-                    error: true,
-                    message: 'Not found',
-                });
+  try {
+    const songs = loadSongs();
+    const song = songs.find((s) => s.id === req.params.id);
+    if (!song) return res.status(404).json({ error: true, message: 'Not found' });
 
-        const {
-            title,
-            description,
-            thumbnail,
-            url,
-            categoryId,
-        } = req.body;
-        if (title) song.title = title;
-        if (description) song.description = description;
-        if (thumbnail) song.thumbnail = thumbnail;
-        if (categoryId) song.categories = [categoryId];
+    const { title, description, thumbnail, url, categoryId } = req.body;
+    if (title) song.title = title;
+    if (description) song.description = description;
+    if (thumbnail) song.thumbnail = thumbnail;
+    if (categoryId) song.categories = [categoryId];
 
-        if (url && url !== song.url) {
-            song.url = url;
-            song.duration = await getAudioDuration(url);
-        }
-        saveJson('songs.json', songs);
-        res.json({ error: false, data: song });
-    } catch (e) {
-        res.status(500).json({
-            error: true,
-            message: e.message,
-        });
+    if (url && url !== song.url) {
+      song.url = url;
+      song.duration = await getAudioDuration(url);
     }
+    saveJson('songs.json', songs);
+    res.json({ error: false, data: song });
+  } catch (e) {
+    res.status(500).json({ error: true, message: e.message });
+  }
 });
 
 app.delete('/api/songs/:id', (req, res) => {
-    const songs = loadSongs();
-    const idx = songs.findIndex(
-        (s) => s.id === req.params.id,
-    );
-    if (idx === -1)
-        return res.status(404).json({ error: true });
-    songs.splice(idx, 1);
+  const songs = loadSongs();
+  const idx = songs.findIndex((s) => s.id === req.params.id);
+  if (idx === -1) return res.status(404).json({ error: true });
+  songs.splice(idx, 1);
 
-    const albums = loadAlbums();
-    albums.forEach((a) => {
-        a.songs = (a.songs || []).filter(
-            (sid) => sid !== req.params.id,
-        );
-    });
-    saveJson('albums.json', albums);
+  const albums = loadAlbums();
+  albums.forEach((a) => {
+    a.songs = (a.songs || []).filter((sid) => sid !== req.params.id);
+  });
+  saveJson('albums.json', albums);
 
-    const categories = loadCategories();
-    categories.forEach((c) => {
-        c.songs = (c.songs || []).filter(
-            (sid) => sid !== req.params.id,
-        );
-    });
-    saveJson('categories.json', categories);
+  const categories = loadCategories();
+  categories.forEach((c) => {
+    c.songs = (c.songs || []).filter((sid) => sid !== req.params.id);
+  });
+  saveJson('categories.json', categories);
 
-    saveJson('songs.json', songs);
-    res.json({ error: false });
+  saveJson('songs.json', songs);
+  res.json({ error: false });
 });
 
 // --- ALBUMS ---
 app.get('/api/albums', (req, res) => {
-    const albums = loadAlbums();
-    const songs = loadSongs();
-    const categories = loadCategories();
-    const data = albums.map((a) => ({
-        ...a,
-        categories: (a.categories || [])
-            .map((cid) =>
-                categories.find((c) => c.id === cid),
-            )
-            .filter(Boolean),
-        songs: (a.songs || [])
-            .map((id) => songs.find((s) => s.id === id))
-            .filter(Boolean),
-    }));
-    res.json({ error: false, data });
+  const albums = loadAlbums();
+  const songs = loadSongs();
+  const categories = loadCategories();
+  const data = albums.map((a) => ({
+    ...a,
+    categories: (a.categories || []).map((cid) => categories.find((c) => c.id === cid)).filter(Boolean),
+    songs: (a.songs || []).map((id) => songs.find((s) => s.id === id)).filter(Boolean),
+  }));
+  res.json({ error: false, data });
 });
 
 app.get('/api/albums/:id', (req, res) => {
-    const albums = loadAlbums();
-    const songs = loadSongs();
-    const categories = loadCategories();
-    const a = albums.find((x) => x.id === req.params.id);
-    if (!a) return res.status(404).json({ error: true });
+  const albums = loadAlbums();
+  const songs = loadSongs();
+  const categories = loadCategories();
+  const a = albums.find((x) => x.id === req.params.id);
+  if (!a) return res.status(404).json({ error: true });
 
-    const enriched = {
-        ...a,
-        categories: (a.categories || [])
-            .map((cid) =>
-                categories.find((c) => c.id === cid),
-            )
-            .filter(Boolean),
-        songs: (a.songs || [])
-            .map((id) => {
-                const s = songs.find((x) => x.id === id);
-                return s
-                    ? {
-                          ...s,
-                          thumbnail: s.thumbnail || a.cover,
-                      }
-                    : null;
-            })
-            .filter(Boolean),
-    };
-    res.json({ error: false, data: enriched });
+  const enriched = {
+    ...a,
+    categories: (a.categories || []).map((cid) => categories.find((c) => c.id === cid)).filter(Boolean),
+    songs: (a.songs || []).map((id) => {
+      const s = songs.find((x) => x.id === id);
+      return s ? { ...s, thumbnail: s.thumbnail || a.cover } : null;
+    }).filter(Boolean),
+  };
+  res.json({ error: false, data: enriched });
 });
 
 app.post('/api/albums', (req, res) => {
-    const albums = loadAlbums();
-    const { title, description, cover, songs, categoryId } =
-        req.body;
-    const newAlbum = {
-        id: generateId(),
-        title,
-        description,
-        cover,
-        songs: songs
-            ? songs.split(',').map((s) => s.trim())
-            : [],
-        categories: categoryId ? [categoryId] : [],
-    };
-    albums.push(newAlbum);
-    saveJson('albums.json', albums);
+  const albums = loadAlbums();
+  const { title, description, cover, songs, categoryId } = req.body;
+  const newAlbum = {
+    id: generateId(),
+    title,
+    description,
+    cover,
+    songs: songs ? songs.split(',').map((s) => s.trim()) : [],
+    categories: categoryId ? [categoryId] : [],
+  };
+  albums.push(newAlbum);
+  saveJson('albums.json', albums);
 
-    if (categoryId) {
-        const categories = loadCategories();
-        const category = categories.find(
-            (c) => c.id === categoryId,
-        );
-        if (category) {
-            category.albums = category.albums || [];
-            category.albums.push(newAlbum.id);
-            saveJson('categories.json', categories);
-        }
+  if (categoryId) {
+    const categories = loadCategories();
+    const category = categories.find((c) => c.id === categoryId);
+    if (category) {
+      category.albums = category.albums || [];
+      category.albums.push(newAlbum.id);
+      saveJson('categories.json', categories);
     }
-    res.json({ error: false, data: newAlbum });
+  }
+  res.json({ error: false, data: newAlbum });
 });
 
 app.put('/api/albums/:id', (req, res) => {
-    const albums = loadAlbums();
-    const a = albums.find((x) => x.id === req.params.id);
-    if (!a) return res.status(404).json({ error: true });
-    Object.assign(a, req.body);
-    if (req.body.categoryId) {
-        a.categories = [req.body.categoryId];
-    }
-    saveJson('albums.json', albums);
-    res.json({ error: false, data: a });
+  const albums = loadAlbums();
+  const a = albums.find((x) => x.id === req.params.id);
+  if (!a) return res.status(404).json({ error: true });
+  Object.assign(a, req.body);
+  if (req.body.categoryId) {
+    a.categories = [req.body.categoryId];
+  }
+  saveJson('albums.json', albums);
+  res.json({ error: false, data: a });
 });
 
 app.delete('/api/albums/:id', (req, res) => {
-    const albums = loadAlbums();
-    const idx = albums.findIndex(
-        (x) => x.id === req.params.id,
-    );
-    if (idx !== -1) albums.splice(idx, 1);
+  const albums = loadAlbums();
+  const idx = albums.findIndex((x) => x.id === req.params.id);
+  if (idx !== -1) albums.splice(idx, 1);
 
-    const categories = loadCategories();
-    categories.forEach((c) => {
-        c.albums = (c.albums || []).filter(
-            (aid) => aid !== req.params.id,
-        );
-    });
-    saveJson('categories.json', categories);
+  const categories = loadCategories();
+  categories.forEach((c) => {
+    c.albums = (c.albums || []).filter((aid) => aid !== req.params.id);
+  });
+  saveJson('categories.json', categories);
 
-    saveJson('albums.json', albums);
-    res.json({ error: false });
+  saveJson('albums.json', albums);
+  res.json({ error: false });
 });
 
 app.listen(3000, () => log('SERVER RUNNING ON PORT 3000'));
