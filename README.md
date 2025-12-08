@@ -48,30 +48,55 @@ This project demonstrates real-world frontend engineering, backend integration, 
 spotify-clone/
 
 │
+
 ├── backend/
+
 │   ├── server.js
+
 │   ├── db/
+
 │   │   ├── albums.json
+
 │   │   ├── songs.json
+
 │   │   └── categories.json
+
 │   └── public/
+
 │
+
 ├── src/app/
+
 │   ├── components/
+
 │   │   ├── albumCard/
+
 │   │   ├── songRow/
+
 │   │   ├── slider/
+
 │   │   └── ...
+
 │   ├── pages/
+
 │   │   ├── home/
+
 │   │   ├── search/
+
 │   │   ├── playlist/
+
 │   │   └── ...
+
 │   ├── services/
+
 │   │   ├── ApiService/
+
 │   │   └── music-store/
+
 │   └── interface/
+
 │
+
 └── README.md
 
 ---
