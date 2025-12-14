@@ -1,54 +1,60 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common'; // Для AsyncPipe, NgIf
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { MusicStoreService } from '../../services/music-store/music-store';
+import { SongInterface } from '../../interface/models'; // Чистый интерфейс
 import { Observable } from 'rxjs';
-import { SongInterface } from '../../interface/models';
 
 @Component({
     selector: 'app-player',
+    standalone: true,
     imports: [CommonModule],
     templateUrl: './player.html',
-    styleUrl: './player.scss',
+    styleUrls: ['./player.scss'],
 })
-export class PlayerComponent implements OnInit {
+export class PlayerComponent {
     currentTrack$: Observable<SongInterface | null>;
+    currentCover$: Observable<string>; // <-- Отдельный поток для картинки
+
     isPlaying$: Observable<boolean>;
     currentTime$: Observable<number>;
     duration$: Observable<number>;
     isBuffering$: Observable<boolean>;
+
     constructor(private musicStore: MusicStoreService) {
         this.currentTrack$ = this.musicStore.currentTrack$;
+        this.currentCover$ = this.musicStore.currentCover$; // Подписка
+
         this.isPlaying$ = this.musicStore.isPlaying$;
         this.currentTime$ = this.musicStore.currentTime$;
         this.duration$ = this.musicStore.duration$;
         this.isBuffering$ = this.musicStore.isBuffering$;
     }
-    ngOnInit(): void {}
+
     togglePlay() {
         this.musicStore.togglePlay();
-    }
-
-    onSeek(event: Event) {
-        const input = event.target as HTMLInputElement;
-        const time = Number(input.value);
-        this.musicStore.seekTo(time);
-    }
-    onVolumeChange(event: Event) {
-        const input = event.target as HTMLInputElement;
-        const volume = Number(input.value) / 100; // range 0-100 -> 0.0-1.0
-        this.musicStore.setVolume(volume);
     }
     nextTrack() {
         this.musicStore.nextTrack();
     }
-
     prevTrack() {
         this.musicStore.prevTrack();
     }
+    onSeek(e: Event) {
+        this.musicStore.seekTo(
+            Number((e.target as HTMLInputElement).value),
+        );
+    }
+    onVolumeChange(e: Event) {
+        this.musicStore.setVolume(
+            Number((e.target as HTMLInputElement).value) /
+                100,
+        );
+    }
+
     formatTime(time: number | null): string {
-    if (!time) return '0:00';
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-  }
+        if (!time) return '0:00';
+        const m = Math.floor(time / 60);
+        const s = Math.floor(time % 60);
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
 }

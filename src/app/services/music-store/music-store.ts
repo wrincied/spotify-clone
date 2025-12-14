@@ -1,35 +1,39 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, map, Observable } from 'rxjs';
-import { AlbumInterface, CategoryInterface, SongInterface } from '../../interface/models'; // Убедись, что SongInterface подходит под определение трека
 import { HttpClient } from '@angular/common/http';
+import { AlbumInterface, CategoryInterface, SongInterface } from '../../interface/models';
 
 @Injectable({ providedIn: 'root' })
 export class MusicStoreService {
   private apiUrl = 'http://localhost:3000/api';
-  
-  // ==========================================
-  // 🎵 AUDIO CORE
-  // ==========================================
   private audio = new Audio();
 
   // ==========================================
-  // 📦 STATE SUBJECTS (Хранилище состояния)
+  // 📦 DATA STATE
   // ==========================================
-  
-  // --- ALBUMS ---
   private albumsSubject = new BehaviorSubject<AlbumInterface[]>([]);
   public albums$: Observable<AlbumInterface[]> = this.albumsSubject.asObservable();
 
-  // --- CATEGORIES ---
   private categoriesSubject = new BehaviorSubject<CategoryInterface[]>([]);
   public categories$: Observable<CategoryInterface[]> = this.categoriesSubject.asObservable();
 
-  // --- PLAYER STATE ---
-  private isPlayingSubject = new BehaviorSubject<boolean>(false);
-  public isPlaying$ = this.isPlayingSubject.asObservable();
+  // ==========================================
+  // 🎵 PLAYER STATE
+  // ==========================================
+  
+  // Очередь воспроизведения
+  private playlist: SongInterface[] = [];
+  private currentTrackIndex: number = -1;
+  private currentContextCover: string = ''; // Обложка для текущего плейлиста
 
   private currentTrackSubject = new BehaviorSubject<SongInterface | null>(null);
   public currentTrack$ = this.currentTrackSubject.asObservable();
+
+  private currentCoverSubject = new BehaviorSubject<string>('');
+  public currentCover$ = this.currentCoverSubject.asObservable();
+
+  private isPlayingSubject = new BehaviorSubject<boolean>(false);
+  public isPlaying$ = this.isPlayingSubject.asObservable();
 
   private currentTimeSubject = new BehaviorSubject<number>(0);
   public currentTime$ = this.currentTimeSubject.asObservable();
@@ -40,91 +44,65 @@ export class MusicStoreService {
   private isBufferingSubject = new BehaviorSubject<boolean>(false);
   public isBuffering$ = this.isBufferingSubject.asObservable();
 
-  // Плейлист пока простой массив, можно расширить
-  private playlist: SongInterface[] = [];
-  private currentTrackIndex = -1;
-
   constructor(private http: HttpClient) {
-    // Настройка Audio
     this.audio.preload = 'metadata';
     this.initAudioEvents();
-
-    // Загрузка данных
     this.loadAlbums();
     this.loadCategories();
   }
 
+  get currentAlbums(): AlbumInterface[] { return this.albumsSubject.value; }
+  get currentCategories(): CategoryInterface[] { return this.categoriesSubject.value; }
+
   // ==========================================
-  // ⚙️ INITIALIZATION (Слушатели аудио)
+  // 🎮 PLAYER ACTIONS (Очередь)
   // ==========================================
-  private initAudioEvents() {
-    // Обновление текущего времени
-    this.audio.ontimeupdate = () => {
-      this.currentTimeSubject.next(this.audio.currentTime);
-    };
 
-    // Обновление длительности при загрузке метаданных
-    this.audio.onloadedmetadata = () => {
-      this.durationSubject.next(this.audio.duration);
-    };
-
-    // Автопереключение при окончании
-    this.audio.onended = () => {
-      this.nextTrack();
-    };
-
-    // Буферизация
-    this.audio.onwaiting = () => {
-      this.isBufferingSubject.next(true);
-    };
-
-    // Возобновление проигрывания
-    this.audio.onplaying = () => {
-      this.isBufferingSubject.next(false);
-    };
-
-    // Обработка ошибок (можно добавить Subject для ошибок)
-    this.audio.onerror = (e) => {
-      console.error('Audio Playback Error:', e);
-      this.isPlayingSubject.next(false);
-      this.isBufferingSubject.next(false);
-    };
+  /**
+   * Запускает воспроизведение списка песен (альбома/плейлиста)
+   * @param songs Массив песен
+   * @param startIndex Индекс песни, с которой начать
+   * @param coverUrl Обложка альбома (общая для всех)
+   */
+  playPlaylist(songs: SongInterface[], startIndex: number, coverUrl: string) {
+    this.playlist = songs;
+    this.currentTrackIndex = startIndex;
+    this.currentContextCover = coverUrl;
+    
+    this.loadCurrentTrack();
   }
 
-  // ==========================================
-  // 🎮 PLAYER ACTIONS (Методы управления)
-  // ==========================================
+  // Для совместимости с одиночным запуском (создает плейлист из 1 песни)
+  setTrack(song: SongInterface, coverUrl: string) {
+    this.playPlaylist([song], 0, coverUrl);
+  }
 
-  setTrack(track: SongInterface) {
-    // 1. Обновляем состояние трека
-    this.currentTrackSubject.next(track);
-    this.currentTimeSubject.next(0);
-    this.durationSubject.next(0);
-    
-    // TODO: Здесь можно обновить playlist и currentTrackIndex, если трек из списка
+  nextTrack() {
+    // Если есть следующая песня
+    if (this.currentTrackIndex < this.playlist.length - 1) {
+      this.currentTrackIndex++;
+      this.loadCurrentTrack();
+    } else {
+      // Конец плейлиста - останавливаем или зацикливаем (сейчас стоп)
+      this.pause(); 
+    }
+  }
 
-    // 2. Загружаем и играем
-    this.audio.src = track.url; // Предполагается, что в SongInterface есть поле url
-    this.audio.load();
-    
-    const playPromise = this.audio.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          this.isPlayingSubject.next(true);
-        })
-        .catch(error => {
-          console.error("Play error:", error);
-          this.isPlayingSubject.next(false);
-        });
+  prevTrack() {
+    // Если больше 3 секунд проиграло, возвращаемся в начало трека
+    if (this.audio.currentTime > 3) {
+      this.audio.currentTime = 0;
+    } else if (this.currentTrackIndex > 0) {
+      // Иначе переключаем на предыдущий
+      this.currentTrackIndex--;
+      this.loadCurrentTrack();
     }
   }
 
   togglePlay() {
     if (this.audio.paused) {
-      // Если есть трек, играем
       if (this.currentTrackSubject.value) {
-        this.audio.play().catch(e => console.error("Play error:", e));
+        this.audio.play();
         this.isPlayingSubject.next(true);
       }
     } else {
@@ -132,70 +110,72 @@ export class MusicStoreService {
       this.isPlayingSubject.next(false);
     }
   }
+  
+  // Вспомогательный метод для паузы
+  private pause() {
+    this.audio.pause();
+    this.isPlayingSubject.next(false);
+  }
 
   seekTo(time: number) {
-    if (!isNaN(this.audio.duration) && this.audio.duration > 0) {
-      this.audio.currentTime = time;
+    if (!isNaN(this.audio.duration)) this.audio.currentTime = time;
+  }
+
+  setVolume(vol: number) {
+    this.audio.volume = Math.max(0, Math.min(1, vol));
+  }
+
+  // Внутренняя логика загрузки трека по индексу
+  private loadCurrentTrack() {
+    const song = this.playlist[this.currentTrackIndex];
+    if (!song) return;
+
+    // Обновляем состояние
+    this.currentTrackSubject.next(song);
+    this.currentCoverSubject.next(this.currentContextCover);
+    this.currentTimeSubject.next(0);
+    this.durationSubject.next(0);
+
+    // Загрузка аудио
+    this.audio.src = song.url;
+    this.audio.load();
+
+    const playPromise = this.audio.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => this.isPlayingSubject.next(true))
+        .catch(e => {
+          console.error("Play error:", e);
+          this.isPlayingSubject.next(false);
+        });
     }
   }
 
-  setVolume(volume: number) {
-    this.audio.volume = Math.max(0, Math.min(1, volume));
-  }
-
-  nextTrack() {
-    console.log('Next track logic pending...');
-    // Логика переключения по this.playlist и this.currentTrackIndex
-  }
-
-  prevTrack() {
-    console.log('Previous track logic pending...');
-    // Логика переключения назад
-  }
-
   // ==========================================
-  // 📥 DATA FETCHING (Существующие методы)
+  // ⚙️ INTERNAL EVENTS
   // ==========================================
 
-  get currentAlbums(): AlbumInterface[] {
-    return this.albumsSubject.value;
-  }
-
-  get currentCategories(): CategoryInterface[] {
-    return this.categoriesSubject.value;
+  private initAudioEvents() {
+    this.audio.ontimeupdate = () => this.currentTimeSubject.next(this.audio.currentTime);
+    this.audio.onloadedmetadata = () => this.durationSubject.next(this.audio.duration);
+    this.audio.onwaiting = () => this.isBufferingSubject.next(true);
+    this.audio.onplaying = () => this.isBufferingSubject.next(false);
+    
+    // АВТОПЕРЕХОД: Когда трек закончился, зовем nextTrack
+    this.audio.onended = () => {
+      this.nextTrack();
+    };
   }
 
   loadAlbums() {
     this.http.get<{ error: boolean, data: AlbumInterface[] }>(`${this.apiUrl}/albums`)
-      .pipe(
-        map(response => {
-          if (response.error) { throw new Error('Backend returned error'); }
-          return response.data || [];
-        })
-      )
-      .subscribe({
-        next: (albums) => {
-          console.log('✅ ALBUMS LOADED:', albums);
-          this.albumsSubject.next(albums);
-        },
-        error: (err) => console.error('❌ ERROR LOADING ALBUMS:', err)
-      });
+      .pipe(map(r => r.data || []))
+      .subscribe(d => this.albumsSubject.next(d));
   }
 
   loadCategories() {
     this.http.get<{ error: boolean, data: CategoryInterface[] }>(`${this.apiUrl}/categories`)
-      .pipe(
-        map(response => {
-          if (response.error) { throw new Error('Backend returned error for categories'); }
-          return response.data || [];
-        })
-      )
-      .subscribe({
-        next: (categories) => {
-          console.log('✅ CATEGORIES LOADED:', categories);
-          this.categoriesSubject.next(categories);
-        },
-        error: (err) => console.error('❌ ERROR LOADING CATEGORIES:', err)
-      });
+      .pipe(map(r => r.data || []))
+      .subscribe(d => this.categoriesSubject.next(d));
   }
 }
