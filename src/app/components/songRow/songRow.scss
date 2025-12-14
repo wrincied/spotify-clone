@@ -3,21 +3,26 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    height: var(--row-height);
-    border-radius: 3px;
+    height: var(--row-height); // Добавил фоллбэк
+    border-radius: 4px;
+    position: relative; // Контекст для наложений
+    transition: background-color 0.2s ease;
+
+    // --- МОДИФИКАТОР ПОИСКА (КАРТИНКА) ---
     &.search-mode {
-        height: 60px; /* Фиксируем под высоту Top Result */
-        padding: 0 8px; /* Чуть меньше отступов по бокам */
+        height: 60px;
+        padding: 0 8px;
         border-radius: 4px;
+
         .row__info {
             .index-col {
-                img {
-                    width: 40px;
-                    max-width: 40px;
-                }
+                width: 40px;
+                max-width: 40px;
             }
         }
     }
+
+    // --- ОБЩАЯ ИНФОРМАЦИЯ ---
     .row__info {
         display: flex;
         align-items: center;
@@ -26,30 +31,123 @@
         padding: 10px;
         font-variant: tabular-nums;
         inset-inline-end: 0.25em;
-        
+
+        // --- КОЛОНКА С ИНДЕКСОМ / КАРТИНКОЙ ---
         .index-col {
-            width: 30px;
-            max-width: 30px;
-            text-align: center;
-            flex-shrink: 0;
+            position: relative; // Важно для позиционирования иконки
+            width: 40px;
+            min-width: 40px; // Фикс сжатия
+            display: flex;
+            justify-content: center; // Центрируем содержимое по горизонтали
+            align-items: center; // Центрируем по вертикали
             color: #b3b3b3;
-            img {
-            border-radius: 2px;
-            max-width:40px;
+            font-variant: tabular-nums;
+
+            // 1. Цифра (по умолчанию видна)
+            .index-number {
+                display: block;
+                font-size: 16px;
+            }
+
+            // 2. Иконка Play для списка (по умолчанию скрыта)
+            .play-icon.hover-icon {
+                display: none; // Скрыто
+                position: absolute; // Чтобы не сдвигала контент
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: transparent;
+                border: none;
+                color: #fff;
+                font-size: 16px;
+                cursor: pointer;
+                z-index: 5;
+            }
+
+            // 3. Обертка картинки (если есть)
+            .thumbnail-wrapper {
+                position: relative;
+                width: 40px;
+                height: 40px;
+                display: flex;
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    border-radius: 2px;
+                    max-width: 40px;
+                    transition: opacity 0.2s ease;
+                }
+
+                // Иконка Play поверх картинки
+                .play-icon.overlay-icon {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 32px;
+                    height: 32px;
+                    background-color: rgba(0, 0, 0, 0.7);
+                    border-radius: 50%;
+                    display: none; // Скрыто
+                    align-items: center;
+                    justify-content: center;
+                    color: #fff;
+                    border: none;
+                    cursor: pointer;
+                    z-index: 10;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+
+                    &:hover {
+                        background-color: #000;
+                        transform: translate(-50%, -50%)
+                            scale(1.1);
+                    }
+                }
+            }
         }
-        }
-        & .title,
+
+        .title,
         .artist {
             cursor: pointer;
-
             &:hover {
                 text-decoration: underline;
             }
         }
     }
-    .row__duration {
-    }
+
+    // --- ЛОГИКА HOVER ДЛЯ ВСЕЙ СТРОКИ ---
     &:hover {
-        background-color: hsla(0, 0%, 100%, 0.3);
+        background-color: hsla(
+            0,
+            0%,
+            100%,
+            0.1
+        ); // Чуть светлее
+
+        .index-col {
+            // Сценарий 1: Обычный список (нет картинки)
+            // Скрываем цифру, показываем иконку, ЕСЛИ нет картинки
+            &:not(:has(.thumbnail-wrapper)) {
+                .index-number {
+                    visibility: hidden; // Лучше чем display: none, сохраняет поток, но мы на абсолюте
+                    opacity: 0;
+                }
+                .play-icon.hover-icon {
+                    display: block;
+                }
+            }
+
+            // Сценарий 2: Режим поиска (есть картинка)
+            .thumbnail-wrapper {
+                img {
+                    opacity: 0.4;
+                }
+                .play-icon.overlay-icon {
+                    display: flex;
+                }
+            }
+        }
     }
 }

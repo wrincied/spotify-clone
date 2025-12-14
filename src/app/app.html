@@ -10,6 +10,14 @@
             <div class="spotify-content-scroll">
                 <router-outlet />
             </div>
+            <div style="padding: 20px">
+                <button (click)="testPlay()"
+                    >TEST PLAYER</button
+                >
+            </div>
+            <div class="spotiy-conent__player">
+                <app-player></app-player>
+            </div>
         </div>
     </div>
 }

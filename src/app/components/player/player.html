@@ -1,1 +1,75 @@
-<p>player works!</p>
+@if (currentTrack$ | async; as track) {
+    <div class="player-container">
+        <div class="track-info">
+            <img
+                [src]="
+                    (currentCover$ | async) ||
+                    'assets/default-cover.png'
+                "
+                alt="Cover"
+                class="cover-image"
+            />
+            <div class="meta">
+                <div class="track-title">{{
+                    track.title
+                }}</div>
+                <div class="artist-name">{{
+                    track.artist
+                }}</div>
+            </div>
+        </div>
+        <div class="player-controls">
+            <div class="buttons">
+                <button
+                    class="control-btn"
+                    (click)="prevTrack()"
+                    >⏮</button
+                >
+                <button
+                    class="control-btn play-btn"
+                    (click)="togglePlay()"
+                >
+                    @if (isBuffering$ | async) {
+                        <span>⏳</span>
+                    } @else {
+                        <span>{{
+                            (isPlaying$ | async) ? '⏸' : '▶'
+                        }}</span>
+                    }
+                </button>
+                <button
+                    class="control-btn"
+                    (click)="nextTrack()"
+                    >⏭</button
+                >
+            </div>
+            <div class="progress-bar-container">
+                <span class="time current">{{
+                    formatTime(currentTime$ | async)
+                }}</span>
+                <input
+                    type="range"
+                    min="0"
+                    [max]="(duration$ | async) || 0"
+                    [value]="(currentTime$ | async) || 0"
+                    (input)="onSeek($event)"
+                    class="seek-slider"
+                />
+                <span class="time total">{{
+                    formatTime(duration$ | async)
+                }}</span>
+            </div>
+        </div>
+        <div class="volume-controls">
+            <span>🔊</span>
+            <input
+                type="range"
+                min="0"
+                max="100"
+                value="100"
+                (input)="onVolumeChange($event)"
+                class="volume-slider"
+            />
+        </div>
+    </div>
+}

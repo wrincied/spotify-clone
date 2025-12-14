@@ -40,3 +40,6 @@ export interface CardItemInterface {
   type: 'album' | 'playlist' | 'category' | 'focus'; // Чтобы понимать, куда кликать
 }
 
+export interface PlayerTrackInterface extends SongInterface {
+  coverUrl: string; // А вот тут она обязательна для UI плеера
+}
