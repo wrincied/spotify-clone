@@ -1,27 +1,32 @@
 <div class="search-container">
     @if (
         filteredAlbums.length > 0 ||
-        filteredTracks.length > 0
+        filteredTracks.length > 0 ||
+        topTrack
     ) {
         <div class="top-section-grid">
             <div class="top-result-column">
                 <h2>Top result</h2>
-                @if (
+                
+                @if (topTrack) {
+                    <app-albumCard
+                        [title]="topTrack.title"
+                        [description]="topTrack.artist"
+                        [playlistThumbnail]="topTrack.coverFromAlbum"
+                        [link]="['/album', topTrack.albumId]"
+                        [isTopResult]="true"
+                        [fixedSize]="false"
+                    ></app-albumCard>
+                } 
+                @else if (
                     filteredAlbums.length > 0 &&
                     filteredAlbums[0]?.id
                 ) {
                     <app-albumCard
                         [title]="filteredAlbums[0].title"
-                        [description]="
-                            filteredAlbums[0].description
-                        "
-                        [playlistThumbnail]="
-                            filteredAlbums[0].cover
-                        "
-                        [link]="[
-                            '/album',
-                            filteredAlbums[0].id,
-                        ]"
+                        [description]="filteredAlbums[0].description"
+                        [playlistThumbnail]="filteredAlbums[0].cover"
+                        [link]="['/album', filteredAlbums[0].id]"
                         [isTopResult]="true"
                         [fixedSize]="false"
                     ></app-albumCard>
@@ -37,9 +42,7 @@
                     ) {
                         <app-songRow
                             [song]="track"
-                            [thumbnailUrl]="
-                                track.coverFromAlbum
-                            "
+                            [thumbnailUrl]="track.coverFromAlbum"
                         ></app-songRow>
                     }
                     @if (filteredTracks.length < 4) {
@@ -52,9 +55,7 @@
                         ) {
                             <app-songRow
                                 [song]="track"
-                                [thumbnailUrl]="
-                                    track.coverFromAlbum
-                                "
+                                [thumbnailUrl]="track.coverFromAlbum"
                             ></app-songRow>
                         }
                     }

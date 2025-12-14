@@ -17,10 +17,10 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        opacity: 0;
-        transition: opacity 0.25s ease;
-        pointer-events: none;
 
+        /* Убрали opacity: 0 и transition, так как angular удаляет/добавляет элемент */
+        /* Если нужна анимация появления, используйте Angular Animations или keyframes при появлении */
+        
         &.left {
             left: 10px;
         }
@@ -30,24 +30,16 @@
         }
     }
 
-    &:hover .scroll-btn {
-        opacity: 1;
-        pointer-events: auto;
-    }
+    /* УДАЛЕН БЛОК &:hover .scroll-btn { ... } */
+    /* Теперь видимость контролирует TypeScript */
 
     .playlist_card_collections {
         display: flex;
         gap: 20px;
-        /* главное: нельзя скроллить по X руками */
         overflow-x: auto;
         overflow-y: hidden;
-
         scroll-snap-type: x mandatory;
         scroll-behavior: smooth;
-
-        /* тач-жесты только по Y, по X отключаем */
-
-        /* чтобы занимал доступное пространство */
         flex: 1;
 
         & > #song_card_item {
@@ -58,20 +50,10 @@
             display: none;
         }
     }
-    /* --- Медиазапросы для мобильных устройств --- */
 
     @media (max-width: 768px) {
-        /* 1. Скрываем кнопки на телефоне (потому что используется свайп) */
         .scroll-btn {
             display: none;
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        /* 2. Отключаем hover эффект, который показывает кнопки */
-        &:hover .scroll-btn {
-            opacity: 0;
-            pointer-events: none;
         }
     }
 }

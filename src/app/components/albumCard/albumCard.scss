@@ -1,167 +1,198 @@
 .spotify__albumCard {
-    max-width: 100%;
-    background-color: #181818;
-    border-radius: 6px;
-    padding: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    border-radius: 4px;
+  /* --- БАЗОВЫЕ СТИЛИ (ОБЫЧНАЯ КАРТОЧКА) --- */
+  max-width: 100%;
+  background-color: #181818;
+  border-radius: 6px;
+  padding: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  position: relative; /* Важно для позиционирования кнопки */
+  display: flex;
+  flex-direction: column;
+  min-height: 260px; /* Высота обычной карточки */
+  gap: 16px;
 
-    /* Стандартный Vertical Layout */
+  &:hover {
+    background-color: #282828;
+  }
+
+  a {
+    // text-decoration: none;
+    // color: inherit;
+    // display: flex;
+    // flex-direction: column;
+    // flex: 1; /* Растягиваем ссылку на всю высоту */
+    // gap: 16px;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  /* 1. КАРТИНКА */
+  .spotify__albumCard_thumbnail {
+    width: 100%;
+    aspect-ratio: 1/1; /* Квадрат */
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    position: relative;
+    background-color: #333; /* Фолбэк цвет */
+    //
+    display: flex;
+    align-items: end;
+    //
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .category-title-overlay {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+      word-break: break-word;
+    }
+  }
+
+  /* 2. ТЕКСТ */
+  .spotify__albumCard_text {
     display: flex;
     flex-direction: column;
-    min-height: 260px; /* Высота обычной карточки */
+    gap: 4px;
 
-    &:hover {
-        background-color: #282828;
+    .title {
+      font-size: 16px;
+      font-weight: 700;
+      color: white;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
+
+    .description {
+      font-size: 14px;
+      color: #b3b3b3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  }
+
+  /* Скрываем кнопку Play для обычных карточек */
+  .play-button-overlay {
+    display: none;
+  }
+
+  /* ============================================= */
+  /* MODIFIER: TOP RESULT (ТОП РЕЗУЛЬТАТ)         */
+  /* ============================================= */
+  &.top-result-mode {
+    grid-column: 1 / -1; /* Занимает всю ширину колонки */
+    min-height: 240px;
+    padding: 20px;
+    gap: 20px;
+
+    /* ВАЖНО: Оставляем вертикальную структуру, но меняем размеры */
+
     a {
-        text-decoration: none;
-        color: inherit;
+      justify-content: flex-start; /* Прижимаем контент к верху */
+      gap: 20px;
     }
 
-    /* --- 1. КАРТИНКА --- */
+    /* Уменьшаем картинку для топ-результата (как на скрине) */
     .spotify__albumCard_thumbnail {
-        width: 100%;
-        aspect-ratio: 1/1;
-        border-radius: 4px;
-        overflow: hidden;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-        position: relative; // Чтобы цвет заливал блок
-        display: flex;
-        align-items: end;
-        .category-title-overlay {
-            font-size: 24px;
-            font-weight: 700;
-            color: white;
-            padding: 16px;
-            word-break: break-word; /* Перенос слов */
-        }
-
-        img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+      width: 92px;
+      height: 92px;
+      flex-grow: 0; /* Запрещаем растягиваться */
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     }
 
-    /* --- 2. ТЕКСТ --- */
+    /* Увеличиваем текст */
     .spotify__albumCard_text {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        min-height: 60px;
-        margin-top: 15px;
+      padding-top: 15px;
+      .title {
+        font-size: 32px; /* Крупный заголовок */
+        font-weight: 700;
+        white-space: normal; /* Разрешаем перенос */
+        line-height: 1.2;
+        margin-bottom: 6px;
+      }
 
-        .title {
-            font-size: 16px;
-            font-weight: 700;
-            color: white;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .description {
-            font-size: 14px;
-            color: #b3b3b3;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .type-badge {
-            display: none; /* Скрыт в обычной карточке */
-        }
+      .description {
+        font-size: 14px;
+        color: #b3b3b3;
+        font-weight: 500;
+      }
     }
 
+    /* --- ЗЕЛЕНАЯ КНОПКА PLAY --- */
     .play-button-overlay {
-        display: none;
-    } /* Скрыт по дефолту */
+      display: flex; /* Делаем видимым блок */
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
 
-    /* ============================================= */
-    /* MODIFIER: TOP RESULT (Большая карточка)  */
-    /* ============================================= */
-    &.top-result-mode {
-        grid-column: 1 / -1; /* Если вдруг попадет в грид */
-        min-height: 240px; /* Высота блока */
-        gap: 20px;
+      /* Анимация появления */
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.3s ease;
+      z-index: 10;
+
+      button {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background-color: #1ed760; /* Зеленый Spotify */
+        color: black;
+        border: none;
+
+        /* Центрирование треугольника */
+        display: flex;
+        align-items: center;
         justify-content: center;
-        align-items: flex-start;
-        padding: 20px;
-        position: relative; /* Для кнопки play */
 
-        /* Картинка становится меньше и слева (или сверху, как у Spotify) */
-        .spotify__albumCard_thumbnail {
-            width: 92px;
-            height: 92px;
-            flex-shrink: 0;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 8px 8px rgba(0, 0, 0, 0.3);
+        transition:
+          transform 0.2s ease,
+          background-color 0.2s;
+
+        &:hover {
+          transform: scale(1.05);
+          background-color: #1fdf64;
         }
 
-        .spotify__albumCard_text {
-            .title {
-                font-size: 32px; /* Огромный заголовок */
-                font-weight: 700;
-                white-space: normal; /* Перенос текста */
-            }
-
-            .meta-row {
-                display: flex;
-                gap: 8px;
-                align-items: center;
-            }
-
-            // .type-badge {
-            //   display: inline-block;
-            //   background-color: #121212;
-            //   color: white;
-            //   font-size: 12px;
-            //   font-weight: 700;
-            //   padding: 4px 12px;
-            //   border-radius: 50px;
-            // }
-
-            .description {
-                // font-weight: 700;
-                color: white;
-            }
-        }
-
-        /* Зеленая кнопка Play справа внизу */
-        // .play-button-overlay {
-        //   display: flex; /* Показываем */
-        //   position: absolute;
-        //   bottom: 20px;
-        //   right: 20px;
-        //   opacity: 0;
-        //   transition: all 0.3s ease;
-        //   transform: translateY(8px);
-
-        //   button {
-        //     width: 48px;
-        //     height: 48px;
-        //     border-radius: 50%;
-        //     background: #1db954;
-        //     border: none;
-        //     font-size: 20px;
-        //     display: flex;
-        //     align-items: center;
-        //     justify-content: center;
-        //     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        //     cursor: pointer;
-        //     &:hover {
-        //       transform: scale(1.05);
-        //     }
-        //   }
-        // }
-
-        // &:hover .play-button-overlay {
-        //   opacity: 1;
-        //   transform: translateY(0);
-        // }
+        /* Если используешь текстовый символ треугольника, чуть сдвинем его */
+        padding-left: 2px;
+      }
     }
-    &.fixed-width {
-        width: 210px; /* Жесткая ширина */
-        min-width: 210px; /* Запрещаем сжиматься */
-        flex-shrink: 0; /* Чтобы не сплющивало в flex-контейнере */
+
+    /* Показываем кнопку при наведении на ВСЮ карточку */
+    &:hover {
+      background-color: #282828;
+
+      .play-button-overlay {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
+  }
+
+  /* ФИКСИРОВАННАЯ ШИРИНА (для слайдеров и т.д.) */
+  &.fixed-width {
+    width: 210px; /* Жесткая ширина */
+    min-width: 210px; /* Запрещаем сжиматься */
+    flex-shrink: 0;
+
+    .spotify__albumCard_thumbnail {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1/1;
+    }
+  }
 }

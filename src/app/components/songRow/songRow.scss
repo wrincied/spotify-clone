@@ -3,53 +3,185 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    height: var(--row-height);
-    border-radius: 3px;
+    min-height: var(--row-height, 56px);
+    border-radius: 4px;
+    position: relative;
+    transition: background-color 0.2s ease;
+    padding: 0 16px; // Базовые отступы
+
+    // --- МОДИФИКАТОР: РЕЖИМ ПОИСКА (С КАРТИНКОЙ) ---
     &.search-mode {
-        height: 60px; /* Фиксируем под высоту Top Result */
-        padding: 0 8px; /* Чуть меньше отступов по бокам */
-        border-radius: 4px;
-        .row__info {
-            .index-col {
+        height: 60px;
+        padding: 0 8px;
+
+        .row__info .index-col {
+            width: 40px;
+            min-width: 40px;
+        }
+    }
+
+    // --- ЛЕВАЯ ЧАСТЬ (ИНДЕКС/КАРТИНКА + ТЕКСТ) ---
+    .row__info {
+        display: flex;
+        align-items: center;
+        flex: 1; // Занимает всё доступное место
+        gap: 16px;
+        overflow: hidden; // Чтобы текст не вылезал
+        padding: 10px;
+        // 1. КОЛОНКА С ИНДЕКСОМ ИЛИ КАРТИНКОЙ
+        .index-col {
+            position: relative; /* Якорь для абсолютных иконок */
+            width: 30px; /* Узкая колонка для цифры */
+            min-width: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #b3b3b3;
+            font-variant: tabular-nums;
+
+            /* ВАРИАНТ А: ПРОСТО ЦИФРА (СПИСОК) */
+            .index-number {
+                font-size: 16px;
+                display: block; /* Видно по умолчанию */
+            }
+
+            /* Иконка Play для списка (скрыта по умолчанию) */
+            .play-icon.hover-icon {
+                display: none;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: transparent;
+                border: none;
+                color: #fff;
+                font-size: 14px;
+                cursor: pointer;
+                padding: 0;
+            }
+
+            /* ВАРИАНТ Б: КАРТИНКА (ПОИСК) */
+            .thumbnail-wrapper {
+                position: relative;
+                width: 40px;
+                height: 40px;
+                flex-shrink: 0;
+
                 img {
-                    width: 40px;
-                    max-width: 40px;
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    border-radius: 2px;
+                    transition: opacity 0.2s ease;
+                }
+
+                /* Иконка поверх картинки */
+                .play-icon.overlay-icon {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 28px;
+                    height: 28px;
+                    background-color: rgba(0, 0, 0, 0.5);
+                    border-radius: 50%;
+                    display: none; /* Скрыто по умолчанию */
+                    align-items: center;
+                    justify-content: center;
+                    color: #fff;
+                    border: none;
+                    cursor: pointer;
+
+                    &:hover {
+                        background-color: rgba(
+                            0,
+                            0,
+                            0,
+                            0.8
+                        );
+                        transform: translate(-50%, -50%)
+                            scale(1.1);
+                    }
+                }
+            }
+        }
+
+        // 2. ТЕКСТ (НАЗВАНИЕ + АРТИСТ)
+        .row__text {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+            .title {
+                font-size: 16px;
+                color: #fff;
+                cursor: pointer;
+                &:hover {
+                    text-decoration: underline;
+                }
+                &.active-title {
+                    color: #1ed760;
+                }
+            }
+            .artist {
+                font-size: 14px;
+                color: #b3b3b3;
+                cursor: pointer;
+                &:hover {
+                    text-decoration: underline;
                 }
             }
         }
     }
-    .row__info {
-        display: flex;
-        align-items: center;
-        justify-content: start;
-        gap: 15px;
-        padding: 10px;
-        font-variant: tabular-nums;
-        inset-inline-end: 0.25em;
-        
-        .index-col {
-            width: 30px;
-            max-width: 30px;
-            text-align: center;
-            flex-shrink: 0;
-            color: #b3b3b3;
-            img {
-            border-radius: 2px;
-            max-width:40px;
-        }
-        }
-        & .title,
-        .artist {
-            cursor: pointer;
 
-            &:hover {
-                text-decoration: underline;
+    // --- ПРАВАЯ ЧАСТЬ (ДЛИТЕЛЬНОСТЬ) ---
+    .row__duration {
+        font-size: 14px;
+        color: #b3b3b3;
+        font-variant: tabular-nums;
+        margin-left: auto;
+    }
+
+    // ==========================================
+    // ЛОГИКА HOVER (НАВЕДЕНИЕ НА ВСЮ СТРОКУ)
+    // ==========================================
+    &:hover {
+        background-color: hsla(0, 0%, 100%, 0.1);
+
+        .row__info .index-col {
+            // СЦЕНАРИЙ А: Если это список (есть цифра)
+            // Скрываем цифру, показываем Play
+            .index-number {
+                display: none;
+            }
+            .play-icon.hover-icon {
+                display: block;
+            }
+
+            // СЦЕНАРИЙ Б: Если это поиск (есть картинка)
+            // Затемняем фото, показываем оверлей
+            .thumbnail-wrapper {
+                img {
+                    opacity: 0.5;
+                }
+                .play-icon.overlay-icon {
+                    display: flex;
+                    border-radius: 0;
+                    background: transparent;
+                    transform: translate(-50%, -50%);
+                }
             }
         }
     }
-    .row__duration {
-    }
-    &:hover {
+
+    // АКТИВНЫЙ ТРЕК (ТЕКУЩИЙ)
+    &.active {
         background-color: hsla(0, 0%, 100%, 0.3);
+
+        // Даже без наведения показываем иконку паузы/игры вместо цифры, если нужно
+        // Но обычно в Spotify цифра становится зеленой, а при ховере меняется на Play.
+        .row__info .index-col .index-number {
+            color: #1ed760;
+        }
     }
 }
