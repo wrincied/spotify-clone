@@ -1,0 +1,161 @@
+@if (currentTrack$ | async; as track) {
+  <div class="player-container">
+    <div class="track-info">
+      <img
+        [src]="(currentCover$ | async) || 'https://placehold.co/56'"
+        alt="Cover"
+        class="cover-image"
+      />
+      <div class="meta">
+        <div class="track-title">{{ track.title }}</div>
+        <div class="artist-name">{{ track.artist }}</div>
+      </div>
+    </div>
+
+    <div class="player-controls">
+      <div class="buttons">
+        <button
+          class="control-btn loop-btn"
+          [class.active]="isLooping$ | async"
+          (click)="toggleLoop()"
+        >
+          <svg
+            version="1.1"
+            viewBox="0 0 16 16"
+            xmlns="http://www.w3.org/2000/svg"
+            width="100%"
+            height="100%"
+          >
+            <path
+              d="M0 0 C1.66611905 -0.042721 3.33382885 -0.04063832 5 0 C6.64849053 1.64849053 6.2102571 3.55046635 6.25 5.8125 C6.27578125 6.68519531 6.3015625 7.55789062 6.328125 8.45703125 C5.93568971 11.49840475 5.11117974 12.80496499 3 15 C0.05868109 15.98043964 -1.82501665 16.11621202 -4.88671875 16.09765625 C-5.82451172 16.09443359 -6.76230469 16.09121094 -7.72851562 16.08789062 C-8.70498047 16.07951172 -9.68144531 16.07113281 -10.6875 16.0625 C-11.67556641 16.05798828 -12.66363281 16.05347656 -13.68164062 16.04882812 C-16.12115474 16.03704303 -18.56054689 16.02059011 -21 16 C-21 17.65 -21 19.3 -21 21 C-26.44208234 20.65986985 -29.93668198 17.29703472 -34 14 C-33.64582169 11.19099964 -33.21351117 10.18543998 -31.0390625 8.296875 C-29.84410156 7.53117187 -29.84410156 7.53117187 -28.625 6.75 C-27.83351563 6.22921875 -27.04203125 5.7084375 -26.2265625 5.171875 C-24 4 -24 4 -21 4 C-21 5.65 -21 7.3 -21 9 C-11.1 8.505 -11.1 8.505 -1 8 C-0.67 5.36 -0.34 2.72 0 0 Z "
+              fill="#FFFFFF"
+              transform="translate(46,32)"
+            />
+            <path
+              d="M0 0 C5.44208234 0.34013015 8.93668198 3.70296528 13 7 C12.64582169 9.80900036 12.21351117 10.81456002 10.0390625 12.703125 C9.24242187 13.21359375 8.44578125 13.7240625 7.625 14.25 C6.83351562 14.77078125 6.04203125 15.2915625 5.2265625 15.828125 C3 17 3 17 0 17 C0 15.35 0 13.7 0 12 C-6.6 12.33 -13.2 12.66 -20 13 C-20.33 15.64 -20.66 18.28 -21 21 C-22.66611905 21.042721 -24.33382885 21.04063832 -26 21 C-27.64849053 19.35150947 -27.2102571 17.44953365 -27.25 15.1875 C-27.27578125 14.31480469 -27.3015625 13.44210938 -27.328125 12.54296875 C-26.93568971 9.50159525 -26.11117974 8.19503501 -24 6 C-21.05868109 5.01956036 -19.17498335 4.88378798 -16.11328125 4.90234375 C-15.17548828 4.90556641 -14.23769531 4.90878906 -13.27148438 4.91210938 C-11.80678711 4.92467773 -11.80678711 4.92467773 -10.3125 4.9375 C-9.32443359 4.94201172 -8.33636719 4.94652344 -7.31835938 4.95117188 C-4.87884526 4.96295697 -2.43945311 4.97940989 0 5 C0 3.35 0 1.7 0 0 Z "
+              fill="#FFFFFF"
+              transform="translate(39,11)"
+            />
+          </svg>
+        </button>
+
+        <button
+          class="control-btn"
+          (click)="prevTrack()"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="100%"
+            height="100%"
+          >
+            <path
+              d="M19 5v14l-8-7 8-7zM6 6h2v12H6V6z"
+              fill="currentColor"
+            />
+          </svg>
+        </button>
+
+        <button
+          class="control-btn play-btn"
+          (click)="togglePlay()"
+        >
+          @if (isBuffering$ | async) {
+            <svg
+              viewBox="0 0 24 24"
+              width="100%"
+              height="100%"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="2"
+                fill="none"
+              >
+                <animate
+                  attributeName="stroke-dasharray"
+                  values="1 25; 25 1"
+                  dur="1.5s"
+                  repeatCount="indefinite"
+                />
+              </circle>
+            </svg>
+          } @else {
+            @if (isPlaying$ | async) {
+              <svg
+                viewBox="0 0 24 24"
+                width="100%"
+                height="100%"
+              >
+                <path
+                  fill="currentColor"
+                  d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"
+                />
+              </svg>
+            } @else {
+              <svg
+                viewBox="0 0 24 24"
+                width="100%"
+                height="100%"
+              >
+                <path
+                  fill="currentColor"
+                  d="M8 5v14l11-7z"
+                />
+              </svg>
+            }
+          }
+        </button>
+
+        <button
+          class="control-btn"
+          (click)="nextTrack()"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="100%"
+            height="100%"
+          >
+            <path
+              d="M5 5v14l8-7-8-7zM16 6h2v12h-2V6z"
+              fill="currentColor"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div class="progress-bar-container">
+        <span class="time current">{{ formatTime(currentTime$ | async) }}</span>
+        <input
+          type="range"
+          min="0"
+          [max]="(duration$ | async) || 0"
+          [value]="(currentTime$ | async) || 0"
+          (input)="onSeek($event)"
+          class="seek-slider"
+        />
+        <span class="time total">{{ formatTime(duration$ | async) }}</span>
+      </div>
+    </div>
+
+    <div class="volume-controls">
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path d="M3 9v6h4l5 5V4L7 9H3z" />
+      </svg>
+      <input
+        type="range"
+        min="0"
+        max="1"
+        step="0.01"
+        (input)="onVolumeChange($event)"
+        class="volume-slider"
+      />
+    </div>
+  </div>
+}
