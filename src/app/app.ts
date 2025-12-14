@@ -85,18 +85,4 @@ export class App implements OnInit {
     goHome() {
         this.spotifyService.setSearch('');
     }
-    testPlay(): void {
-        const fakeSong: SongInterface = {
-            id: 'test-1', // Обязательное поле
-            title: 'Test Song',
-            artist: 'Test Artist',
-            url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-            duration: 300,
-            thumbnail: 'https://via.placeholder.com/150', // Обязательное поле
-        };
-
-        const fakeCover = 'https://via.placeholder.com/150';
-
-        this.musicStore.setTrack(fakeSong, fakeCover);
-    }
 }

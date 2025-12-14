@@ -3,104 +3,102 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    height: var(--row-height); // Добавил фоллбэк
+    min-height: var(--row-height, 56px);
     border-radius: 4px;
-    position: relative; // Контекст для наложений
+    position: relative;
     transition: background-color 0.2s ease;
+    padding: 0 16px; // Базовые отступы
 
-    // --- МОДИФИКАТОР ПОИСКА (КАРТИНКА) ---
+    // --- МОДИФИКАТОР: РЕЖИМ ПОИСКА (С КАРТИНКОЙ) ---
     &.search-mode {
         height: 60px;
         padding: 0 8px;
-        border-radius: 4px;
 
-        .row__info {
-            .index-col {
-                width: 40px;
-                max-width: 40px;
-            }
+        .row__info .index-col {
+            width: 40px;
+            min-width: 40px;
         }
     }
 
-    // --- ОБЩАЯ ИНФОРМАЦИЯ ---
+    // --- ЛЕВАЯ ЧАСТЬ (ИНДЕКС/КАРТИНКА + ТЕКСТ) ---
     .row__info {
         display: flex;
         align-items: center;
-        justify-content: start;
-        gap: 15px;
+        flex: 1; // Занимает всё доступное место
+        gap: 16px;
+        overflow: hidden; // Чтобы текст не вылезал
         padding: 10px;
-        font-variant: tabular-nums;
-        inset-inline-end: 0.25em;
-
-        // --- КОЛОНКА С ИНДЕКСОМ / КАРТИНКОЙ ---
+        // 1. КОЛОНКА С ИНДЕКСОМ ИЛИ КАРТИНКОЙ
         .index-col {
-            position: relative; // Важно для позиционирования иконки
-            width: 40px;
-            min-width: 40px; // Фикс сжатия
+            position: relative; /* Якорь для абсолютных иконок */
+            width: 30px; /* Узкая колонка для цифры */
+            min-width: 30px;
             display: flex;
-            justify-content: center; // Центрируем содержимое по горизонтали
-            align-items: center; // Центрируем по вертикали
+            justify-content: center;
+            align-items: center;
             color: #b3b3b3;
             font-variant: tabular-nums;
 
-            // 1. Цифра (по умолчанию видна)
+            /* ВАРИАНТ А: ПРОСТО ЦИФРА (СПИСОК) */
             .index-number {
-                display: block;
                 font-size: 16px;
+                display: block; /* Видно по умолчанию */
             }
 
-            // 2. Иконка Play для списка (по умолчанию скрыта)
+            /* Иконка Play для списка (скрыта по умолчанию) */
             .play-icon.hover-icon {
-                display: none; // Скрыто
-                position: absolute; // Чтобы не сдвигала контент
+                display: none;
+                position: absolute;
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
                 background: transparent;
                 border: none;
                 color: #fff;
-                font-size: 16px;
+                font-size: 14px;
                 cursor: pointer;
-                z-index: 5;
+                padding: 0;
             }
 
-            // 3. Обертка картинки (если есть)
+            /* ВАРИАНТ Б: КАРТИНКА (ПОИСК) */
             .thumbnail-wrapper {
                 position: relative;
                 width: 40px;
                 height: 40px;
-                display: flex;
+                flex-shrink: 0;
 
                 img {
                     width: 100%;
                     height: 100%;
                     object-fit: cover;
                     border-radius: 2px;
-                    max-width: 40px;
                     transition: opacity 0.2s ease;
                 }
 
-                // Иконка Play поверх картинки
+                /* Иконка поверх картинки */
                 .play-icon.overlay-icon {
                     position: absolute;
                     top: 50%;
                     left: 50%;
                     transform: translate(-50%, -50%);
-                    width: 32px;
-                    height: 32px;
-                    background-color: rgba(0, 0, 0, 0.7);
+                    width: 28px;
+                    height: 28px;
+                    background-color: rgba(0, 0, 0, 0.5);
                     border-radius: 50%;
-                    display: none; // Скрыто
+                    display: none; /* Скрыто по умолчанию */
                     align-items: center;
                     justify-content: center;
                     color: #fff;
                     border: none;
                     cursor: pointer;
-                    z-index: 10;
-                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 
                     &:hover {
-                        background-color: #000;
+                        background-color: rgba(
+                            0,
+                            0,
+                            0,
+                            0.8
+                        );
                         transform: translate(-50%, -50%)
                             scale(1.1);
                     }
@@ -108,46 +106,82 @@
             }
         }
 
-        .title,
-        .artist {
-            cursor: pointer;
-            &:hover {
-                text-decoration: underline;
+        // 2. ТЕКСТ (НАЗВАНИЕ + АРТИСТ)
+        .row__text {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+            .title {
+                font-size: 16px;
+                color: #fff;
+                cursor: pointer;
+                &:hover {
+                    text-decoration: underline;
+                }
+                &.active-title {
+                    color: #1ed760;
+                }
+            }
+            .artist {
+                font-size: 14px;
+                color: #b3b3b3;
+                cursor: pointer;
+                &:hover {
+                    text-decoration: underline;
+                }
             }
         }
     }
 
-    // --- ЛОГИКА HOVER ДЛЯ ВСЕЙ СТРОКИ ---
-    &:hover {
-        background-color: hsla(
-            0,
-            0%,
-            100%,
-            0.1
-        ); // Чуть светлее
+    // --- ПРАВАЯ ЧАСТЬ (ДЛИТЕЛЬНОСТЬ) ---
+    .row__duration {
+        font-size: 14px;
+        color: #b3b3b3;
+        font-variant: tabular-nums;
+        margin-left: auto;
+    }
 
-        .index-col {
-            // Сценарий 1: Обычный список (нет картинки)
-            // Скрываем цифру, показываем иконку, ЕСЛИ нет картинки
-            &:not(:has(.thumbnail-wrapper)) {
-                .index-number {
-                    visibility: hidden; // Лучше чем display: none, сохраняет поток, но мы на абсолюте
-                    opacity: 0;
-                }
-                .play-icon.hover-icon {
-                    display: block;
-                }
+    // ==========================================
+    // ЛОГИКА HOVER (НАВЕДЕНИЕ НА ВСЮ СТРОКУ)
+    // ==========================================
+    &:hover {
+        background-color: hsla(0, 0%, 100%, 0.1);
+
+        .row__info .index-col {
+            // СЦЕНАРИЙ А: Если это список (есть цифра)
+            // Скрываем цифру, показываем Play
+            .index-number {
+                display: none;
+            }
+            .play-icon.hover-icon {
+                display: block;
             }
 
-            // Сценарий 2: Режим поиска (есть картинка)
+            // СЦЕНАРИЙ Б: Если это поиск (есть картинка)
+            // Затемняем фото, показываем оверлей
             .thumbnail-wrapper {
                 img {
-                    opacity: 0.4;
+                    opacity: 0.5;
                 }
                 .play-icon.overlay-icon {
                     display: flex;
+                    border-radius: 0;
+                    background: transparent;
+                    transform: translate(-50%, -50%);
                 }
             }
+        }
+    }
+
+    // АКТИВНЫЙ ТРЕК (ТЕКУЩИЙ)
+    &.active {
+        background-color: hsla(0, 0%, 100%, 0.3);
+
+        // Даже без наведения показываем иконку паузы/игры вместо цифры, если нужно
+        // Но обычно в Spotify цифра становится зеленой, а при ховере меняется на Play.
+        .row__info .index-col .index-number {
+            color: #1ed760;
         }
     }
 }
