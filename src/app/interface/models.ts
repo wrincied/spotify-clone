@@ -6,7 +6,14 @@ export interface SongInterface {
   artist: string;
   url: string;
 }
-
+export interface PlayerState{
+  isPlaying: boolean;
+  currentTrack: SongInterface | null;
+  volume: number;     // 0.0 - 1.0
+  currentTime: number;
+  duration: number;   // Текущая длительность из метаданных аудио
+  isBuffering: boolean;
+}
 export interface AlbumInterface {
   thumbnail: any;
   id: string;
@@ -24,7 +31,6 @@ export interface CategoryInterface {
   songs?: string[]; // ids of songs
   playlists?: string[]; // future
 }
-
 export interface CardItemInterface {
   id: string;
   title: string;        // Сюда попадет Album.title или Category.name
@@ -33,3 +39,4 @@ export interface CardItemInterface {
   color?: string;       // Сюда Category.color (для полоски снизу)
   type: 'album' | 'playlist' | 'category' | 'focus'; // Чтобы понимать, куда кликать
 }
+

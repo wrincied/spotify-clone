@@ -31,35 +31,96 @@ export class Slider implements AfterViewInit, OnChanges {
     @ViewChild('slider', { static: false })
     slider!: ElementRef<HTMLDivElement>;
 
-    showButtons = false;
+    // Флаги видимости кнопок
+    showLeftBtn = false;
+    showRightBtn = false;
 
     ngAfterViewInit() {
-        setTimeout(() => this.checkOverflow(), 0);
+        // Первичная проверка не требуется, кнопки появятся при наведении
     }
 
     ngOnChanges() {
-        setTimeout(() => this.checkOverflow(), 0);
+        // Сбрасываем кнопки при изменении данных
+        this.hideButtons();
     }
 
-    private checkOverflow() {
+    // Основная логика при движении мыши
+    onMouseMove(e: MouseEvent) {
         if (!this.slider) return;
-
         const el = this.slider.nativeElement;
-        this.showButtons = el.scrollWidth > el.clientWidth;
+
+        // Получаем размеры контейнера и координаты курсора
+        const rect = (
+            e.currentTarget as HTMLElement
+        ).getBoundingClientRect();
+        const x = e.clientX - rect.left; // X относительно контейнера
+        const width = rect.width;
+
+        // Проверяем возможность скролла в принципе
+        const canScrollLeft = el.scrollLeft > 0;
+        // Math.ceil используется для исправления багов с дробными пикселями при масштабировании
+        const canScrollRight =
+            Math.ceil(el.scrollLeft + el.clientWidth) <
+            el.scrollWidth;
+
+        // Логика разделения зон
+        if (x < width / 2) {
+            // Мышь в левой половине
+            this.showLeftBtn = canScrollLeft;
+            this.showRightBtn = false;
+        } else {
+            // Мышь в правой половине
+            this.showLeftBtn = false;
+            this.showRightBtn = canScrollRight;
+        }
+    }
+
+    // Скрытие кнопок при уходе мыши с компонента
+    hideButtons() {
+        this.showLeftBtn = false;
+        this.showRightBtn = false;
     }
 
     scrollLeft(container: HTMLElement) {
-        container.scrollTo({
-            left: container.scrollLeft - 250,
+        container.scrollBy({
+            left: -250,
             behavior: 'smooth',
         });
+        // Небольшой таймаут, чтобы обновить состояние, если мы доскроллили до края
+        setTimeout(
+            () =>
+                this.updateButtonStateAfterScroll(
+                    container,
+                ),
+            350,
+        );
     }
 
     scrollRight(container: HTMLElement) {
-        container.scrollTo({
-            left: container.scrollLeft + 250,
+        container.scrollBy({
+            left: 250,
             behavior: 'smooth',
         });
+        setTimeout(
+            () =>
+                this.updateButtonStateAfterScroll(
+                    container,
+                ),
+            350,
+        );
+    }
+
+    // Проверка после клика (если дошли до края, кнопка должна исчезнуть даже под курсором)
+    private updateButtonStateAfterScroll(el: HTMLElement) {
+        const canScrollLeft = el.scrollLeft > 0;
+        const canScrollRight =
+            Math.ceil(el.scrollLeft + el.clientWidth) <
+            el.scrollWidth;
+
+        if (this.showLeftBtn && !canScrollLeft)
+            this.showLeftBtn = false;
+        if (this.showRightBtn && !canScrollRight)
+            this.showRightBtn = false;
     }
 
     @HostListener('wheel', ['$event'])
