@@ -1,5 +1,9 @@
-<div class="slider-container">
-    @if (showButtons) {
+<div
+    class="slider-container"
+    (mousemove)="onMouseMove($event)"
+    (mouseleave)="hideButtons()"
+>
+    @if (showLeftBtn) {
         <button
             class="scroll-btn left"
             (click)="scrollLeft(slider)"
@@ -10,6 +14,7 @@
     <div
         #slider
         class="playlist_card_collections"
+        (scroll)="hideButtons()"
     >
         @if (albumItem.length > 0) {
             @for (item of albumItem; track item.id) {
@@ -51,7 +56,7 @@
         }
     </div>
 
-    @if (showButtons) {
+    @if (showRightBtn) {
         <button
             class="scroll-btn right"
             (click)="scrollRight(slider)"
