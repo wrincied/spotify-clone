@@ -1,44 +1,85 @@
 <div
-    class="songRow__container"
-    [class.search-mode]="isSearchMode"
-    [class.active]="isCurrent"
-    (click)="handlePlay($event)"
+  class="songRow__container"
+  [class.search-mode]="isSearchMode"
+  [class.active]="isCurrent"
+  (click)="handlePlay($event)"
 >
-    <div class="row__info">
-        
-        <div class="index-col">
-            
-            @if (thumbnailUrl) {
-                <div class="thumbnail-wrapper">
-                    <img [src]="thumbnailUrl" class="row-thumbnail" />
-                    <button class="play-icon overlay-icon" (click)="handlePlay($event)">
-                        {{ (isCurrent && isPlaying) ? '⏸' : '▶' }}
-                    </button>
-                </div>
-            } 
-            
-            @else {
-                <span class="index-number">
-                    {{ isCurrent ? '▶' : index }} 
-                </span>
-                
-                <button class="play-icon hover-icon" (click)="handlePlay($event)">
-                    {{ (isCurrent && isPlaying) ? '⏸' : '▶' }}
-                </button>
+  <div class="row__info">
+    <div class="index-col">
+      @if (thumbnailUrl) {
+        <div class="thumbnail-wrapper">
+          <img
+            [src]="thumbnailUrl"
+            class="row-thumbnail"
+            alt="cover"
+          />
+          <button
+            class="play-icon overlay-icon"
+            (click)="handlePlay($event)"
+          >
+            @if (isCurrent && isPlaying) {
+              <img
+                src="assets/icons/pause.svg"
+                alt="Pause"
+                class="svg-icon"
+              />
+            } @else {
+              <img
+                src="assets/icons/play.svg"
+                alt="Play"
+                class="svg-icon"
+              />
             }
+          </button>
         </div>
+      } @else {
+        <span class="index-number">
+          @if (isCurrent) {
+            <img
+              src="assets/icons8-spielen-24.svg"
+              alt="Active"
+              class="index-icon"
+            />
+          } @else {
+            {{ index }}
+          }
+        </span>
 
-        <div class="row__text">
-            <div class="title" [class.active-title]="isCurrent">
-                <span>{{ song.title }}</span>
-            </div>
-            <div class="artist">
-                <span>{{ song.artist }}</span>
-            </div>
-        </div>
+        <button
+          class="play-icon hover-icon"
+          (click)="handlePlay($event)"
+        >
+          @if (isCurrent && isPlaying) {
+            <img
+              src="assets/icons8-pause-24.svg"
+              alt="Pause"
+              class="svg-icon"
+            />
+          } @else {
+            <img
+              src="assets/icons8-spielen-24.svg"
+              alt="Play"
+              class="svg-icon"
+            />
+          }
+        </button>
+      }
     </div>
 
-    <div class="row__duration">
-        <span>{{ song.duration | formatTime }}</span>
+    <div class="row__text">
+      <div
+        class="title"
+        [class.active-title]="isCurrent"
+      >
+        <span>{{ song.title }}</span>
+      </div>
+      <div class="artist">
+        <span>{{ song.artist }}</span>
+      </div>
     </div>
+  </div>
+
+  <div class="row__duration">
+    <span>{{ song.duration | formatTime }}</span>
+  </div>
 </div>

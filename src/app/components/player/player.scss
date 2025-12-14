@@ -72,8 +72,13 @@
       display: flex; /* Важно для центровки */
       align-items: center;
       justify-content: center;
-
-      &:hover { color: #fff; }
+      width: 25px;
+      svg {
+        
+      }
+      &:hover {
+        color: #fff;
+      }
 
       &.play-btn {
         background-color: #fff;
@@ -82,7 +87,9 @@
         width: 32px;
         height: 32px;
         font-size: 16px;
-        &:hover { transform: scale(1.05); }
+        &:hover {
+          transform: scale(1.05);
+        }
       }
     }
   }
@@ -118,6 +125,8 @@
     height: 4px;
     accent-color: #b3b3b3;
     cursor: pointer;
-    &:hover { accent-color: #1db954; }
+    &:hover {
+      accent-color: #1db954;
+    }
   }
 }

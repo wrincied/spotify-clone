@@ -1,39 +1,68 @@
 <div
-    class="spotify__albumCard"
-    [class.top-result-mode]="isTopResult"
-    [class.fixed-width]="fixedSize"
+  class="spotify__albumCard"
+  [class.top-result-mode]="isTopResult"
+  [class.fixed-width]="fixedSize"
 >
-    <a [routerLink]="link">
+  <a [routerLink]="link">
+    <div
+      class="spotify__albumCard_thumbnail"
+      [style.background-color]="backgroundColor"
+    >
+      @if (playlistThumbnail) {
+        <img
+          [src]="playlistThumbnail"
+          (error)="onImageError($event)"
+          loading="lazy"
+          alt="Cover"
+        />
+      }
+      @if (!playlistThumbnail && backgroundColor) {
         <div
-            class="spotify__albumCard_thumbnail"
-            [style.background-color]="backgroundColor"
+          class="category-title-overlay"
+          appFitText
+          [minFontSize]="16"
+          [maxFontSize]="16"
         >
-            @if (playlistThumbnail) {
-                <img
-                    [src]="playlistThumbnail"
-                    (error)="onImageError($event)"
-                    loading="lazy"
-                />
-            }
-            @if (!playlistThumbnail && backgroundColor) {
-                <div class="category-title-overlay">
-                    {{ title }}
-                </div>
-            }
+          {{ title }}
         </div>
+      }
+    </div>
 
-        <div class="spotify__albumCard_text">
-            @if (playlistThumbnail) {
-                <p class="title">{{ title }}</p>
-            }
+    <div class="spotify__albumCard_text">
+      <p
+        class="title"
+        appFitText
+        [minFontSize]="16"
+        [maxFontSize]="32"
+      >
+        {{ title }}
+      </p>
 
-            <p class="description">{{ description }}</p>
-        </div>
+      @if (description) {
+        <p class="description">{{ description }}</p>
+      }
+    </div>
 
-        @if (isTopResult) {
-            <div class="play-button-overlay">
-                <button>▶</button>
-            </div>
-        }
-    </a>
+    @if (isTopResult) {
+      <div class="play-button-overlay">
+        <button
+          class="play-btn"
+          (click)="handlePlay($event)"
+        >
+          <svg
+            role="img"
+            height="24"
+            width="24"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              d="M7.05 3.606l13.49 7.788a.7.7 0 010 1.212L7.05 20.394A.7.7 0 016 19.788V4.212a.7.7 0 011.05-.606z"
+              fill="currentColor"
+            ></path>
+          </svg>
+        </button>
+      </div>
+    }
+  </a>
 </div>
