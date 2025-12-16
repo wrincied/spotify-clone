@@ -54,7 +54,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
     // 1. ЗАГРУЗКА АЛЬБОМА
     this.route.paramMap.subscribe((params) => {
       // Лучше брать id из params, а не snapshot, чтобы работало при смене ID в URL
-      const id = params.get('id'); 
+      const id = params.get('id');
       if (!id) return;
 
       this.gradientColor = 'linear-gradient(to bottom, #333, #121212)';
@@ -66,7 +66,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
           if (album.cover) this.setDominantColor(album.cover);
           this.cdr.detectChanges();
           // Перезапускаем observer при смене альбома
-          setTimeout(() => this.initObserver(), 0); 
+          setTimeout(() => this.initObserver(), 0);
         },
         error: (err) => console.error(err),
       });
@@ -78,7 +78,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
       this.musicStore.isPlaying$.subscribe((isPlaying) => {
         this.isPlayerPlaying = isPlaying;
         this.cdr.detectChanges(); // Обновляем UI
-      })
+      }),
     );
 
     // 3. ПОДПИСКА НА ТЕКУЩИЙ ТРЕК (ВАЖНО!)
@@ -86,7 +86,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
       this.musicStore.currentTrack$.subscribe((track) => {
         this.currentTrack = track;
         this.cdr.detectChanges(); // Обновляем UI
-      })
+      }),
     );
   }
 
@@ -107,28 +107,31 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // Observer запускается внутри подписки API, 
+    // Observer запускается внутри подписки API,
     // но можно оставить метод пустым или перенести логику сюда
   }
 
   initObserver() {
     if (this.observer) this.observer.disconnect();
-    
+
     // Ищем контейнер скролла. Убедитесь, что класс .spotify-main существует в app.component
-    const scrollContainer = document.querySelector('.spotify-main') || document.querySelector('.main-view'); 
-    
+    const scrollContainer =
+      document.querySelector('.spotify-main') ||
+      document.querySelector('.main-view');
+
     if (!scrollContainer || !this.albumHeaderRef) return;
 
     const options = {
       root: scrollContainer,
       threshold: 0,
-      rootMargin: '-70px 0px 0px 0px', // Настройка момента срабатывания
+      rootMargin: '-90px 0px 0px 0px', // Настройка момента срабатывания
     };
 
     this.observer = new IntersectionObserver(([entry]) => {
       // Логика: если элемент уехал наверх (top < 64) и перестал пересекаться
-      const isHidden = !entry.isIntersecting && entry.boundingClientRect.top < 64;
-      
+      const isHidden =
+        !entry.isIntersecting && entry.boundingClientRect.top < 64;
+
       if (this.isSticky !== isHidden) {
         this.isSticky = isHidden;
         this.cdr.detectChanges();
@@ -150,12 +153,12 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
 
   get isAlbumPlaying(): boolean {
     if (!this.album || !this.currentTrack) return false;
-    
+
     // Проверяем, есть ли текущий трек в этом альбоме
     const isTrackInAlbum = this.album.songs.some(
-      (s) => String(s.id) === String(this.currentTrack?.id)
+      (s) => String(s.id) === String(this.currentTrack?.id),
     );
-    
+
     // И статус плеера должен быть Playing
     return isTrackInAlbum && this.isPlayerPlaying;
   }

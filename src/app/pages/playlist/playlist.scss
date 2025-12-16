@@ -53,7 +53,7 @@
     &.visible {
       opacity: 1;
       pointer-events: auto;
-      transform: translateY(0);
+      // transform: translateY(0);
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
     }
     /* ... контент sticky ... */
@@ -142,7 +142,7 @@
   /* --- 3. TABLE HEADER --- */
   .table-header {
     position: sticky;
-    top: 64px; /* Прилипает под Sticky Header */
+    top: 54px; /* Прилипает под Sticky Header */
     z-index: 40;
 
     /* Добавляем плавность перехода цвета (от прозрачного к цветному) */

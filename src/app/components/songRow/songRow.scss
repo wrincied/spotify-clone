@@ -46,7 +46,7 @@
       align-items: center;
       color: #b3b3b3;
       font-variant: tabular-nums;
-
+      border-radius: 4px; // Чуть мягче углы
       // А) КОНТЕЙНЕР ДЛЯ НОМЕРА / GIF / СТАТИЧНОЙ ИКОНКИ
       .index-number {
         display: flex; /* Чтобы выровнять img или текст по центру */
@@ -82,6 +82,7 @@
         color: #fff;
         padding: 0;
         cursor: pointer;
+        border-radius: 4px; // Чуть мягче углы
         transition:
           opacity 0.2s ease,
           transform 0.2s ease;
@@ -161,7 +162,7 @@
         overflow: hidden;
         text-overflow: ellipsis;
         cursor: pointer;
-        transition: color 0.2s ease; 
+        transition: color 0.2s ease;
         &:hover {
           text-decoration: underline;
         }
