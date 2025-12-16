@@ -4,19 +4,20 @@ import {
   OnInit,
   OnChanges,
   SimpleChanges,
+  OnDestroy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Observable, Subscription } from 'rxjs';
 
 import { MusicStoreService } from '../../services/music-store/music-store';
-import { AlbumInterface, SongInterface } from '../../interface/models';
+import {
+  AlbumInterface,
+  SongInterface,
+  TrackWithContext,
+} from '../../interface/models';
 import { albumCard } from '../../components/albumCard/albumCard';
 import { SongRow } from '../../components/songRow/songRow';
-
-type TrackView = SongInterface & {
-  albumId: string;
-  coverFromAlbum: string | null;
-};
 
 @Component({
   selector: 'app-search',
@@ -25,33 +26,67 @@ type TrackView = SongInterface & {
   templateUrl: './search.html',
   styleUrls: ['./search.scss'],
 })
-export class SearchComponent implements OnInit, OnChanges {
+export class SearchComponent implements OnInit, OnChanges, OnDestroy {
   @Input() query = '';
   @Input() items: AlbumInterface[] = [];
-  filteredAlbums: AlbumInterface[] = [];
 
-  filteredTracks: TrackView[] = [];
-  topAlbumSongs: TrackView[] = [];
-  topTrack: TrackView | null = null;
+  filteredAlbums: AlbumInterface[] = [];
+  filteredTracks: TrackWithContext[] = [];
+  topAlbumSongs: TrackWithContext[] = [];
+  topTrack: TrackWithContext | null = null;
+
+  // === 1. OBSERVABLES ДЛЯ HTML (чтобы передавать в SongRow через | async) ===
+  currentTrack$: Observable<SongInterface | null>;
+  isPlaying$: Observable<boolean>;
+
+  // === 2. ЛОКАЛЬНЫЕ ПЕРЕМЕННЫЕ ДЛЯ ЛОГИКИ (для isTopResultPlaying) ===
+  currentTrack: SongInterface | null = null;
+  isPlaying: boolean = false;
+
+  private subs: Subscription = new Subscription();
 
   constructor(
     private route: ActivatedRoute,
     private musicStore: MusicStoreService,
     private router: Router,
-  ) {}
+  ) {
+    // Инициализируем потоки из сервиса
+    this.currentTrack$ = this.musicStore.currentTrack$;
+    this.isPlaying$ = this.musicStore.isPlaying$;
+  }
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe((params) => {
-      const q = (params['q'] ?? '').toString();
-      if (q !== this.query) {
-        this.query = q;
-        this.runFilter();
-      }
-    });
+    // 1. Следим за URL
+    this.subs.add(
+      this.route.queryParams.subscribe((params) => {
+        const q = (params['q'] ?? '').toString();
+        if (q !== this.query) {
+          this.query = q;
+          this.runFilter();
+        }
+      }),
+    );
 
-    this.musicStore.albums$.subscribe((albums) => {
-      this.runFilter(albums);
-    });
+    // 2. Следим за альбомами
+    this.subs.add(
+      this.musicStore.albums$.subscribe((albums) => {
+        this.runFilter(albums);
+      }),
+    );
+
+    // 3. ПОДПИСЫВАЕМСЯ, ЧТОБЫ ОБНОВЛЯТЬ ЛОКАЛЬНЫЕ ПЕРЕМЕННЫЕ
+    // Это нужно, чтобы работал твой геттер isTopResultPlaying
+    this.subs.add(
+      this.currentTrack$.subscribe((track) => {
+        this.currentTrack = track;
+      }),
+    );
+
+    this.subs.add(
+      this.isPlaying$.subscribe((state) => {
+        this.isPlaying = state;
+      }),
+    );
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -60,10 +95,14 @@ export class SearchComponent implements OnInit, OnChanges {
     }
   }
 
-  private runFilter(albums?: AlbumInterface[]): void {
-    const list = albums ?? this.musicStore.currentAlbums;
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
+  }
 
-    // Сброс состояний
+  // ... runFilter оставляем как есть ...
+  private runFilter(albums?: AlbumInterface[]): void {
+    // ... твой код runFilter ...
+    const list = albums ?? this.musicStore.currentAlbums;
     this.topTrack = null;
     this.filteredAlbums = [];
     this.filteredTracks = [];
@@ -75,7 +114,7 @@ export class SearchComponent implements OnInit, OnChanges {
     if (!term) return;
 
     // 1. Все треки
-    const allTracks = list.flatMap<TrackView>((album) =>
+    const allTracks = list.flatMap<TrackWithContext>((album) =>
       (album.songs || []).map((song) => ({
         ...song,
         albumId: album.id,
@@ -90,21 +129,18 @@ export class SearchComponent implements OnInit, OnChanges {
       return title.includes(term) || desc.includes(term);
     });
 
-    // 3. Песни (предварительный поиск)
+    // 3. Песни
     const matchingTracks = allTracks.filter((track) => {
       const title = (track.title || '').toLowerCase();
       const artist = (track.artist || '').toLowerCase();
       return title.includes(term) || artist.includes(term);
     });
 
-    // 4. Логика TOP TRACK (Изменено для лучшей работы)
-    // Сначала ищем идеальное совпадение, если нет - берем первый трек, который начинается с запроса
+    // 4. Логика TOP TRACK
     let bestMatch = matchingTracks.find(
       (t) => (t.title || '').toLowerCase() === term,
     );
 
-    // Если строгого совпадения нет, но есть треки, и мы явно ищем не альбом (альбомов мало или нет),
-    // можно взять первый наиболее релевантный трек.
     if (
       !bestMatch &&
       matchingTracks.length > 0 &&
@@ -115,7 +151,6 @@ export class SearchComponent implements OnInit, OnChanges {
 
     if (bestMatch) {
       this.topTrack = bestMatch;
-      // Исключаем топ-трек из общего списка справа
       this.filteredTracks = matchingTracks
         .filter((t) => t.id !== bestMatch!.id)
         .slice(0, 5);
@@ -124,7 +159,7 @@ export class SearchComponent implements OnInit, OnChanges {
       this.filteredTracks = matchingTracks.slice(0, 5);
     }
 
-    // 5. Песни из топ-альбома (как было)
+    // 5. Песни из топ-альбома
     const topAlbum = this.filteredAlbums[0];
     if (topAlbum) {
       this.topAlbumSongs = (topAlbum.songs || []).slice(0, 4).map((song) => ({
@@ -133,5 +168,36 @@ export class SearchComponent implements OnInit, OnChanges {
         coverFromAlbum: topAlbum.cover ?? null,
       }));
     }
+  }
+
+  get isTopResultPlaying(): boolean {
+    // ЗДЕСЬ ИСПОЛЬЗУЕМ ЛОКАЛЬНЫЕ ПЕРЕМЕННЫЕ (boolean и object), А НЕ OBSERVABLES
+    if (!this.isPlaying || !this.currentTrack) return false;
+
+    // 1. Если в топе ТРЕК
+    if (this.topTrack) {
+      return String(this.currentTrack.id) === String(this.topTrack.id);
+    }
+
+    // 2. Если в топе АЛЬБОМ
+    if (this.filteredAlbums.length > 0) {
+      const topAlbum = this.filteredAlbums[0];
+      if (topAlbum.songs && topAlbum.songs.length > 0) {
+        return topAlbum.songs.some(
+          (s) => String(s.id) === String(this.currentTrack?.id),
+        );
+      }
+    }
+
+    return false;
+  }
+
+  handlePlay(song: SongInterface) {
+    const trackView =
+      this.filteredTracks.find((t) => t.id === song.id) ||
+      this.topAlbumSongs.find((t) => t.id === song.id);
+
+    const cover = trackView?.coverFromAlbum || song.thumbnail || '';
+    this.musicStore.playOrPause(song, [song], cover);
   }
 }

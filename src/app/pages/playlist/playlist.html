@@ -15,7 +15,23 @@
           class="play-btn"
           (click)="handlePlay(album.songs[0])"
         >
-          <div class="play-icon">▶</div>
+          <div class="play-icon">
+            @if (isAlbumPlaying) {
+              <img
+                width="25px"
+                src="assets/pause-50.svg"
+                alt="pause"
+                class="svg-icon"
+              />
+            } @else {
+              <img
+                width="25px"
+                src="assets/spielen-50.svg"
+                alt="Play"
+                class="svg-icon"
+              />
+            }
+          </div>
         </button>
         <div class="sticky-text">
           <h2>{{ album.title }}</h2>
