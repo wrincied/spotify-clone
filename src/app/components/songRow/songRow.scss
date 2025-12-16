@@ -1,187 +1,240 @@
 .songRow__container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  min-height: var(--row-height, 56px);
+  border-radius: 4px;
+  position: relative;
+  transition: background-color 0.2s ease;
+  padding: 0 16px;
+  cursor: default; // Чтобы курсор был обычным, а на ссылках — палец
+  transition: background-color 0.2s ease;
+
+  // ==========================================
+  // 1. МОДИФИКАТОР: РЕЖИМ ПОИСКА (С КАРТИНКОЙ)
+  // ==========================================
+  &.search-mode {
+    height: 60px;
+    padding: 0 8px;
+
+    .row__info .index-col {
+      width: 40px;
+      min-width: 40px;
+    }
+  }
+
+  // ==========================================
+  // 2. ЛЕВАЯ ЧАСТЬ (ИНФО)
+  // ==========================================
+  .row__info {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
     align-items: center;
-    min-height: var(--row-height, 56px);
-    border-radius: 4px;
-    position: relative;
-    transition: background-color 0.2s ease;
-    padding: 0 16px; // Базовые отступы
+    flex: 1;
+    gap: 16px;
+    overflow: hidden;
+    padding: 10px; // Немного воздуха внутри
 
-    // --- МОДИФИКАТОР: РЕЖИМ ПОИСКА (С КАРТИНКОЙ) ---
-    &.search-mode {
-        height: 60px;
-        padding: 0 8px;
-
-        .row__info .index-col {
-            width: 40px;
-            min-width: 40px;
-        }
-    }
-
-    // --- ЛЕВАЯ ЧАСТЬ (ИНДЕКС/КАРТИНКА + ТЕКСТ) ---
-    .row__info {
-        display: flex;
+    // --- КОЛОНКА ИНДЕКСА ---
+    .index-col {
+      position: relative;
+      width: 30px;
+      min-width: 30px;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #b3b3b3;
+      font-variant: tabular-nums;
+      border-radius: 4px; // Чуть мягче углы
+      // А) КОНТЕЙНЕР ДЛЯ НОМЕРА / GIF / СТАТИЧНОЙ ИКОНКИ
+      .index-number {
+        display: flex; /* Чтобы выровнять img или текст по центру */
+        justify-content: center;
         align-items: center;
-        flex: 1; // Занимает всё доступное место
-        gap: 16px;
-        overflow: hidden; // Чтобы текст не вылезал
-        padding: 10px;
-        // 1. КОЛОНКА С ИНДЕКСОМ ИЛИ КАРТИНКОЙ
-        .index-col {
-            position: relative; /* Якорь для абсолютных иконок */
-            width: 30px; /* Узкая колонка для цифры */
-            min-width: 30px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #b3b3b3;
-            font-variant: tabular-nums;
+        font-size: 16px;
+        width: 100%;
+        opacity: 1;
+        transition: opacity 0.2s ease; // Анимируем прозрачность
+        // Стили для иконок внутри номера (GIF или Pause.svg)
+        .index-icon {
+          width: 16px; // Размер эквалайзера/паузы
+          height: 16px;
+          object-fit: contain;
 
-            /* ВАРИАНТ А: ПРОСТО ЦИФРА (СПИСОК) */
-            .index-number {
-                font-size: 16px;
-                display: block; /* Видно по умолчанию */
-            }
+          // Если это GIF - улучшаем рендеринг
+          &.playing-gif {
+            image-rendering: -webkit-optimize-contrast;
+          }
+        }
+      }
 
-            /* Иконка Play для списка (скрыта по умолчанию) */
-            .play-icon.hover-icon {
-                display: none;
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: transparent;
-                border: none;
-                color: #fff;
-                font-size: 14px;
-                cursor: pointer;
-                padding: 0;
-            }
+      // Б) КНОПКА PLAY/PAUSE (Появляется при наведении)
+      .play-icon.hover-icon {
+        display: flex;
+        opacity: 0; // Скрыта по умолчанию
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: transparent;
+        border: none;
+        color: #fff;
+        padding: 0;
+        cursor: pointer;
+        border-radius: 4px; // Чуть мягче углы
+        transition:
+          opacity 0.2s ease,
+          transform 0.2s ease;
+        // Сама SVG внутри кнопки
+        .svg-icon {
+          display: block; // Убираем отступы снизу у картинки
+        }
+      }
 
-            /* ВАРИАНТ Б: КАРТИНКА (ПОИСК) */
-            .thumbnail-wrapper {
-                position: relative;
-                width: 40px;
-                height: 40px;
-                flex-shrink: 0;
+      // В) КАРТИНКА АЛЬБОМА (ТОЛЬКО ДЛЯ ПОИСКА)
+      .thumbnail-wrapper {
+        position: relative;
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
 
-                img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                    border-radius: 2px;
-                    transition: opacity 0.2s ease;
-                }
-
-                /* Иконка поверх картинки */
-                .play-icon.overlay-icon {
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    width: 28px;
-                    height: 28px;
-                    background-color: rgba(0, 0, 0, 0.5);
-                    border-radius: 50%;
-                    display: none; /* Скрыто по умолчанию */
-                    align-items: center;
-                    justify-content: center;
-                    color: #fff;
-                    border: none;
-                    cursor: pointer;
-
-                    &:hover {
-                        background-color: rgba(
-                            0,
-                            0,
-                            0,
-                            0.8
-                        );
-                        transform: translate(-50%, -50%)
-                            scale(1.1);
-                    }
-                }
-            }
+        .row-thumbnail {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 4px; // Чуть мягче углы
+          transition: opacity 0.2s ease;
         }
 
-        // 2. ТЕКСТ (НАЗВАНИЕ + АРТИСТ)
-        .row__text {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+        // Кнопка поверх картинки
+        .play-icon.overlay-icon {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          display: flex;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+          align-items: center;
+          justify-content: center;
+          color: #fff;
+          border: none;
+          cursor: pointer;
 
-            .title {
-                font-size: 16px;
-                color: #fff;
-                cursor: pointer;
-                &:hover {
-                    text-decoration: underline;
-                }
-                &.active-title {
-                    color: #1ed760;
-                }
-            }
-            .artist {
-                font-size: 14px;
-                color: #b3b3b3;
-                cursor: pointer;
-                &:hover {
-                    text-decoration: underline;
-                }
-            }
+          .svg-icon {
+            width: 24px;
+            height: 24px;
+          }
         }
+      }
     }
 
-    // --- ПРАВАЯ ЧАСТЬ (ДЛИТЕЛЬНОСТЬ) ---
-    .row__duration {
+    // --- ТЕКСТ ---
+    .row__text {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow: hidden; // Важно для text-overflow
+
+      .title {
+        font-size: 16px;
+        color: #fff;
+        font-weight: 400;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding-right: 8px;
+        cursor: pointer;
+        transition: color 0.2s ease; // Плавная смена цвета при active
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+
+      .artist {
         font-size: 14px;
         color: #b3b3b3;
-        font-variant: tabular-nums;
-        margin-left: auto;
-    }
-
-    // ==========================================
-    // ЛОГИКА HOVER (НАВЕДЕНИЕ НА ВСЮ СТРОКУ)
-    // ==========================================
-    &:hover {
-        background-color: hsla(0, 0%, 100%, 0.1);
-
-        .row__info .index-col {
-            // СЦЕНАРИЙ А: Если это список (есть цифра)
-            // Скрываем цифру, показываем Play
-            .index-number {
-                display: none;
-            }
-            .play-icon.hover-icon {
-                display: block;
-            }
-
-            // СЦЕНАРИЙ Б: Если это поиск (есть картинка)
-            // Затемняем фото, показываем оверлей
-            .thumbnail-wrapper {
-                img {
-                    opacity: 0.5;
-                }
-                .play-icon.overlay-icon {
-                    display: flex;
-                    border-radius: 0;
-                    background: transparent;
-                    transform: translate(-50%, -50%);
-                }
-            }
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: pointer;
+        transition: color 0.2s ease;
+        &:hover {
+          text-decoration: underline;
         }
+      }
     }
+  }
 
-    // АКТИВНЫЙ ТРЕК (ТЕКУЩИЙ)
+  // ==========================================
+  // 3. ПРАВАЯ ЧАСТЬ (ВРЕМЯ)
+  // ==========================================
+  .row__duration {
+    font-size: 14px;
+    color: #b3b3b3;
+    font-variant: tabular-nums;
+    margin-left: auto;
+    padding-left: 16px;
+  }
+
+  // ==========================================
+  // 4. СОСТОЯНИЯ (HOVER & ACTIVE)
+  // ==========================================
+
+  // АКТИВНЫЙ ТРЕК (Текущий)
+  &.active {
+    background-color: hsla(0, 0%, 100%, 0.3); // Светлая подсветка
+
+    .row__info {
+      .index-col .index-number {
+        color: #1ed760; // Зеленая цифра (если не гифка)
+      }
+      .row__text .title {
+        color: #1ed760; // Зеленое название
+      }
+    }
+  }
+
+  // НАВЕДЕНИЕ (HOVER)
+  &:hover {
+    background-color: hsla(0, 0%, 100%, 0.1); // Подсветка при наведении
+    transition: 1s all;
+
+    // Если строка уже активна, чуть меняем фон, чтобы было видно наведение
     &.active {
-        background-color: hsla(0, 0%, 100%, 0.3);
-
-        // Даже без наведения показываем иконку паузы/игры вместо цифры, если нужно
-        // Но обычно в Spotify цифра становится зеленой, а при ховере меняется на Play.
-        .row__info .index-col .index-number {
-            color: #1ed760;
-        }
+      background-color: hsla(0, 0%, 100%, 0.35);
     }
+
+    .row__info .index-col {
+      // ЛОГИКА ДЛЯ ОБЫЧНОГО СПИСКА
+      // Если нет обложки (.thumbnail-wrapper не существует в этом блоке HTML в этом случае)
+      .index-number {
+        opacity: 0; // Плавно исчезает
+      }
+      .play-icon.hover-icon {
+        opacity: 1; // Плавно появляется
+        transform: translate(-50%, -50%) scale(1.1); // Небольшой зум эффект
+      }
+
+      // ЛОГИКА ДЛЯ ПОИСКА (С КАРТИНКОЙ)
+      .thumbnail-wrapper {
+        .row-thumbnail {
+          opacity: 0.4; // Затемняем фото
+        }
+        .play-icon.overlay-icon {
+          opacity: 1; // Плавно появляется
+        }
+      }
+    }
+
+    // Цвет времени и артиста становится белым при наведении (как в Spotify)
+    .row__duration,
+    .row__info .row__text .artist {
+      color: #fff;
+    }
+  }
 }

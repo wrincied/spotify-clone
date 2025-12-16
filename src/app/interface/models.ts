@@ -43,3 +43,7 @@ export interface CardItemInterface {
 export interface PlayerTrackInterface extends SongInterface {
   coverUrl: string; // А вот тут она обязательна для UI плеера
 }
+export type TrackWithContext = SongInterface & {
+  albumId: string;
+  coverFromAlbum: string | null;
+};

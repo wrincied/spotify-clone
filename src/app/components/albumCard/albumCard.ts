@@ -1,4 +1,11 @@
-import { Component, EventEmitter, input, Input, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  OnInit,
+  OnChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { AlbumInterface, CategoryInterface } from '../../interface/models';
@@ -11,41 +18,48 @@ import { FitText } from '../../directives/fit-text';
   templateUrl: './albumCard.html',
   styleUrls: ['./albumCard.scss'],
 })
-export class albumCard {
-  constructor(private router: Router) {}
-
+export class albumCard implements OnInit, OnChanges {
+  // === INPUTS ===
   @Input() title!: string;
   @Input() description!: string;
   @Input() playlistThumbnail: string | null = null;
   @Input() backgroundColor?: string;
   @Input() isTopResult: boolean = false;
-  // НОВЫЙ ИНПУТ: Если true, ширина будет 210px. Если false — 100%.
   @Input() fixedSize: boolean = false;
-
-  @Output() select = new EventEmitter<void>();
-  @Input() items: AlbumInterface[] = [];
-  @Input() itemCtgr: CategoryInterface[] = [];
+  // Добавляем этот Input, чтобы родитель (Search) мог сказать: "Ты сейчас играешь, покажи паузу!"
+  @Input() isPlaying: boolean = false;
+  // Ссылка для роутера (например ['/album', '123'])
   @Input() link!: string | any[];
-  @Output() playRequest = new EventEmitter<void>();
-  onClick() {
-    this.select.emit();
-  }
 
+  // === OUTPUTS ===
+  @Output() playRequest = new EventEmitter<void>();
+
+  // === STATE ===
   isError = false;
 
-  onImageError(event: Event) {
-    const img = event.target as HTMLImageElement;
-    img.src = 'https://placehold.co/600x400/png';
-  }
+  constructor(private router: Router) {}
+
+  ngOnInit() {}
 
   ngOnChanges() {
     if (!this.playlistThumbnail) {
       this.isError = true;
     }
   }
-  ngOnInit() {}
+
+  onImageError(event: Event) {
+    const img = event.target as HTMLImageElement;
+    img.src = 'https://placehold.co/600x400/png';
+  }
+
+  /**
+   * Обрабатывает клик по зеленой кнопке Play.
+   * Останавливает всплытие, чтобы не сработал переход по ссылке (routerLink),
+   * и сообщает родителю о намерении воспроизведения.
+   */
   handlePlay(event: Event) {
-    event.stopPropagation(); // Чтобы клик не сработал дважды (если есть вложенность)
+    event.preventDefault(); // На всякий случай блокируем стандартное действие
+    event.stopPropagation(); // Блокируем всплытие к тегу <a>
     this.playRequest.emit();
   }
 }
