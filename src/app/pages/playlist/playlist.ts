@@ -33,9 +33,15 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @ViewChild('albumHeaderRef') albumHeaderRef!: ElementRef;
   @Output() playRequest = new EventEmitter<void>();
+
+  // УБРАЛИ ЛИШНИЕ @Input, добавили обычные поля
+  currentTrack: SongInterface | null = null;
+  isPlayerPlaying: boolean = false;
+
   isSticky: boolean = false;
   private observer?: IntersectionObserver;
-  private sub?: Subscription;
+  // Единая подписка для чистоты
+  private subs: Subscription = new Subscription();
 
   constructor(
     private route: ActivatedRoute,
@@ -45,23 +51,43 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {}
 
   ngOnInit() {
+    // 1. ЗАГРУЗКА АЛЬБОМА
     this.route.paramMap.subscribe((params) => {
-      const id = this.route.snapshot.paramMap.get('id');
+      // Лучше брать id из params, а не snapshot, чтобы работало при смене ID в URL
+      const id = params.get('id'); 
       if (!id) return;
 
       this.gradientColor = 'linear-gradient(to bottom, #333, #121212)';
       this.mainColor = '#1f1f1f';
 
-      this.sub = this.api.getPlaylistById(id).subscribe({
+      const apiSub = this.api.getPlaylistById(id).subscribe({
         next: (album) => {
           this.album = album;
           if (album.cover) this.setDominantColor(album.cover);
           this.cdr.detectChanges();
-          this.initObserver();
+          // Перезапускаем observer при смене альбома
+          setTimeout(() => this.initObserver(), 0); 
         },
         error: (err) => console.error(err),
       });
+      this.subs.add(apiSub);
     });
+
+    // 2. ПОДПИСКА НА СТАТУС ПЛЕЕРА (ВАЖНО!)
+    this.subs.add(
+      this.musicStore.isPlaying$.subscribe((isPlaying) => {
+        this.isPlayerPlaying = isPlaying;
+        this.cdr.detectChanges(); // Обновляем UI
+      })
+    );
+
+    // 3. ПОДПИСКА НА ТЕКУЩИЙ ТРЕК (ВАЖНО!)
+    this.subs.add(
+      this.musicStore.currentTrack$.subscribe((track) => {
+        this.currentTrack = track;
+        this.cdr.detectChanges(); // Обновляем UI
+      })
+    );
   }
 
   setDominantColor(imageUrl: string) {
@@ -80,24 +106,31 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  ngAfterViewInit() {}
+  ngAfterViewInit() {
+    // Observer запускается внутри подписки API, 
+    // но можно оставить метод пустым или перенести логику сюда
+  }
 
   initObserver() {
     if (this.observer) this.observer.disconnect();
-    const scrollContainer = document.querySelector('.spotify-main');
+    
+    // Ищем контейнер скролла. Убедитесь, что класс .spotify-main существует в app.component
+    const scrollContainer = document.querySelector('.spotify-main') || document.querySelector('.main-view'); 
+    
     if (!scrollContainer || !this.albumHeaderRef) return;
 
     const options = {
       root: scrollContainer,
       threshold: 0,
-      rootMargin: '-70px 0px 0px 0px',
+      rootMargin: '-70px 0px 0px 0px', // Настройка момента срабатывания
     };
 
     this.observer = new IntersectionObserver(([entry]) => {
-      const top = entry.boundingClientRect.top;
-      const shouldBeSticky = !entry.isIntersecting && top < 64;
-      if (this.isSticky !== shouldBeSticky) {
-        this.isSticky = shouldBeSticky;
+      // Логика: если элемент уехал наверх (top < 64) и перестал пересекаться
+      const isHidden = !entry.isIntersecting && entry.boundingClientRect.top < 64;
+      
+      if (this.isSticky !== isHidden) {
+        this.isSticky = isHidden;
         this.cdr.detectChanges();
       }
     }, options);
@@ -106,15 +139,24 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy() {
-    this.sub?.unsubscribe();
+    this.subs.unsubscribe(); // Отписка от всего сразу (API + Store)
     this.observer?.disconnect();
   }
 
-  // === ВСЯ ЛОГИКА ТЕПЕРЬ ТУТ: ПРОСТО ЗОВЕМ СЕРВИС ===
   handlePlay(song: SongInterface) {
     if (!this.album) return;
-
-    // Сервис сам решит: пауза или новый трек
     this.musicStore.playOrPause(song, this.album.songs, this.album.cover || '');
+  }
+
+  get isAlbumPlaying(): boolean {
+    if (!this.album || !this.currentTrack) return false;
+    
+    // Проверяем, есть ли текущий трек в этом альбоме
+    const isTrackInAlbum = this.album.songs.some(
+      (s) => String(s.id) === String(this.currentTrack?.id)
+    );
+    
+    // И статус плеера должен быть Playing
+    return isTrackInAlbum && this.isPlayerPlaying;
   }
 }
