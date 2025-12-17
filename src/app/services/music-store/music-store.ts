@@ -6,8 +6,8 @@ import {
   CategoryInterface,
   SongInterface,
 } from '../../interface/models';
-
 @Injectable({ providedIn: 'root' })
+
 export class MusicStoreService {
   private apiUrl = 'http://localhost:3000/api';
   private audio = new Audio();
@@ -26,7 +26,7 @@ export class MusicStoreService {
   // ==========================================
   // 🎵 PLAYER STATE
   // ==========================================
-
+  
   private playlist: SongInterface[] = [];
   private currentTrackIndex: number = -1;
   private currentContextCover: string = '';
