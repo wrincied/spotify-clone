@@ -163,8 +163,16 @@
         text-overflow: ellipsis;
         cursor: pointer;
         transition: color 0.2s ease;
-        &:hover {
-          text-decoration: underline;
+        position: relative;
+        .artist-link {
+          color: #b3b3b3;
+          text-decoration: none;
+          position: relative;
+          z-index: 100; /* Ссылка должна быть выше всего в строке */
+          display: inline-block; /* Чтобы кликабельная область была четкой */
+          &:hover {
+            text-decoration: underline;
+          }
         }
       }
     }

@@ -1,25 +1,28 @@
 export interface SongInterface {
-  thumbnail: string | null;
   id: string;
   title: string;
+  artist: string; // Имя артиста (текст)
+  artistId?: string; // ID артиста (для сравнения и ссылок)
+  thumbnail: string | null;
   duration: number;
-  artist: string;
   url: string;
 }
-export interface PlayerState{
+
+export interface PlayerState {
   isPlaying: boolean;
   currentTrack: SongInterface | null;
-  volume: number;     // 0.0 - 1.0
+  volume: number; // 0.0 - 1.0
   currentTime: number;
-  duration: number;   // Текущая длительность из метаданных аудио
+  duration: number; // Текущая длительность из метаданных аудио
   isBuffering: boolean;
 }
 export interface AlbumInterface {
-  thumbnail: any;
   id: string;
-  title: string;
+  title: string; // Было name, но в интерфейсе title - приводим к стандарту
   description: string;
-  cover: string | null;
+  cover: string | null; // Ссылка на картинку
+  year?: number; // Год выпуска
+  type?: 'Album' | 'EP' | 'Single';
   songs: SongInterface[]; // Строгая типизация вместо any[]
 }
 export interface CategoryInterface {
@@ -33,11 +36,22 @@ export interface CategoryInterface {
 }
 export interface CardItemInterface {
   id: string;
-  title: string;        // Сюда попадет Album.title или Category.name
-  subtitle?: string;    // Сюда Album.description или "Rock Mix"
-  image?: string;       // Сюда Album.cover или Song.thumbnail
-  color?: string;       // Сюда Category.color (для полоски снизу)
+  title: string; // Сюда попадет Album.title или Category.name
+  subtitle?: string; // Сюда Album.description или "Rock Mix"
+  image?: string; // Сюда Album.cover или Song.thumbnail
+  color?: string; // Сюда Category.color (для полоски снизу)
   type: 'album' | 'playlist' | 'category' | 'focus'; // Чтобы понимать, куда кликать
+}
+
+export interface ArtistInterface {
+  id: string;
+  name: string;
+  avatar: string; // Фото артиста
+  followers: number; // Число подписчиков
+  bio?: string;
+  isVerified?: boolean; // Галочка верификации
+  topTracks: SongInterface[];
+  albums: AlbumInterface[];
 }
 
 export interface PlayerTrackInterface extends SongInterface {

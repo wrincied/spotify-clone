@@ -176,8 +176,18 @@
       >
         <span>{{ song.title }}</span>
       </div>
+
       <div class="artist">
-        <span>{{ song.artist }}</span>
+        @if (song.artistId) {
+          <a
+            class="artist-link"
+            (click)="goToArtist($event, song.artistId)"
+          >
+            <span>{{ song.artist }}</span>
+          </a>
+        } @else {
+          <span>{{ song.artist }}</span>
+        }
       </div>
     </div>
   </div>
