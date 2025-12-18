@@ -1,7 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { AsyncPipe, CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import {
-  ActivatedRoute,
   NavigationEnd,
   Router,
   RouterModule,
@@ -10,18 +8,21 @@ import { User } from 'firebase/auth';
 
 import { SpotifySidebar } from './components/spotify-sidebar/spotify-sidebar';
 import { TopNavComponent } from './components/top-nav/top-nav';
-import { HomeComponent } from './pages/home/home';
-import { SearchComponent } from './pages/search/search';
 
 import { SpotifyService } from './services/spotifyService/spotify-service';
 import { MusicStoreService } from './services/music-store/music-store';
 import { filter, map, Observable } from 'rxjs';
 import { PlayerComponent } from './components/player/player';
-import { SongInterface } from './interface/models';
+import { PlayerService } from './services/playerService/player-service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [SpotifySidebar, TopNavComponent, RouterModule, PlayerComponent,AsyncPipe],
+  imports: [
+    SpotifySidebar,
+    TopNavComponent,
+    RouterModule,
+    PlayerComponent,
+  ],
   templateUrl: './app.html',
   styleUrls: ['./app.scss'],
 })
@@ -31,14 +32,15 @@ export class App implements OnInit {
   currentView: 'home' | 'search' = 'home';
   isNoLayout: boolean = false;
   isPlayerVisible$: Observable<boolean>;
+  public playerService = inject(PlayerService);
   constructor(
     private spotifyService: SpotifyService,
     private musicStore: MusicStoreService,
     private cdr: ChangeDetectorRef,
     private router: Router,
   ) {
-    this.isPlayerVisible$ = this.musicStore.currentTrack$.pipe(
-      map((track) => !!track), // Превращаем объект трека в boolean
+    this.isPlayerVisible$ = this.playerService.currentTrack$.pipe(
+      map((track) => !!track),
     );
   }
 

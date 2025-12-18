@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { AlbumInterface, CategoryInterface } from '../../interface/models';
 import { FitText } from '../../directives/fit-text';
 
 @Component({

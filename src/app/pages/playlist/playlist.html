@@ -76,8 +76,8 @@
         <app-songRow
           [song]="s"
           [index]="$index + 1"
-          [currentTrack]="musicStore.currentTrack$ | async"
-          [isPlaying]="(musicStore.isPlaying$ | async) || false"
+          [currentTrack]="playerService.currentTrack$ | async"
+          [isPlaying]="(playerService.isPlaying$ | async) || false"
           (playRequest)="handlePlay(s)"
         ></app-songRow>
       }

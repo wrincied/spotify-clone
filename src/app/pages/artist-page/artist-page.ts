@@ -1,95 +1,84 @@
-// src/app/pages/artist-page/artist-page.component.ts
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, combineLatest, map, switchMap, shareReplay } from 'rxjs';
+import {
+  Observable,
+  combineLatest,
+  map,
+  switchMap,
+  shareReplay,
+  take,
+} from 'rxjs';
 
-// Импорты компонентов UI
+// ОБЯЗАТЕЛЬНО ИМПОРТИРУЕМ SongRow
 import { SongRow } from '../../components/songRow/songRow';
-
-// Сервисы
 import { ArtistService } from '../../services/artistService/artist-service';
 import { PlayerService } from '../../services/playerService/player-service';
-
-// Интерфейсы (Важно: используем правильные названия)
-import {
-  ArtistInterface,
-  SongInterface,
-  AlbumInterface,
-} from '../../interface/models';
-import { MusicStoreService } from '../../services/music-store/music-store';
+import { ArtistInterface, SongInterface } from '../../interface/models';
 
 @Component({
   selector: 'app-page-artist',
   standalone: true,
-  imports: [CommonModule, SongRow],
+  imports: [CommonModule, SongRow], // <-- ПРОВЕРЬ ЭТО
   templateUrl: './artist-page.html',
   styleUrls: ['./artist-page.scss'],
 })
 export class PageArtistComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private artistService = inject(ArtistService);
-  public playerService = inject(PlayerService); // public, чтобы юзать в HTML
+  public playerService = inject(PlayerService);
 
-  // Используем точные типы из models.ts
   artist$!: Observable<ArtistInterface>;
-  topTracks$!: Observable<SongInterface[]>;
-  albums$!: Observable<AlbumInterface[]>;
 
-  // Состояние: играет ли сейчас трек этого артиста?
-  isPlayingThisArtist$!: Observable<boolean>;
+  // Поток: true, если сейчас играет трек ИМЕННО ЭТОГО артиста
+  isArtistPlaying$!: Observable<boolean>;
 
   ngOnInit() {
-    // 1. Получаем ID из URL (например, /artist/123)
     const artistId$ = this.route.paramMap.pipe(
       map((params) => params.get('id') as string),
-      shareReplay(1), // Кэшируем ID, чтобы не дергать роут трижды
+      shareReplay(1),
     );
 
-    // 2. Загружаем данные (Параллельные потоки)
     this.artist$ = artistId$.pipe(
       switchMap((id) => this.artistService.getArtist(id)),
     );
 
-    this.topTracks$ = artistId$.pipe(
-      switchMap((id) => this.artistService.getTopTracks(id)),
-    );
-
-    this.albums$ = artistId$.pipe(
-      switchMap((id) => this.artistService.getAlbums(id)),
-    );
-
-    // 3. Логика для кнопки "Play/Pause" в шапке профиля
-    this.isPlayingThisArtist$ = combineLatest([
-      this.playerService.isPlaying$, // Играет ли плеер вообще?
-      this.playerService.currentTrack$, // Какой трек играет?
-      this.artist$, // Какой артист открыт?
+    // Вычисляем, играет ли сейчас этот артист
+    this.isArtistPlaying$ = combineLatest([
+      this.playerService.isPlaying$,
+      this.playerService.currentTrack$,
+      this.artist$,
     ]).pipe(
-      map(([isPlaying, currentTrack, currentPageArtist]) => {
-        if (!currentTrack || !currentPageArtist) return false;
-
-        // Сравниваем ID артиста из трека с ID артиста на странице
-        // Если у трека нет artistId, фолбэк на сравнение имен
-        const trackArtistId = currentTrack.artistId;
-        const pageArtistId = currentPageArtist.id;
-
-        if (trackArtistId) {
-          return isPlaying && trackArtistId === pageArtistId;
-        }
-
-        return isPlaying && currentTrack.artist === currentPageArtist.name;
+      map(([isPlaying, currentTrack, artist]) => {
+        if (!currentTrack || !artist) return false;
+        return isPlaying && currentTrack.artistId === artist.id;
       }),
     );
   }
 
-  // Запуск списка популярных треков
-  playPopular(tracks: SongInterface[]) {
-    if (!tracks || tracks.length === 0) return;
-    // Передаем весь список треков, начинаем с 0-го
-    this.playerService.playTrackList(tracks, 0);
+  // Главная кнопка Play (зеленая)
+  togglePlayArtist(event: MouseEvent, artist: ArtistInterface) {
+    event.stopPropagation(); // <--- ЭТО ОСТАНОВИТ ЛИШНИЕ ВЫЗОВЫ
+
+    if (!artist.topTracks || artist.topTracks.length === 0) return;
+
+    // 1. Читаем текущее состояние МГНОВЕННО (это правильно!)
+    const currentTrack = this.playerService.currentTrack();
+    // const isPlaying = this.playerService.isPlaying(); // Можно прочитать, если нужно для логики
+
+    // 2. Логика:
+    // Если сейчас УЖЕ играет (или стоит на паузе) трек этого артиста...
+    if (currentTrack && currentTrack.artistId === artist.id) {
+      // ...то мы просто переключаем паузу (сервис сам разберется)
+      this.playerService.togglePlay();
+    } else {
+      // Иначе — это новый артист, загружаем его плейлист с 0-го трека
+      this.playerService.playTrackList(artist.topTracks, 0);
+    }
+    return this.playerService.isPlaying();
   }
 
-  toggleFollow() {
-    console.log('Follow clicked (Logic not implemented yet)');
+  getYear(album: any): string {
+    return '2024';
   }
 }
