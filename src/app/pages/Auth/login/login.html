@@ -1,72 +1,92 @@
 <div class="container">
-    <form
-        [formGroup]="userForm"
-        (ngSubmit)="submit()"
-    >
-        <div class="login__container">
-            <img
-                width="300"
-                src="assets/spotify-logo_green.png"
-                alt="spotify light logo"
-            />
-            <hr />
-            <div>
-                <label
-                    ><strong
-                        >Email adress or username</strong
-                    >
-                </label>
-                <br />
-                <input
-                    [formControl]="userNameFormControl"
-                    type="text"
-                    placeholder="Email adress or username"
-                />
-            </div>
-            <div>
-                <label><strong>Password</strong></label
-                ><br />
-                <input
-                    [formControl]="passwordFormControl"
-                    type="password"
-                    placeholder="Password"
-                /><br />
-                <label class="mt-2">
-                    <a [style.textDecoration]="'underline'"
-                        ><b>Forgot your Password ?</b>
-                    </a>
-                </label>
-            </div>
-            <div class="login-under__container">
-                <span
-                    [style.display]="'flex'"
-                    [style.justifyContent]="'flex-start'"
-                    [style.alighItems]="'stretch'"
-                    [style.gap]="'5px'"
-                >
-                    <input
-                        type="checkbox"
-                        name=""
-                        id="remember_me"
-                    />
-                    <label for="remember_me"
-                        ><span
-                            ><strong>Remember Me</strong>
-                        </span></label
-                    >
-                </span>
+  <form
+    [formGroup]="userForm"
+    (ngSubmit)="submit()"
+  >
+    <div class="login__container">
+      <img
+        width="300"
+        src="assets/spotify-logo_green.png"
+        alt="spotify light logo"
+      />
+      <hr />
 
-                <div>
-                    <button class="login__btn"
-                        >LOG IN</button
-                    >
-                </div>
-            </div>
-            <hr [style.width]="'30%'" />
-            <h5><strong>Don't have a account ?</strong></h5>
-            <button class="signup__btn"
-                >SIGN UP FOR SPOTIFY</button
-            >
+      @if (errorMessage()) {
+        <div
+          class="error-banner"
+          [style.color]="'#ef4444'"
+          [style.marginBottom.px]="15"
+        >
+          <strong>{{ errorMessage() }}</strong>
         </div>
-    </form>
+      }
+
+      <div>
+        <label><strong>Email address or username</strong></label>
+        <br />
+        <input
+          [formControl]="userNameFormControl"
+          type="text"
+          placeholder="Email address or username"
+          [class.invalid]="
+            userNameFormControl.touched && userNameFormControl.invalid
+          "
+        />
+      </div>
+
+      <div>
+        <label><strong>Password</strong></label
+        ><br />
+        <input
+          [formControl]="passwordFormControl"
+          type="password"
+          placeholder="Password"
+          [class.invalid]="
+            passwordFormControl.touched && passwordFormControl.invalid
+          "
+        /><br />
+
+        <label class="mt-2">
+          <a [style.textDecoration]="'underline'"
+            ><b>Forgot your Password?</b></a
+          >
+        </label>
+      </div>
+
+      <div class="login-under__container">
+        <span
+          [style.display]="'flex'"
+          [style.justifyContent]="'flex-start'"
+          [style.gap]="'5px'"
+        >
+          <input
+            type="checkbox"
+            id="remember_me"
+          />
+          <label for="remember_me"
+            ><span><strong>Remember Me</strong></span></label
+          >
+        </span>
+
+        <div>
+          <button
+            class="login__btn"
+            type="submit"
+            [disabled]="isLoading()"
+          >
+            {{ isLoading() ? 'LOGGING IN...' : 'LOG IN' }}
+          </button>
+        </div>
+      </div>
+
+      <hr [style.width]="'30%'" />
+      <h5><strong>Don't have an account?</strong></h5>
+      <button
+        class="signup__btn"
+        type="button"
+      >
+        SIGN UP FOR SPOTIFY
+      </button>
+    </div>
+  </form>
 </div>

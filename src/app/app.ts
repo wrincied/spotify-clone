@@ -1,9 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
-import {
-  NavigationEnd,
-  Router,
-  RouterModule,
-} from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { User } from 'firebase/auth';
 
 import { SpotifySidebar } from './components/spotify-sidebar/spotify-sidebar';
@@ -14,15 +10,11 @@ import { MusicStoreService } from './services/music-store/music-store';
 import { filter, map, Observable } from 'rxjs';
 import { PlayerComponent } from './components/player/player';
 import { PlayerService } from './services/playerService/player-service';
+import { AuthService } from './services/authService/auth-service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    SpotifySidebar,
-    TopNavComponent,
-    RouterModule,
-    PlayerComponent,
-  ],
+  imports: [SpotifySidebar, TopNavComponent, RouterModule, PlayerComponent],
   templateUrl: './app.html',
   styleUrls: ['./app.scss'],
 })
@@ -32,6 +24,7 @@ export class App implements OnInit {
   currentView: 'home' | 'search' = 'home';
   isNoLayout: boolean = false;
   isPlayerVisible$: Observable<boolean>;
+  private authService = inject(AuthService);
   public playerService = inject(PlayerService);
   constructor(
     private spotifyService: SpotifyService,
@@ -47,6 +40,9 @@ export class App implements OnInit {
   ngOnInit() {
     // Глобальная загрузка альбомов
     this.musicStore.loadAlbums();
+
+    // Проверяем статус при каждой инициализации приложения (в т.ч. после F5) [cite: 2025-12-18]
+    this.authService.checkAuthStatus().subscribe();
 
     // Подписка на поиск
     this.spotifyService.searchQuery$.subscribe((q) => {

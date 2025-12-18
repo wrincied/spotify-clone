@@ -41,6 +41,10 @@
       @if (description) {
         <p class="description">{{ description }}</p>
       }
+
+      @if (getYear(); as year) {
+        <div class="album-meta">{{ year }} • Album</div>
+      }
     </div>
 
     @if (isTopResult) {
@@ -53,7 +57,7 @@
             <img
               width="25px"
               src="assets/pause-50.svg"
-              alt="plat-btn"
+              alt="Pause"
             />
           } @else {
             <img

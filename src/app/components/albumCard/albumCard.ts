@@ -9,6 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { FitText } from '../../directives/fit-text';
+import { AlbumInterface } from '../../interface/models';
 
 @Component({
   selector: 'app-albumCard',
@@ -29,6 +30,7 @@ export class albumCard implements OnInit, OnChanges {
   @Input() isPlaying: boolean = false;
   // Ссылка для роутера (например ['/album', '123'])
   @Input() link!: string | any[];
+  @Input() releaseYear?: string;
 
   // === OUTPUTS ===
   @Output() playRequest = new EventEmitter<void>();
@@ -60,5 +62,18 @@ export class albumCard implements OnInit, OnChanges {
     event.preventDefault(); // На всякий случай блокируем стандартное действие
     event.stopPropagation(); // Блокируем всплытие к тегу <a>
     this.playRequest.emit();
+  }
+  getYear(): string | null {
+    // 1. Проверяем наличие явной даты
+    if (this.releaseYear) {
+      return this.releaseYear;
+    }
+    // 2. Попытка извлечь год из описания (Regex) [cite: 2025-12-14]
+    if (this.description) {
+      const yearMatch = this.description.match(/\d{4}/);
+      if (yearMatch) return yearMatch[0];
+    }
+
+    return null; // Возвращаем null, чтобы скрыть элемент в UI
   }
 }
