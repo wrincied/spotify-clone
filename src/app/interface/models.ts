@@ -18,12 +18,12 @@ export interface PlayerState {
 }
 export interface AlbumInterface {
   id: string;
-  title: string; // Было name, но в интерфейсе title - приводим к стандарту
+  title: string;
   description: string;
-  cover: string | null; // Ссылка на картинку
-  year?: number; // Год выпуска
-  type?: 'Album' | 'EP' | 'Single';
-  songs: SongInterface[]; // Строгая типизация вместо any[]
+  cover: string | null;
+  thumbnail: any; // <--- ТВОЕ НОВОЕ ПОЛЕ
+  songs: SongInterface[];
+  year?: number;
 }
 export interface CategoryInterface {
   name: string;
