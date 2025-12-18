@@ -80,18 +80,15 @@
         <h2>Discography</h2>
         <div class="albums-grid">
           @for (album of artist.albums; track album.id) {
-            <div class="album-card">
-              <div class="img-wrapper">
-                <img
-                  [src]="album.thumbnail || 'assets/no-album.png'"
-                  loading="lazy"
-                />
-              </div>
-              <div class="card-text">
-                <div class="album-name">{{ album.title }}</div>
-                <div class="album-meta">{{ getYear(album) }} • Album</div>
-              </div>
-            </div>
+            <app-albumCard
+              [title]="album.title"
+              [description]="album.description"
+              [playlistThumbnail]="album.cover || album.thumbnail || 'assets/no-album.png'"
+              [releaseYear]="album.releaseYear"
+              [link]="['/album', album.id]"
+            ></app-albumCard>
+          } @empty {
+            <div class="empty-state">No albums available</div>
           }
         </div>
       </section>

@@ -1,66 +1,61 @@
 <div
-    class="slider-container"
-    (mousemove)="onMouseMove($event)"
-    (mouseleave)="hideButtons()"
+  class="slider-container"
+  (mousemove)="onMouseMove($event)"
+  (mouseleave)="hideButtons()"
 >
-    @if (showLeftBtn) {
-        <button
-            class="scroll-btn left"
-            (click)="scrollLeft(slider)"
-            >‹</button
-        >
-    }
-
-    <div
-        #slider
-        class="playlist_card_collections"
-        (scroll)="hideButtons()"
+  @if (showLeftBtn) {
+    <button
+      class="scroll-btn left"
+      (click)="scrollLeft(slider)"
     >
-        @if (albumItem.length > 0) {
-            @for (item of albumItem; track item.id) {
-                <div class="album-card-wrapper">
-                    <app-albumCard
-                        [title]="item.title"
-                        [description]="item.description"
-                        [playlistThumbnail]="
-                            item.thumbnail?.trim() ||
-                            item.cover?.trim() ||
-                            'https://placehold.co/600x400/png'
-                        "
-                        [id]="item.id"
-                        [fixedSize]="true"
-                        [link]="
-                            item.songs
-                                ? ['/album', item.id]
-                                : ['/song', item.id]
-                        "
-                    >
-                    </app-albumCard>
-                </div>
-            }
-        } @else if (categItem.length > 0) {
-            @for (item of categItem; track item.id) {
-                <div class="album-card-wrapper">
-                    <app-albumCard
-                        [title]="item.name"
-                        [description]="item.description"
-                        [playlistThumbnail]="null"
-                        [backgroundColor]="item.color"
-                        [id]="item.id"
-                        [fixedSize]="true"
-                        [link]="['/category', item.id]"
-                    >
-                    </app-albumCard>
-                </div>
-            }
-        }
-    </div>
+      ‹
+    </button>
+  }
 
-    @if (showRightBtn) {
-        <button
-            class="scroll-btn right"
-            (click)="scrollRight(slider)"
-            >›</button
-        >
+  <div
+    #slider
+    class="playlist_card_collections"
+    (scroll)="hideButtons()"
+  >
+    @if (album.length > 0) {
+      @for (item of album; track item.id) {
+        <div class="album-card-wrapper">
+          <app-albumCard
+            [title]="item.title"
+            [description]="item.description"
+            [playlistThumbnail]="
+              item.cover || item.thumbnail || 'https://placehold.co/600x400/png'
+            "
+            [link]="['/album', item.id]"
+            [releaseYear]="item.releaseYear"
+            [fixedSize]="true"
+          ></app-albumCard>
+        </div>
+      }
+    } @else if (category.length > 0) {
+      @for (item of category; track item.id) {
+        <div class="album-card-wrapper">
+          <app-albumCard
+            [title]="item.name"
+            [description]="item.description"
+            [playlistThumbnail]="null"
+            [backgroundColor]="item.color"
+            [id]="item.id"
+            [fixedSize]="true"
+            [link]="['/category', item.id]"
+          >
+          </app-albumCard>
+        </div>
+      }
     }
+  </div>
+
+  @if (showRightBtn) {
+    <button
+      class="scroll-btn right"
+      (click)="scrollRight(slider)"
+    >
+      ›
+    </button>
+  }
 </div>

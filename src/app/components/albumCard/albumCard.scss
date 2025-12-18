@@ -59,6 +59,7 @@
 
   /* 2. ТЕКСТ */
   .spotify__albumCard_text {
+    padding-top: 5px;
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -70,9 +71,11 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      margin-bottom: 10px !important;
     }
 
-    .description {
+    .description,
+    .album-meta {
       font-size: 14px;
       color: #b3b3b3;
       display: -webkit-box;

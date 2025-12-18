@@ -1,25 +1,23 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import {
-  Observable,
-  combineLatest,
-  map,
-  switchMap,
-  shareReplay,
-  take,
-} from 'rxjs';
+import { Observable, combineLatest, map, switchMap, shareReplay } from 'rxjs';
 
-// ОБЯЗАТЕЛЬНО ИМПОРТИРУЕМ SongRow
 import { SongRow } from '../../components/songRow/songRow';
 import { ArtistService } from '../../services/artistService/artist-service';
 import { PlayerService } from '../../services/playerService/player-service';
-import { ArtistInterface, SongInterface } from '../../interface/models';
+import { MusicStoreService } from '../../services/music-store/music-store';
+import {
+  ArtistInterface,
+  SongInterface,
+  AlbumInterface,
+} from '../../interface/models';
+import { albumCard } from '../../components/albumCard/albumCard';
 
 @Component({
   selector: 'app-page-artist',
   standalone: true,
-  imports: [CommonModule, SongRow], // <-- ПРОВЕРЬ ЭТО
+  imports: [CommonModule, SongRow, albumCard],
   templateUrl: './artist-page.html',
   styleUrls: ['./artist-page.scss'],
 })
@@ -27,23 +25,49 @@ export class PageArtistComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private artistService = inject(ArtistService);
   public playerService = inject(PlayerService);
+  public musicStore = inject(MusicStoreService);
 
-  artist$!: Observable<ArtistInterface>;
-
-  // Поток: true, если сейчас играет трек ИМЕННО ЭТОГО артиста
+  artist$!: Observable<ArtistInterface | null>;
   isArtistPlaying$!: Observable<boolean>;
 
   ngOnInit() {
+    // Получаем ID артиста из параметров маршрута [cite: 2025-12-14]
     const artistId$ = this.route.paramMap.pipe(
       map((params) => params.get('id') as string),
       shareReplay(1),
     );
 
+    // КОМБИНИРУЕМ: Данные артиста из API + Песни и Альбомы из Store [cite: 2025-12-14]
     this.artist$ = artistId$.pipe(
-      switchMap((id) => this.artistService.getArtist(id)),
+      switchMap((id) =>
+        combineLatest([
+          this.artistService.getArtist(id),
+          this.musicStore.songs$,
+          this.musicStore.albums$,
+        ]).pipe(
+          map(([artist, allSongs, allAlbums]) => {
+            if (!artist) return null;
+
+            // 1. Фильтруем песни: ищем те, где artistId совпадает с id артиста [cite: 2025-12-14]
+            const topTracks = allSongs.filter(
+              (s) => String(s.artistId) === String(artist.id),
+            );
+
+            // 2. ИСПРАВЛЕНО: Фильтруем альбомы по artistId, а не по id самого альбома [cite: 2025-12-14]
+            const artistAlbums = allAlbums.filter(
+              (al: AlbumInterface) => String(al.artistId) === String(artist.id),
+            );
+            return {
+              ...artist,
+              topTracks: topTracks,
+              albums: artistAlbums,
+            } as ArtistInterface;
+          }),
+        ),
+      ),
     );
 
-    // Вычисляем, играет ли сейчас этот артист
+    // Определение статуса воспроизведения [cite: 2025-12-14]
     this.isArtistPlaying$ = combineLatest([
       this.playerService.isPlaying$,
       this.playerService.currentTrack$,
@@ -51,34 +75,31 @@ export class PageArtistComponent implements OnInit {
     ]).pipe(
       map(([isPlaying, currentTrack, artist]) => {
         if (!currentTrack || !artist) return false;
-        return isPlaying && currentTrack.artistId === artist.id;
+        return isPlaying && String(currentTrack.artistId) === String(artist.id);
       }),
     );
   }
 
-  // Главная кнопка Play (зеленая)
   togglePlayArtist(event: MouseEvent, artist: ArtistInterface) {
-    event.stopPropagation(); // <--- ЭТО ОСТАНОВИТ ЛИШНИЕ ВЫЗОВЫ
-
+    event.stopPropagation();
     if (!artist.topTracks || artist.topTracks.length === 0) return;
 
-    // 1. Читаем текущее состояние МГНОВЕННО (это правильно!)
     const currentTrack = this.playerService.currentTrack();
-    // const isPlaying = this.playerService.isPlaying(); // Можно прочитать, если нужно для логики
 
-    // 2. Логика:
-    // Если сейчас УЖЕ играет (или стоит на паузе) трек этого артиста...
-    if (currentTrack && currentTrack.artistId === artist.id) {
-      // ...то мы просто переключаем паузу (сервис сам разберется)
+    // Если играет текущий артист — переключаем паузу [cite: 2025-12-14]
+    if (currentTrack && String(currentTrack.artistId) === String(artist.id)) {
       this.playerService.togglePlay();
     } else {
-      // Иначе — это новый артист, загружаем его плейлист с 0-го трека
+      // Начинаем играть список популярных треков [cite: 2025-12-14]
       this.playerService.playTrackList(artist.topTracks, 0);
     }
-    return this.playerService.isPlaying();
   }
 
-  getYear(album: any): string {
-    return '2024';
+  /**
+   * Получение года из описания или даты альбома [cite: 2025-12-14]
+   */
+  getYear(album: AlbumInterface): string {
+    const yearMatch = album.description?.match(/\d{4}/);
+    return yearMatch ? yearMatch[0] : '2024';
   }
 }

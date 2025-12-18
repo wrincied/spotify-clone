@@ -1,0 +1,301 @@
+.admin-wrapper {
+  // Цветовая палитра "Zinc/Green"
+  --bg: #09090b;
+  --bg-card: #18181b;
+  --border: #27272a;
+  --text: #f4f4f5;
+  --text-muted: #a1a1aa;
+  --accent: #22c55e;
+  --danger: #ef4444;
+
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(9, 9, 11, 0.8);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      img {
+        height: 24px;
+        width: 24px;
+        object-fit: contain;
+      }
+    }
+
+    .refresh-btn {
+      color: var(--text-muted);
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-weight: 600;
+      &:hover {
+        color: var(--accent);
+      }
+    }
+  }
+
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 24px;
+    @media (max-width: 900px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .forms-col,
+  .data-col {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .admin-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      .card-title {
+        font-weight: 600;
+        font-size: 1rem;
+      }
+      .badge {
+        font-size: 0.75rem;
+        background: var(--border);
+        padding: 2px 8px;
+        border-radius: 99px;
+        color: var(--text-muted);
+      }
+    }
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    input,
+    select,
+    textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      outline: none;
+      font-family: inherit;
+      &:focus {
+        border-color: var(--accent);
+      }
+    }
+    .color-picker {
+      height: 40px;
+      padding: 2px;
+      cursor: pointer;
+    }
+    .btn {
+      width: 100%;
+      background: var(--text);
+      color: var(--bg);
+      border: none;
+      padding: 10px;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      &:hover:not(:disabled) {
+        background: var(--accent);
+        color: #000;
+      }
+    }
+  }
+
+  .list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+
+    .item-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      gap: 12px;
+      &:hover {
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .item-thumb,
+      .item-color {
+        width: 60px;
+        height: 60px;
+        border-radius: 6px;
+        flex-shrink: 0;
+        object-fit: cover;
+        background: #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.5);
+        font-weight: 700;
+      }
+
+      .item-content {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        .item-title {
+          font-weight: 600;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .item-meta {
+          font-size: 0.75rem;
+          color: var(--text-muted);
+          margin-top: 4px;
+        }
+      }
+
+      .item-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        justify-content: center;
+        .btn-sm {
+          padding: 4px 8px;
+          font-size: 0.7rem;
+          border-radius: 4px;
+          border: 1px solid var(--border);
+          background: transparent;
+          color: var(--text-muted);
+          cursor: pointer;
+          font-weight: 600;
+          &:hover {
+            color: var(--text);
+            border-color: var(--text-muted);
+          }
+          &.danger:hover {
+            color: var(--danger);
+            border-color: var(--danger);
+          }
+        }
+      }
+    }
+  }
+
+  .logs {
+    background: #000;
+    padding: 12px;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 0.75rem;
+    color: #33ff00;
+    max-height: 200px;
+    overflow-y: auto;
+    div {
+      margin-bottom: 2px;
+      &::before {
+        content: '> ';
+        opacity: 0.5;
+      }
+    }
+  }
+
+  // МОДАЛЬНОЕ ОКНО С ЗАЩИТОЙ ОТ BOOTSTRAP [cite: 2025-12-14]
+  .admin-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    &.open {
+      display: flex !important;
+    }
+
+    .admin-modal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: 480px;
+      max-width: 95%;
+      padding: 32px;
+      animation: slideUp 0.2s ease-out;
+
+      h2 {
+        margin: 0 0 20px;
+        font-size: 1.25rem;
+        font-weight: 700;
+      }
+      .modal-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        .btn-cancel {
+          background: transparent;
+          border: 1px solid var(--border);
+          color: var(--text);
+        }
+      }
+    }
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
