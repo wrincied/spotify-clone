@@ -1,0 +1,201 @@
+.artist-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  color: #fff;
+  padding-bottom: 32px;
+}
+
+/* === HERO HEADER === */
+.artist-header {
+  position: relative;
+  height: 40vh; /* Занимает 40% высоты экрана */
+  min-height: 340px;
+  max-height: 500px;
+  
+  background-size: cover;
+  background-position: center 20%; /* Центрируем, но чуть выше */
+  background-repeat: no-repeat;
+  
+  display: flex;
+  align-items: flex-end; /* Контент прижат к низу */
+  padding: 0 32px 24px;
+
+  /* Затемнение поверх картинки, чтобы текст читался */
+  .header-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(transparent 0, rgba(0,0,0,0.5) 100%);
+    z-index: 0;
+  }
+
+  .header-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+
+    .verified-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      margin-bottom: 8px;
+      
+      .verified-icon {
+        display: block; // Убираем лишние отступы SVG
+      }
+    }
+
+    .artist-name {
+      /* Адаптивный шрифт: минимум 48px, максимум 96px */
+      font-size: clamp(48px, 8vw, 96px);
+      font-weight: 900;
+      margin: 0;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      padding-bottom: 12px;
+    }
+
+    .listeners {
+      font-size: 16px;
+      font-weight: 400;
+      margin: 0;
+    }
+  }
+}
+
+/* === BODY GRADIENT & CONTENT === */
+.artist-body {
+  position: relative;
+  /* Темно-серый градиент, имитирующий "фирменный цвет" артиста, уходящий в черный */
+  background: linear-gradient(rgba(34, 34, 34, 1) 0%, #121212 250px);
+  padding: 24px 32px;
+}
+
+/* === ACTION BAR === */
+.action-bar {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  margin-bottom: 32px;
+
+  .play-btn-big {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: #1ed760; /* Spotify Green */
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.1s ease, background-color 0.1s;
+    color: black; /* Иконка внутри черная */
+
+    &:hover {
+      transform: scale(1.05);
+      background-color: #1fdf64;
+    }
+    &:active {
+      transform: scale(1.0);
+      background-color: #16be55;
+    }
+  }
+
+  .follow-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    border-radius: 18px; /* Капсула */
+    padding: 7px 15px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    letter-spacing: 1px;
+    
+    &:hover {
+      border-color: white;
+    }
+  }
+
+  .more-btn {
+    background: transparent;
+    border: none;
+    color: #b3b3b3;
+    font-size: 24px;
+    cursor: pointer;
+    &:hover { color: white; }
+  }
+}
+
+/* === SECTIONS === */
+.section {
+  margin-bottom: 40px;
+
+  h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+}
+
+.tracks-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* === GRID АЛЬБОМОВ === */
+.albums-grid {
+  display: grid;
+  /* Адаптивная сетка: карточки не уже 180px */
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 24px;
+
+  .album-card {
+    background: #181818;
+    padding: 16px;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #282828;
+    }
+
+    .img-wrapper {
+      width: 100%;
+      aspect-ratio: 1/1; /* Квадрат */
+      margin-bottom: 16px;
+      
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 4px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      }
+    }
+
+    .card-text {
+      .album-name {
+        font-size: 16px;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 4px;
+      }
+      .album-meta {
+        font-size: 14px;
+        color: #b3b3b3;
+      }
+    }
+  }
+}
+
+.loading {
+  padding: 50px;
+  text-align: center;
+  color: #b3b3b3;
+}

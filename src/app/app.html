@@ -1,25 +1,24 @@
 @if (isNoLayout) {
   <router-outlet />
 } @else {
-  @if ({ isVisible: isPlayerVisible$ | async }; as state) {
-    
-    <div class="spotify-app">
-      <app-spotify-sidebar />
+  <div class="spotify-app">
+    <app-spotify-sidebar />
 
-      <div class="spotify-main">
-        <app-top-nav />
+    <div class="spotify-main">
+      <app-top-nav />
 
-        <div class="spotify-content-scroll" [class.has-player]="state.isVisible">
-          <router-outlet />
-        </div>
+      <div
+        class="spotify-content-scroll"
+        [class.has-player]="playerService.isVisible()"
+      >
+        <router-outlet />
       </div>
-
-      @if (state.isVisible) {
-        <div class="spotify-app__player">
-          <app-player></app-player>
-        </div>
-      }
     </div>
 
-  }
+    @if (playerService.isVisible()) {
+      <div class="spotify-app__player">
+        <app-player></app-player>
+      </div>
+    }
+  </div>
 }

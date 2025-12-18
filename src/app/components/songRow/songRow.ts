@@ -1,5 +1,6 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { SongInterface } from '../../interface/models';
 import { FormatTimePipe } from '../../pipes/format-time-pipe';
 
@@ -11,30 +12,56 @@ import { FormatTimePipe } from '../../pipes/format-time-pipe';
   styleUrl: './songRow.scss',
 })
 export class SongRow {
-  // === INPUTS ===
+  private router = inject(Router);
+
   @Input({ required: true }) song!: SongInterface;
   @Input() index: number = 0;
-
-  // ВЕРНУЛ ЭТО ПОЛЕ, чтобы не падал SearchComponent
   @Input() thumbnailUrl?: string | null;
-
   @Input() isSearchMode: boolean = false;
   @Input() currentTrack: SongInterface | null = null;
   @Input() isPlaying: boolean = false;
 
-  // === OUTPUTS ===
-  // ТЕПЕРЬ ТИП ПРАВИЛЬНЫЙ: передаем песню, а не void
   @Output() playRequest = new EventEmitter<SongInterface>();
 
-  // === LOGIC ===
   get isCurrent(): boolean {
     return (
       this.currentTrack !== null &&
       String(this.currentTrack.id) === String(this.song.id)
     );
   }
-  handlePlay(event: Event) {
-    event.stopPropagation(); // Предотвращаем всплытие (если кликнули кнопку внутри строки)
+
+  // Обработчик для РОДИТЕЛЯ (строка целиком)
+  handlePlay(event: MouseEvent) {
+    console.log('🟦 [SongRow] handlePlay сработал (Клик по строке)');
+    
+    // Останавливаем, чтобы не ушло выше (если есть что-то выше)
+    event.stopPropagation(); 
     this.playRequest.emit(this.song);
+  }
+
+  // Обработчик для АРТИСТА (ссылка)
+  goToArtist(event: MouseEvent, artistId: string | undefined) {
+    console.log('🟧 [SongRow] goToArtist сработал (Клик по имени)');
+    console.log('   -> Пришедший ID:', artistId);
+    console.log('   -> Объект песни:', this.song);
+
+    // 1. ЖЕСТКАЯ ОСТАНОВКА
+    event.stopImmediatePropagation();
+    event.stopPropagation();
+    event.preventDefault();
+
+    if (!artistId) {
+      console.error('❌ [SongRow] Ошибка: artistId отсутствует (undefined/null)!');
+      return;
+    }
+
+    console.log('✅ [SongRow] Пытаемся перейти по роуту:', ['/artist', artistId]);
+
+    this.router.navigate(['/artist', artistId])
+      .then(success => {
+        if (success) console.log('🚀 [Router] Переход успешен!');
+        else console.warn('⚠️ [Router] Переход отменен или не удался (проверь app.routes.ts)');
+      })
+      .catch(err => console.error('🔥 [Router] Критическая ошибка навигации:', err));
   }
 }
