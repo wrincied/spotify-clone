@@ -1,61 +1,60 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MusicStoreService } from '../../services/music-store/music-store';
-import { SongInterface } from '../../interface/models'; // Чистый интерфейс
+import { PlayerService } from '../../services/playerService/player-service';
+import { SongInterface } from '../../interface/models';
 import { Observable } from 'rxjs';
-import { FormatTimePipe } from '../../pipes/format-time-pipe'; // <--- НУЖЕН ЭТОТ ИМПОРТ
-import { Subscription } from 'rxjs'; // Добавьте Subscription
 
 @Component({
   selector: 'app-player',
   standalone: true,
-  imports: [CommonModule, FormatTimePipe],
+  imports: [CommonModule],
   templateUrl: './player.html',
   styleUrls: ['./player.scss'],
 })
 export class PlayerComponent {
-  isLooping$: Observable<boolean>;
-  currentTrack$: Observable<SongInterface | null>;
-  currentCover$: Observable<string>; // <-- Отдельный поток для картинки
-  @Input() thumbnailUrl?: string | null;
-  isPlaying$: Observable<boolean>;
-  currentTime$: Observable<number>;
-  duration$: Observable<number>;
-  isBuffering$: Observable<boolean>;
+  // Внедряем синглтон
+  public playerService = inject(PlayerService);
 
-  constructor(private musicStore: MusicStoreService) {
-    this.currentTrack$ = this.musicStore.currentTrack$;
-    this.currentCover$ = this.musicStore.currentCover$; // Подписка
-    this.isLooping$ = this.musicStore.isLooping$;
-    this.isPlaying$ = this.musicStore.isPlaying$;
-    this.currentTime$ = this.musicStore.currentTime$;
-    this.duration$ = this.musicStore.duration$;
-    this.isBuffering$ = this.musicStore.isBuffering$;
-  }
+  // === ИСПРАВЛЕННЫЕ ПОТОКИ ===
+  currentTrack$: Observable<SongInterface | null> =
+    this.playerService.currentTrack$;
+  isPlaying$: Observable<boolean> = this.playerService.isPlaying$;
+  currentTime$: Observable<number> = this.playerService.currentTime$;
+  duration$: Observable<number> = this.playerService.duration$;
+  isBuffering$: Observable<boolean> = this.playerService.isBuffering$;
+  isLooping$: Observable<boolean> = this.playerService.isLooping$;
+
+  // ФИКС: Теперь это поток строки URL из сигнала сервиса
+  currentCover$: Observable<string> = this.playerService.currentCover$;
 
   togglePlay() {
-    this.musicStore.togglePlay();
+    this.playerService.togglePlay();
   }
+
   nextTrack() {
-    this.musicStore.nextTrack();
+    this.playerService.nextTrack();
   }
+
   prevTrack() {
-    this.musicStore.prevTrack();
+    this.playerService.prevTrack();
   }
+
   onSeek(e: Event) {
-    this.musicStore.seekTo(Number((e.target as HTMLInputElement).value));
+    this.playerService.seekTo(Number((e.target as HTMLInputElement).value));
   }
+
   toggleLoop() {
-    this.musicStore.toggleLoop();
+    this.playerService.toggleLoop();
   }
+
   onVolumeChange(e: Event) {
-    this.musicStore.setVolume(
-      Number((e.target as HTMLInputElement).value) / 100,
-    );
+    // Если слайдер от 0 до 100, делим на 100. Если от 0 до 1, используем как есть.
+    const val = Number((e.target as HTMLInputElement).value);
+    this.playerService.setVolume(val > 1 ? val / 100 : val);
   }
 
   formatTime(time: number | null): string {
-    if (!time) return '0:00';
+    if (!time || isNaN(time)) return '0:00';
     const m = Math.floor(time / 60);
     const s = Math.floor(time % 60);
     return `${m}:${s < 10 ? '0' : ''}${s}`;
