@@ -25,8 +25,8 @@ import {
 export class Slider implements AfterViewInit, OnChanges {
     constructor(private router: Router) {}
 
-    @Input() albumItem: AlbumInterface[] = [];
-    @Input() categItem: CategoryInterface[] = [];
+    @Input() album: AlbumInterface[] = [];
+    @Input() category: CategoryInterface[] = [];
 
     @ViewChild('slider', { static: false })
     slider!: ElementRef<HTMLDivElement>;

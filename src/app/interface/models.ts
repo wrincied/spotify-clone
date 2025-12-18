@@ -21,9 +21,10 @@ export interface AlbumInterface {
   title: string;
   description: string;
   cover: string | null;
+  artistId: string;
   thumbnail: any; // <--- ТВОЕ НОВОЕ ПОЛЕ
   songs: SongInterface[];
-  year?: number;
+  releaseYear?: string;
 }
 export interface CategoryInterface {
   name: string;

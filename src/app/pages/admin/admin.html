@@ -1,0 +1,429 @@
+<div class="admin-wrapper">
+  <header class="topbar">
+    <div class="brand">
+      <img
+        src="/assets/logo.png"
+        alt="Logo"
+        onerror="this.style.display = 'none'"
+      />
+      <span>Spotify Admin</span>
+    </div>
+    <button
+      (click)="admin.loadAll()"
+      class="refresh-btn"
+    >
+      Refresh Data
+    </button>
+  </header>
+
+  <main>
+    <section class="forms-col">
+      <div class="admin-card">
+        <div class="card-header">
+          <span class="card-title">Add Artist</span
+          ><span class="badge">Person</span>
+        </div>
+        <form
+          [formGroup]="artistForm"
+          (ngSubmit)="handleCreate('artists', artistForm)"
+        >
+          <label>Name</label>
+          <input
+            formControlName="name"
+            placeholder="Artist Name"
+          />
+          <label>Avatar URL</label>
+          <input
+            formControlName="avatar"
+            placeholder="https://..."
+          />
+          <label>Bio</label>
+          <input
+            formControlName="bio"
+            placeholder="Short biography"
+          />
+          <button
+            type="submit"
+            class="btn"
+            [disabled]="artistForm.invalid"
+          >
+            Create Artist
+          </button>
+        </form>
+      </div>
+
+      <div class="admin-card">
+        <div class="card-header">
+          <span class="card-title">Add Song</span><span class="badge">MP3</span>
+        </div>
+        <form
+          [formGroup]="songForm"
+          (ngSubmit)="handleCreate('songs', songForm)"
+        >
+          <label>Title</label>
+          <input
+            formControlName="title"
+            placeholder="Track Name"
+          />
+          <label>MP3 Path</label>
+          <input
+            formControlName="url"
+            placeholder="public/music/track.mp3"
+          />
+          <label>Cover URL</label>
+          <input
+            formControlName="thumbnail"
+            placeholder="https://..."
+          />
+          <label>Artist Link</label>
+          <select formControlName="artistId">
+            <option value="">-- No Artist Link --</option>
+            @for (a of admin.artists(); track a.id) {
+              <option [value]="a.id">{{ a.name }}</option>
+            }
+          </select>
+          <label>Artist Name (Text)</label>
+          <input
+            formControlName="description"
+            placeholder="Artist name text"
+          />
+          <label>Category</label>
+          <select formControlName="categoryId">
+            <option value="">-- None --</option>
+            @for (c of admin.categories(); track c.id) {
+              <option [value]="c.id">{{ c.name }}</option>
+            }
+          </select>
+          <button
+            type="submit"
+            class="btn"
+            [disabled]="songForm.invalid"
+          >
+            Create Song
+          </button>
+        </form>
+      </div>
+
+      <div class="admin-card">
+        <div class="card-header">
+          <span class="card-title">Add Album</span
+          ><span class="badge">Collection</span>
+        </div>
+        <form
+          [formGroup]="albumForm"
+          (ngSubmit)="handleCreate('albums', albumForm)"
+        >
+          <label>Title</label>
+          <input
+            formControlName="title"
+            placeholder="Album Title"
+          />
+          <label>Cover URL</label>
+          <input
+            formControlName="cover"
+            placeholder="https://..."
+          />
+          <label>Artist</label>
+          <select formControlName="artistId">
+            <option value="">-- Select Artist --</option>
+            @for (a of admin.artists(); track a.id) {
+              <option [value]="a.id">{{ a.name }}</option>
+            }
+          </select>
+          <label>Release Date</label>
+          <input
+            type="description"
+            formControlName="releaseYear"
+          />
+          <label>Description</label>
+          <input
+            formControlName="description"
+            placeholder="About this album"
+          />
+          <label>Release Date</label>
+          <input
+            type="description"
+            formControlName="releaseYear"
+          />
+          <button
+            type="submit"
+            class="btn"
+            [disabled]="albumForm.invalid"
+          >
+            Create Album
+          </button>
+        </form>
+      </div>
+
+      <div class="admin-card">
+        <div class="card-header">
+          <span class="card-title">Add Category</span
+          ><span class="badge">Genre</span>
+        </div>
+        <form
+          [formGroup]="categoryForm"
+          (ngSubmit)="handleCreate('categories', categoryForm)"
+        >
+          <label>Name</label>
+          <input
+            formControlName="name"
+            placeholder="Genre name"
+          />
+          <label>Color</label>
+          <input
+            formControlName="color"
+            type="color"
+            class="color-picker"
+          />
+          <label>Description</label>
+          <input
+            formControlName="description"
+            placeholder="Optional description"
+          />
+          <button
+            type="submit"
+            class="btn"
+            [disabled]="categoryForm.invalid"
+          >
+            Create Category
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <section class="data-col">
+      <div class="admin-card">
+        <div class="card-header">
+          <span class="card-title">Artists</span
+          ><span class="badge">{{ admin.artists().length }} total</span>
+        </div>
+        <div class="list-grid">
+          @for (a of admin.artists(); track a.id) {
+            <div class="item-card">
+              <img
+                [src]="a.avatar || 'https://placehold.co/60'"
+                class="item-thumb"
+                style="border-radius: 50%"
+              />
+              <div class="item-content">
+                <div class="item-title">{{ a.name }}</div>
+                <div class="item-meta">{{ a.followers || 0 }} followers</div>
+              </div>
+              <div class="item-actions">
+                <button
+                  class="btn-sm"
+                  (click)="openEditModal('artists', a)"
+                >
+                  EDIT
+                </button>
+                <button
+                  class="btn-sm danger"
+                  (click)="handleDelete('artists', a.id)"
+                >
+                  DEL
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="card-header">
+          <span class="card-title">Categories</span
+          ><span class="badge">{{ admin.categories().length }} total</span>
+        </div>
+        <div class="list-grid">
+          @for (c of admin.categories(); track c.id) {
+            <div class="item-card">
+              <div
+                class="item-color"
+                [style.background-color]="c.color"
+              >
+                ID
+              </div>
+              <div class="item-content">
+                <div class="item-title">{{ c.name }}</div>
+                <div class="item-meta">{{ c.description || c.color }}</div>
+              </div>
+              <div class="item-actions">
+                <button
+                  class="btn-sm"
+                  (click)="openEditModal('categories', c)"
+                >
+                  EDIT
+                </button>
+                <button
+                  class="btn-sm danger"
+                  (click)="handleDelete('categories', c.id)"
+                >
+                  DEL
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="card-header">
+          <span class="card-title">Albums</span
+          ><span class="badge">{{ admin.albums().length }} total</span>
+        </div>
+        <div class="list-grid">
+          @for (al of admin.albums(); track al.id) {
+            <div class="item-card">
+              <img
+                [src]="al.cover || 'https://placehold.co/60'"
+                class="item-thumb"
+              />
+              <div class="item-content">
+                <div class="item-title">{{ al.title }}</div>
+                <div class="item-meta">
+                  {{ al.releaseYear || 'No Date' }}
+                </div>
+              </div>
+              <div class="item-actions">
+                <button
+                  class="btn-sm"
+                  (click)="openEditModal('albums', al)"
+                >
+                  EDIT
+                </button>
+                <button
+                  class="btn-sm danger"
+                  (click)="handleDelete('albums', al.id)"
+                >
+                  DEL
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="card-header">
+          <span class="card-title">Songs</span
+          ><span class="badge">{{ admin.songs().length }} total</span>
+        </div>
+        <div class="list-grid">
+          @for (s of admin.songs(); track s.id) {
+            <div class="item-card">
+              <img
+                [src]="s.thumbnail || 'https://placehold.co/60'"
+                class="item-thumb"
+              />
+              <div class="item-content">
+                <div class="item-title">{{ s.title }}</div>
+                <div class="item-meta">
+                  Dur: {{ s.duration }}s | {{ s.url ? 'Has MP3' : 'No MP3' }}
+                </div>
+              </div>
+              <div class="item-actions">
+                <button
+                  class="btn-sm"
+                  (click)="openEditModal('songs', s)"
+                >
+                  EDIT
+                </button>
+                <button
+                  class="btn-sm danger"
+                  (click)="handleDelete('songs', s.id)"
+                >
+                  DEL
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="card-header"><span class="card-title">Logs</span></div>
+        <div class="logs">
+          @for (log of admin.logs(); track $index) {
+            <div>{{ log }}</div>
+          }
+        </div>
+      </div>
+    </section>
+  </main>
+  @if (editingItem(); as edit) {
+    <div class="admin-modal-overlay open">
+      <div class="admin-modal-box">
+        <h2>Edit {{ edit.type | titlecase }}</h2>
+        <form
+          [formGroup]="editForm"
+          (ngSubmit)="handleUpdate(edit.type, edit.data.id)"
+        >
+          <label>Name / Title</label>
+          <input
+            formControlName="name"
+            placeholder="Name or Title"
+          />
+
+          @if (
+            edit.type === 'songs' ||
+            edit.type === 'albums' ||
+            edit.type === 'artists'
+          ) {
+            <label>Image URL (Cover/Avatar/Thumbnail)</label>
+            <input
+              formControlName="thumbnail"
+              placeholder="https://..."
+            />
+          }
+
+          <label>
+            @if (edit.type === 'artists') {
+              Biography
+            } @else if (edit.type === 'songs') {
+              Artist Name (Text)
+            } @else {
+              Description
+            }
+          </label>
+          <textarea
+            formControlName="description"
+            rows="3"
+            placeholder="Enter details..."
+          ></textarea>
+
+          @if (edit.type === 'songs') {
+            <label>MP3 File Path</label>
+            <input
+              formControlName="url"
+              placeholder="public/music/track.mp3"
+            />
+          }
+
+          @if (edit.type === 'albums') {
+            <label>Release Date</label>
+            <input
+              type="description"
+              formControlName="releaseYear"
+            />
+          }
+
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn btn-cancel"
+              (click)="editingItem.set(null)"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="btn"
+              [disabled]="editForm.invalid"
+            >
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>
