@@ -50,12 +50,12 @@ export class SongRow {
     event.stopPropagation();
     event.preventDefault();
 
-    if (!artistId) {
-      console.error('❌ [SongRow] Ошибка: artistId отсутствует (undefined/null)!');
-      return;
-    }
+    // if (!artistId) {
+    //   console.error('❌ [SongRow] Ошибка: artistId отсутствует (undefined/null)!');
+    //   return;
+    // }
 
-    console.log('✅ [SongRow] Пытаемся перейти по роуту:', ['/artist', artistId]);
+    // console.log('✅ [SongRow] Пытаемся перейти по роуту:', ['/artist', artistId]);
 
     this.router.navigate(['/artist', artistId])
       .then(success => {

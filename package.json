@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:spotify-clone": "node dist/spotify-clone/server/server.mjs"
+    "serve:ssr:spotify-clone": "node dist/spotify-clone/server/server.mjs",
+    "backend": "node backend/server.js"
   },
   "prettier": {
     "arrowParens": "always",
