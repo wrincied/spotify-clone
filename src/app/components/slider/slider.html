@@ -21,13 +21,15 @@
       @for (item of album; track item.id) {
         <div class="album-card-wrapper">
           <app-albumCard
+            [id]="item.id"
+            [type]="'album'"
             [title]="item.title"
             [description]="item.description"
             [playlistThumbnail]="
               item.cover || item.thumbnail || 'https://placehold.co/600x400/png'
             "
-            [link]="['/album', item.id]"
             [releaseYear]="item.releaseYear"
+            [artistId]="item.artistId"
             [fixedSize]="true"
           ></app-albumCard>
         </div>
@@ -36,13 +38,12 @@
       @for (item of category; track item.id) {
         <div class="album-card-wrapper">
           <app-albumCard
+            [id]="item.id"
+            [type]="'category'"
             [title]="item.name"
             [description]="item.description"
-            [playlistThumbnail]="null"
             [backgroundColor]="item.color"
-            [id]="item.id"
             [fixedSize]="true"
-            [link]="['/category', item.id]"
           >
           </app-albumCard>
         </div>

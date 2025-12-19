@@ -2,77 +2,130 @@
 
 html,
 body {
-  overflow-x: hidden;
+  overflow: hidden;
   box-sizing: border-box;
   background-color: #000000;
   color: #ffffff;
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
 }
 
 .spotify-app {
   width: 100%;
   height: 100vh;
   display: flex;
-
-  /* Контейнер приложения не должен скроллиться */
   overflow: hidden;
   background-color: black;
 
-  /* Левый сайдбар */
-  app-spotify-sidebar {
-    width: 20%;
+  /* --- DESKTOP LAYOUT (Row) --- */
+  flex-direction: row;
+
+  /* --- MOBILE LAYOUT (Column Reverse) --- */
+  /* Сайдбар (1) улетит вниз, Плеер (2) посередине, Контент (3) наверх */
+  @media (max-width: 768px) {
+    flex-direction: column-reverse;
   }
 
-  /* Правая область */
+  /* ========================================= */
+  /* 1. SIDEBAR                                */
+  /* ========================================= */
+  app-spotify-sidebar {
+    /* Desktop */
+    width: 20%;
+    flex-shrink: 0;
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      width: 100%;
+      height: 60px; /* Жесткая высота */
+      flex: 0 0 60px; /* Запрещаем сжиматься */
+      z-index: 200;
+      /* position: fixed НЕ нужен, работает Flexbox */
+    }
+  }
+
+  /* ========================================= */
+  /* 2. PLAYER WRAPPER                         */
+  /* ========================================= */
+  .spotify-app__player {
+    /* DESKTOP: Плеер поверх всего внизу */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    max-height: 80px;
+    height: 100%;
+    /* MOBILE: Плеер становится блоком между меню и контентом */
+    @media (max-width: 768px) {
+      position: relative; /* Возвращаем в поток */
+      bottom: auto;
+      left: auto;
+      max-height: 56px; /* Высота мини-плеера */
+      flex: 0 0 56px; /* Не сжимать */
+      background-color: #181818;
+      border-bottom: 1px solid #282828;
+      z-index: 150;
+    }
+  }
+
+  /* ========================================= */
+  /* 3. MAIN CONTENT                           */
+  /* ========================================= */
   .spotify-main {
+    /* Desktop */
     width: 80%;
     flex: 0 0 80%;
     max-width: 80%;
-
-    /* Важно: ровно высота viewport, без calc и margin-top */
-    height: 100vh;
+    height: 100%;
 
     background-color: #121212;
     position: relative;
-
-    /* Важно: скролл запрещён тут, скролл будет только внутри .spotify-content-scroll */
     overflow: hidden;
-
     border-radius: 8px 0 0 0;
-
-    /* Важно: padding убран, чтобы не ломать абсолютный scroll-container */
     padding: 0;
     box-sizing: border-box;
-  }
 
-  .spotify-content-scroll {
-    /*
-      Важно: единственная область, которая скроллится.
-      Границы строго между фиксированными top-nav и player.
-    */
-    position: absolute;
-    top: var(--top-nav-height);
-    bottom: 0;
-    left: 0;
-    right: 0;
+    /* Tablet (< 1024px) */
+    @media (max-width: 1024px) {
+      width: 100%;
+      flex: 1;
+      max-width: 100%;
+      margin-left: 0;
+      border-radius: 0;
+    }
 
-    overflow-y: auto;
-
-    /*
-      Важно: весь внутренний отступ задаётся тут (а не у родителя),
-      чтобы последний трек не уходил под player.
-    */
-    // padding: 16px 8px;
-    box-sizing: border-box;
-    &.has-player {
-      bottom: var(--player-height);
+    /* Mobile (< 768px) */
+    @media (max-width: 768px) {
+      /* Занимаем все оставшееся место (100vh - 60px Sidebar - 56px Player) */
+      flex: 1;
+      height: auto;
+      padding-bottom: 0;
     }
   }
-}
-@keyframes slideUp {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
+
+  /* ========================================= */
+  /* 4. SCROLL AREA                            */
+  /* ========================================= */
+  .spotify-content-scroll {
+    position: absolute;
+    top: var(--top-nav-height);
+    left: 0;
+    right: 0;
+    bottom: 0; /* По умолчанию до низа контейнера */
+
+    overflow-y: auto;
+    box-sizing: border-box;
+
+    /* DESKTOP FIX: Если есть плеер, отступаем, так как он fixed поверх */
+    &.has-player {
+      bottom: var(--player-height);
+
+      /* MOBILE FIX: На мобильном отступ НЕ нужен, так как плеер физически под контентом */
+      @media (max-width: 768px) {
+        bottom: 0;
+      }
+    }
   }
 }
