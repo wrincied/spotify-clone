@@ -1,6 +1,6 @@
-import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, map, Observable } from 'rxjs';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import {
   AlbumInterface,
   CategoryInterface,
@@ -12,9 +12,9 @@ export class MusicStoreService {
   private http = inject(HttpClient);
   private apiUrl = 'http://localhost:3000/api';
 
-  // 1. Добавляем хранилище для песен [cite: 2025-12-14]
+  // Состояния через BehaviorSubject для стримов (совместимость с async pipe) [cite: 2025-12-14]
   private songsSubject = new BehaviorSubject<SongInterface[]>([]);
-  public songs$: Observable<SongInterface[]> = this.songsSubject.asObservable();
+  public songs$ = this.songsSubject.asObservable();
 
   private albumsSubject = new BehaviorSubject<AlbumInterface[]>([]);
   public albums$ = this.albumsSubject.asObservable();
@@ -22,54 +22,80 @@ export class MusicStoreService {
   private categoriesSubject = new BehaviorSubject<CategoryInterface[]>([]);
   public categories$ = this.categoriesSubject.asObservable();
 
+  // Сигналы для синхронного доступа (Angular 21 стандарты) [cite: 2025-12-14]
+  private _songs = signal<SongInterface[]>([]);
+  private _albums = signal<AlbumInterface[]>([]);
+  private _categories = signal<CategoryInterface[]>([]);
+
+  // Публичные геттеры (теперь это сигналы) [cite: 2025-12-14]
+  public currentSongs = computed(() => this._songs());
+  public currentAlbums = computed(() => this._albums());
+  public currentCategories = computed(() => this._categories());
+
   constructor() {
-    this.loadAll(); // Унифицированный метод загрузки
+    this.loadAll();
   }
 
   loadAll() {
+    this.loadSongs();
     this.loadAlbums();
     this.loadCategories();
-    this.loadSongs();
-  }
-  get currentAlbums(): AlbumInterface[] {
-    return this.albumsSubject.value;
-  }
-
-  get currentCategories(): CategoryInterface[] {
-    return this.categoriesSubject.value;
-  }
-  get currentSongs(): SongInterface[] {
-    return this.songsSubject.value;
   }
 
   /**
-   * Загрузка песен с исправлением структуры данных [cite: 2025-12-14]
+   * Загрузка и нормализация песен [cite: 2025-12-14]
    */
   loadSongs() {
     this.http
       .get<{ error: boolean; data: any[] }>(`${this.apiUrl}/songs`)
       .pipe(
-        map((response) => {
-          const rawSongs = response.data || [];
-          // ТРАНСФОРМАЦИЯ: Приводим данные к интерфейсу SongInterface [cite: 2025-12-14]
-          return rawSongs.map((s) => ({
-            ...s,
-            title: s.title || s.name || 'Unknown Track',
-            artist: s.artist || s.description || 'Unknown Artist',
-            url: s.url || '', // Критично для фикса ошибки startsWith
-            duration: s.duration || 0,
-          }));
+        map((res) =>
+          (res.data || []).map(
+            (s): SongInterface => ({
+              ...s,
+              id: s.id || Math.random().toString(36).substr(2, 9),
+              title: s.title || s.name || 'Unknown Track',
+              artist: s.artist || 'Unknown Artist',
+              url: s.url || '',
+              thumbnail: s.thumbnail || 'assets/no-album.png',
+              duration: Number(s.duration) || 0,
+            }),
+          ),
+        ),
+        tap((data) => {
+          this._songs.set(data);
+          this.songsSubject.next(data);
         }),
       )
-      .subscribe((data) => this.songsSubject.next(data));
+      .subscribe();
   }
 
-  // loadAlbums и loadCategories остаются как в твоем примере [cite: 2025-12-14]
+  /**
+   * Загрузка альбомов с защитой от пустых полей [cite: 2025-12-14]
+   */
   loadAlbums() {
     this.http
-      .get<{ error: boolean; data: AlbumInterface[] }>(`${this.apiUrl}/albums`)
-      .pipe(map((r) => r.data || []))
-      .subscribe((d) => this.albumsSubject.next(d));
+      .get<{ error: boolean; data: any[] }>(`${this.apiUrl}/albums`)
+      .pipe(
+        map((res) =>
+          (res.data || []).map(
+            (a): AlbumInterface => ({
+              ...a,
+              id: a.id,
+              title: a.title || 'Untitled Album',
+              description: a.description || 'No description',
+              cover: a.cover || a.thumbnail || 'assets/no-album.png',
+              songs: Array.isArray(a.songs) ? a.songs : [], // В БД это массив ID [cite: 2025-12-18]
+              artistId: a.artistId || '',
+            }),
+          ),
+        ),
+        tap((data) => {
+          this._albums.set(data);
+          this.albumsSubject.next(data);
+        }),
+      )
+      .subscribe();
   }
 
   loadCategories() {
@@ -77,7 +103,13 @@ export class MusicStoreService {
       .get<{ error: boolean; data: CategoryInterface[] }>(
         `${this.apiUrl}/categories`,
       )
-      .pipe(map((r) => r.data || []))
-      .subscribe((d) => this.categoriesSubject.next(d));
+      .pipe(
+        map((res) => res.data || []),
+        tap((data) => {
+          this._categories.set(data);
+          this.categoriesSubject.next(data);
+        }),
+      )
+      .subscribe();
   }
 }

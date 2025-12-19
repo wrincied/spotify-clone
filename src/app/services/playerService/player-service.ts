@@ -82,33 +82,45 @@ export class PlayerService {
   play(song: SongInterface, coverUrl?: string) {
     const current = this.currentTrack();
 
-    // 1. Детекция текущего трека (сравнение ID как строк)
     if (current && String(current.id) === String(song.id)) {
       this.togglePlay();
       return;
     }
 
-    // 2. Подготовка нового трека
+    // Проверка на валидность URL перед запуском
+    if (!song.url) {
+      console.error('❌ [Player] Ошибка: У песни нет URL!', song);
+      return;
+    }
+
     this.audio.pause();
     this.currentTrack.set(song);
-
-    // Приоритет обложки: переданная -> из песни -> пусто
     this.currentCover.set(coverUrl || song.thumbnail || '');
 
-    // 3. Формирование корректного URL (логика из MusicStore)
+    // Умное формирование пути [cite: 2025-12-14]
     let fullUrl: string;
     if (song.url.startsWith('http')) {
       fullUrl = song.url;
     } else {
-      const path = song.url.startsWith('public/')
-        ? song.url
-        : `public/music/${song.url}`;
-      fullUrl = `${this.API_URL}${path}`;
+      // Убираем 'public/' или 'music/' из начала строки, чтобы не дублировать их
+      // Это решает проблему http://localhost:3000/public/music/public/music/song.mp3
+      const cleanPath = song.url
+        .replace(/^\/+/, '') // убираем слэш в начале
+        .replace(/^public\//, '') // убираем public/
+        .replace(/^music\//, ''); // убираем music/
+
+      fullUrl = `${this.API_URL}public/music/${cleanPath}`;
     }
+
+    console.log('🎵 [Player] Loading Source:', fullUrl);
 
     this.audio.src = fullUrl;
     this.audio.load();
-    this.audio.play().catch((err) => console.error('Playback Error:', err));
+    this.audio.play().catch((err) => {
+      console.error('❌ Playback Error:', err);
+      // Сбрасываем состояние, если файл не загрузился
+      this.isPlaying.set(false);
+    });
   }
 
   togglePlay() {

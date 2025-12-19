@@ -65,7 +65,7 @@
           @for (track of artist.topTracks; track track.id; let i = $index) {
             <app-songRow
               [song]="track"
-              [index]="i + 1"
+              [index]="track.thumbnail || 'https://placehold.co/600x400/png'"
               [currentTrack]="playerService.currentTrack$ | async"
               [isPlaying]="(playerService.isPlaying$ | async) ?? false"
               (playRequest)="playerService.playTrackList(artist.topTracks, i)"
@@ -81,11 +81,13 @@
         <div class="albums-grid">
           @for (album of artist.albums; track album.id) {
             <app-albumCard
+              [id]="album.id"
+              [type]="$any(album.type || 'album')"
               [title]="album.title"
               [description]="album.description"
-              [playlistThumbnail]="album.cover || album.thumbnail || 'assets/no-album.png'"
+              [playlistThumbnail]="
+                album.cover || album.thumbnail || 'assets/no-album.png'"
               [releaseYear]="album.releaseYear"
-              [link]="['/album', album.id]"
             ></app-albumCard>
           } @empty {
             <div class="empty-state">No albums available</div>
