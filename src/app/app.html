@@ -4,6 +4,12 @@
   <div class="spotify-app">
     <app-spotify-sidebar />
 
+    @if (playerService.isVisible()) {
+      <div class="spotify-app__player">
+        <app-player></app-player>
+      </div>
+    }
+
     <div class="spotify-main">
       <app-top-nav />
 
@@ -14,11 +20,5 @@
         <router-outlet />
       </div>
     </div>
-
-    @if (playerService.isVisible()) {
-      <div class="spotify-app__player">
-        <app-player></app-player>
-      </div>
-    }
   </div>
 }

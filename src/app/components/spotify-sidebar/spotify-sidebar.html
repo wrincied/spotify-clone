@@ -1,20 +1,90 @@
 <div class="spotify-sidebar">
-    <div class="spotify-sidebar-logo">
-        <img
-            width="150"
-            src="assets/spotify-logo_light.png"
-        />
+  <div class="spotify-sidebar-logo">
+    <img
+      width="150"
+      src="assets/spotify-logo_light.png"
+      alt="Spotify"
+    />
+  </div>
+
+  <div class="spotify-sidebar-nav">
+    <div class="spotify-sidebar-item">
+      <a
+        (click)="goToHome()"
+        title="Home"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          fill="currentColor"
+        >
+          <path
+            d="M12.5 3.247a1 1 0 0 0-1 0L4 8.5V20h5v-6h6v6h5V8.5l-7.5-5.253z"
+          />
+        </svg>
+        <span>Home</span>
+      </a>
+    </div>
+
+    <div class="spotify-sidebar-item mobile-only">
+      <a
+        (click)="goToSearch()"
+        title="Search"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          fill="currentColor"
+        >
+          <path
+            d="M10.533 1.279c-5.18 0-9.407 4.14-9.407 9.279s4.226 9.279 9.407 9.279c2.234 0 4.29-.77 5.907-2.058l4.353 4.353a1 1 0 1 0 1.414-1.414l-4.344-4.344a9.157 9.157 0 0 0 2.077-5.816c0-5.14-4.226-9.28-9.407-9.28zm-7.407 9.279c0-4.006 3.302-7.28 7.407-7.28s7.407 3.274 7.407 7.28-3.302 7.279-7.407 7.279-7.407-3.273-7.407-7.28z"
+          ></path>
+        </svg>
+        <span>Search</span>
+      </a>
     </div>
 
     <div class="spotify-sidebar-item">
-        <a (click)="goToHome()">Home</a>
-    </div>
-    <div class="spotify-sidebar-item">
-        <a (click)="goToLibrary()">Your Library</a>
-    </div>
-    <div class="spotify-sidebar-item">
-        <a (click)="goToCreatePlaylist()"
-            >Create Playlist</a
+      <a
+        (click)="goToLibrary()"
+        title="Your Library"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          fill="currentColor"
         >
+          <path
+            d="M3 22a1 1 0 0 1-1-1V3a1 1 0 0 1 2 0v18a1 1 0 0 1-1 1zM15.5 2.134A1 1 0 0 0 14 3v18a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6.464a1 1 0 0 0-.5-.866l-6-3.464zM9 2a1 1 0 0 0-1 1v18a1 1 0 1 0 2 0V3a1 1 0 0 0-1-1z"
+          />
+        </svg>
+        <span>Your Library</span>
+      </a>
     </div>
+
+    <div class="spotify-sidebar-item">
+      <a
+        (click)="goToCreatePlaylist()"
+        title="Create Playlist"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          fill="currentColor"
+        >
+          <path
+            d="M12.75 11.25H17a.75.75 0 0 1 0 1.5h-4.25V17a.75.75 0 0 1-1.5 0v-4.25H7a.75.75 0 0 1 0-1.5h4.25V7a.75.75 0 0 1 1.5 0v4.25z"
+          />
+          <path
+            d="M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10zm-1.5 0a8.5 8.5 0 1 0-17 0 8.5 8.5 0 0 0 17 0z"
+          />
+        </svg>
+        <span>Create Playlist</span>
+      </a>
+    </div>
+  </div>
 </div>

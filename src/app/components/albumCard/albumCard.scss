@@ -1,30 +1,38 @@
 .spotify__albumCard {
-  /* --- БАЗОВЫЕ СТИЛИ (ОБЫЧНАЯ КАРТОЧКА) --- */
+  /* --- БАЗОВЫЕ СТИЛИ КОНТЕЙНЕРА --- */
   max-width: 100%;
   background-color: #181818;
   border-radius: 6px;
   padding: 16px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  position: relative; /* Важно для позиционирования кнопки */
-  display: flex;
-  flex-direction: column;
-  min-height: 260px; /* Высота обычной карточки */
-  gap: 16px;
+  position: relative;
+  min-height: 260px;
 
-  &:hover {
-    background-color: #282828;
-  }
-
+  /* Ссылки внутри карточки */
   a {
-    // text-decoration: none;
-    // color: inherit;
-    // display: flex;
-    // flex-direction: column;
-    // flex: 1; /* Растягиваем ссылку на всю высоту */
-    // gap: 16px;
     text-decoration: none;
     color: inherit;
+  }
+
+  /* Ховер эффект на саму карточку */
+  &:hover {
+    background-color: #282828;
+
+    /* Показываем кнопку Play при наведении на карточку */
+    .play-button-overlay {
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+    }
+  }
+
+  /* --- ВНУТРЕННЯЯ ОБЕРТКА (DOM Fix) --- */
+  .card-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 100%;
+    position: relative; /* Чтобы кнопка Play позиционировалась внутри контента */
   }
 
   /* 1. КАРТИНКА */
@@ -36,16 +44,16 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     position: relative;
     background-color: #333; /* Фолбэк цвет */
-    //
     display: flex;
     align-items: end;
-    //
+
     img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
 
+    /* Текст поверх цвета (если нет картинки) */
     .category-title-overlay {
       position: absolute;
       bottom: 10px;
@@ -71,58 +79,100 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-bottom: 10px !important;
+      margin-bottom: 4px !important; /* Чуть уменьшил отступ для компактности */
+      cursor: pointer;
     }
 
-    .description,
-    .album-meta {
+    .description {
       font-size: 14px;
       color: #b3b3b3;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+    .album-meta {
+      font-size: 14px;
+      color: #b3b3b3;
     }
   }
 
-  /* Скрываем кнопку Play для обычных карточек */
+  /* 3. КНОПКА PLAY (Базовые стили) */
   .play-button-overlay {
-    display: none;
+    display: flex;
+    position: absolute;
+    bottom: 0px; /* Позиционируем в правом нижнем углу card-inner */
+    right: 0px;
+
+    /* Скрыта по умолчанию для обычных карточек, если не TopResult (логика ниже) */
+    /* Но в твоем HTML для обычных карточек кнопка вообще не рендерится через @if */
+
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.3s ease;
+    z-index: 10;
+
+    button {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background-color: #1ed760;
+      color: black;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 8px 8px rgba(0, 0, 0, 0.3);
+      transition:
+        transform 0.2s ease,
+        background-color 0.2s;
+
+      &:hover {
+        transform: scale(1.05);
+        background-color: #1fdf64;
+      }
+    }
   }
 
   /* ============================================= */
-  /* MODIFIER: TOP RESULT (ТОП РЕЗУЛЬТАТ)         */
+  /* MODIFIER: TOP RESULT (ТОП РЕЗУЛЬТАТ)          */
   /* ============================================= */
   &.top-result-mode {
-    grid-column: 1 / -1; /* Занимает всю ширину колонки */
+    grid-column: 1 / -1; /* Растягиваем на всю ширину сетки */
     min-height: 240px;
     padding: 20px;
-    gap: 20px;
 
-    /* ВАЖНО: Оставляем вертикальную структуру, но меняем размеры */
-
-    a {
-      justify-content: flex-start; /* Прижимаем контент к верху */
+    /* Обновляем отступы внутри card-inner для Top Result */
+    .card-inner {
       gap: 20px;
+      justify-content: flex-start;
     }
 
-    /* Уменьшаем картинку для топ-результата (как на скрине) */
+    /* Уменьшаем картинку */
     .spotify__albumCard_thumbnail {
       width: 92px;
       height: 92px;
-      flex-grow: 0; /* Запрещаем растягиваться */
+      flex-grow: 0;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     }
 
-    /* Увеличиваем текст */
+    /* Увеличиваем текст и добавляем стили бейджа */
     .spotify__albumCard_text {
-      padding-top: 15px;
+      padding-top: 0; /* Убираем лишний паддинг, так как есть gap */
+      justify-content: center;
+
       .title {
-        font-size: 32px; /* Крупный заголовок */
+        font-size: 32px;
         font-weight: 700;
-        white-space: normal; /* Разрешаем перенос */
+        white-space: normal;
         line-height: 1.2;
-        margin-bottom: 6px;
+        margin-bottom: 6px !important;
       }
 
       .description {
@@ -130,63 +180,41 @@
         color: #b3b3b3;
         font-weight: 500;
       }
-    }
 
-    /* --- ЗЕЛЕНАЯ КНОПКА PLAY --- */
-    .play-button-overlay {
-      display: flex; /* Делаем видимым блок */
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
+      /* --- НОВОЕ: Стили для типа сущности (ALBUM/SONG) --- */
+      .entity-badge {
+        margin-top: 12px;
 
-      /* Анимация появления */
-      opacity: 0;
-      transform: translateY(8px);
-      transition: all 0.3s ease;
-      z-index: 10;
-
-      button {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        background-color: #1ed760; /* Зеленый Spotify */
-        color: black;
-        border: none;
-
-        /* Центрирование треугольника */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        font-size: 20px;
-        cursor: pointer;
-        box-shadow: 0 8px 8px rgba(0, 0, 0, 0.3);
-        transition:
-          transform 0.2s ease,
-          background-color 0.2s;
-
-        &:hover {
-          transform: scale(1.05);
-          background-color: #1fdf64;
+        .chip {
+          background-color: rgba(0, 0, 0, 0.2);
+          color: #fff;
+          padding: 6px 12px;
+          border-radius: 500px; /* Pill shape */
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 0.5px;
+          text-transform: uppercase;
+          display: inline-block;
         }
       }
     }
 
-    /* Показываем кнопку при наведении на ВСЮ карточку */
-    &:hover {
-      background-color: #282828;
-
-      .play-button-overlay {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    /* Позиция кнопки Play для Top Result */
+    .play-button-overlay {
+      bottom: 0px;
+      right: 0px;
+      /* В Top Result кнопка должна быть видна всегда или при ховере? 
+         В оригинале Spotify на десктопе она появляется при ховере, 
+         но если isPlaying, то видна всегда. */
     }
   }
 
-  /* ФИКСИРОВАННАЯ ШИРИНА (для слайдеров и т.д.) */
+  /* ============================================= */
+  /* MODIFIER: FIXED WIDTH (для слайдеров)         */
+  /* ============================================= */
   &.fixed-width {
-    width: 210px; /* Жесткая ширина */
-    min-width: 210px; /* Запрещаем сжиматься */
+    width: 210px;
+    min-width: 210px;
     flex-shrink: 0;
 
     .spotify__albumCard_thumbnail {

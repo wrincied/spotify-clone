@@ -25,6 +25,7 @@ export interface AlbumInterface {
   thumbnail: any; // <--- ТВОЕ НОВОЕ ПОЛЕ
   songs: SongInterface[];
   releaseYear?: string;
+  type?: 'album' | 'single' | 'ep' | 'compilation';
 }
 export interface CategoryInterface {
   name: string;
@@ -41,7 +42,6 @@ export interface CardItemInterface {
   subtitle?: string; // Сюда Album.description или "Rock Mix"
   image?: string; // Сюда Album.cover или Song.thumbnail
   color?: string; // Сюда Category.color (для полоски снизу)
-  type: 'album' | 'playlist' | 'category' | 'focus'; // Чтобы понимать, куда кликать
 }
 
 export interface ArtistInterface {

@@ -9,6 +9,7 @@ import {
   Output,
   EventEmitter,
   inject,
+  Input,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
@@ -20,6 +21,7 @@ import { AlbumInterface, SongInterface } from '../../interface/models';
 import { SongRow } from '../../components/songRow/songRow';
 import { MusicStoreService } from '../../services/music-store/music-store';
 import { PlayerService } from '../../services/playerService/player-service';
+import { NavigationService } from '../../services/navigationService/navigation-service';
 
 @Component({
   selector: 'app-playlist',
@@ -47,7 +49,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private observer?: IntersectionObserver;
   private subs: Subscription = new Subscription();
-
+  private nav = inject(NavigationService);
   currentTrack: SongInterface | null = null;
   isPlayerPlaying: boolean = false;
 
@@ -65,7 +67,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
         this.api.getPlaylistById(id).subscribe({
           next: (albumData) => {
             // «Склейка»: получаем полные данные песен из Store [cite: 2025-12-14]
-            const allSongs = this.musicStore.currentSongs;
+            const allSongs = this.musicStore.currentSongs();
 
             const enrichedSongs = albumData.songs.map((albumSong: any) => {
               const songId = albumSong.id || albumSong;
@@ -135,6 +137,18 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
       (s) => String(s.id) === String(this.currentTrack?.id),
     );
     return isTrackInAlbum && this.isPlayerPlaying;
+  }
+  onArtistClick(event: Event): void {
+    // Данные об артисте находятся внутри загруженного объекта album [cite: 2025-12-14]
+    const idToNavigate = this.album?.artistId;
+
+    if (idToNavigate) {
+      event.stopPropagation();
+      console.log('🚀 [Playlist] Navigating to artist:', idToNavigate);
+      this.nav.goToArtist(idToNavigate);
+    } else {
+      console.error('❌ [Playlist] artistId not found in album data');
+    }
   }
 
   private setDominantColor(imageUrl: string) {

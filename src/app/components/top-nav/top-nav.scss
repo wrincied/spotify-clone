@@ -1,5 +1,6 @@
 .spotify-top-nav {
-  width: 80%;
+  /* --- БАЗОВЫЕ ДЕСКТОПНЫЕ СТИЛИ --- */
+  width: 80%; /* По умолчанию оставляем место под сайдбар */
   left: 20%;
   height: var(--top-nav-height);
   background-color: #101010;
@@ -15,17 +16,40 @@
   color: lightgray;
   font-weight: 500;
   font-size: 18px;
+  transition:
+    width 0.3s ease,
+    left 0.3s ease,
+    padding 0.3s ease;
+
+  /* --- АДАПТИВ --- */
+
+  /* 1. Планшеты и ноутбуки (< 1024px) */
+  /* Сайдбар обычно скрывается, хедер занимает всю ширину */
+  @media (max-width: 1024px) {
+    width: 100%;
+    left: 0;
+    padding: 0 24px;
+  }
+
+  /* 2. Мобильные устройства (< 768px) */
+  @media (max-width: 768px) {
+    padding: 0 16px;
+  }
 
   /* ------------------------------- */
-  /* Кнопки назад / вперед          */
+  /* Кнопки назад / вперед           */
   /* ------------------------------- */
-
   &__history {
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: row;
     gap: 0 20px;
+
+    /* Скрываем навигацию истории на маленьких экранах */
+    @media (max-width: 600px) {
+      display: none;
+    }
 
     button {
       width: 40px;
@@ -35,13 +59,16 @@
       background-color: rgba(0, 0, 0, 0.7);
       color: #ffffff;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition:
         transform 0.2s ease,
         background-color 0.2s ease;
 
       &:hover {
         background-color: rgba(0, 0, 0, 0.3);
-        transform: all(1.05);
+        transform: scale(1.05); /* Исправлена ошибка all(1.05) */
       }
     }
   }
@@ -49,7 +76,6 @@
   /* ------------------------------- */
   /* Поиск                           */
   /* ------------------------------- */
-
   &__search {
     flex: 1;
     max-width: 500px;
@@ -58,13 +84,22 @@
     margin: 0 20px;
     position: relative;
 
-    /* Иконка поиска */
+    /* На мобильных уменьшаем отступы, чтобы влезло */
+    @media (max-width: 600px) {
+      margin: 0 10px;
+      margin-right: 0;
+    }
+    @media (max-width: 768px) {
+      display: none;
+    }
+
     &-icon {
       position: absolute;
       left: 12px;
       top: 50%;
       transform: translateY(-50%);
       pointer-events: none;
+      display: flex;
 
       img {
         width: 24px;
@@ -73,7 +108,6 @@
       }
     }
 
-    /* Поле ввода */
     &-input {
       width: 100%;
       padding: 12px 15px 12px 51px;
@@ -85,41 +119,54 @@
       background-color: white;
       color: #121212;
       cursor: pointer;
+      transition: all 0.2s ease;
+
+      /* Уменьшаем шрифт на мобильных */
+      @media (max-width: 480px) {
+        font-size: 14px;
+        padding-left: 42px;
+        padding-right: 10px;
+      }
 
       &::placeholder {
         color: #757575;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+
+        /* На очень узких экранах скрываем текст плейсхолдера */
+        @media (max-width: 380px) {
+          color: transparent;
+        }
       }
     }
 
-    /* Кнопка очистки */
     &-clear {
       position: absolute;
       right: 12px;
       top: 50%;
       transform: translateY(-50%);
-
       width: 20px;
       height: 20px;
-
       border-radius: 50%;
-      background: #fff;
+      background: #eee;
       color: #000;
-
       font-size: 12px;
       font-weight: bold;
-
       display: flex;
       align-items: center;
       justify-content: center;
-
       cursor: pointer;
+
+      &:hover {
+        background: #ddd;
+      }
     }
   }
 
   /* ------------------------------- */
   /* Авторизация                     */
   /* ------------------------------- */
-
   &__auth {
     display: flex;
     align-items: center;
@@ -127,15 +174,25 @@
     min-width: 180px;
     justify-content: flex-end;
 
-    /* Sign Up */
+    /* Сжимаем блок на планшетах/мобильных */
+    @media (max-width: 768px) {
+      gap: 12px;
+      min-width: auto;
+    }
+
     &-signup {
       cursor: pointer;
       color: #a7a7a7;
       white-space: nowrap;
-
+      font-weight: 700;
       transition:
         color 0.2s,
         transform 0.2s;
+
+      /* Скрываем Sign Up на очень маленьких экранах */
+      @media (max-width: 400px) {
+        display: none;
+      }
 
       &:hover {
         color: white;
@@ -143,7 +200,6 @@
       }
     }
 
-    /* Log In */
     &-btn {
       background-color: white;
       padding: 12px 32px;
@@ -152,10 +208,16 @@
       font-weight: 700;
       white-space: nowrap;
       cursor: pointer;
-
+      border: none;
       transition:
         transform 0.2s,
         background-color 0.2s;
+
+      /* Компактная кнопка на мобильных */
+      @media (max-width: 768px) {
+        padding: 8px 20px;
+        font-size: 14px;
+      }
 
       &:hover {
         background-color: #f0f0f0;
