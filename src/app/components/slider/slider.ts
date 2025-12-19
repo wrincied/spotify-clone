@@ -1,137 +1,139 @@
 import {
-    Component,
-    HostListener,
-    Input,
-    ElementRef,
-    ViewChild,
-    AfterViewInit,
-    OnChanges,
+  Component,
+  Input,
+  ElementRef,
+  ViewChild,
+  AfterViewInit,
+  OnChanges,
+  OnDestroy,
+  inject,
+  NgZone,
 } from '@angular/core';
-import { albumCard } from '../albumCard/albumCard';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import {
-    AlbumInterface,
-    CategoryInterface,
-} from '../../interface/models';
+import { albumCard } from '../albumCard/albumCard';
+import { AlbumInterface, CategoryInterface } from '../../interface/models';
 
 @Component({
-    selector: 'app-slider',
-    standalone: true,
-    imports: [albumCard, CommonModule],
-    templateUrl: './slider.html',
-    styleUrls: ['./slider.scss'],
+  selector: 'app-slider',
+  standalone: true,
+  imports: [albumCard, CommonModule],
+  templateUrl: './slider.html',
+  styleUrls: ['./slider.scss'],
 })
-export class Slider implements AfterViewInit, OnChanges {
-    constructor(private router: Router) {}
+export class Slider implements AfterViewInit, OnChanges, OnDestroy {
+  @Input() album: AlbumInterface[] = [];
+  @Input() category: CategoryInterface[] = [];
 
-    @Input() album: AlbumInterface[] = [];
-    @Input() category: CategoryInterface[] = [];
+  // Ссылка на div-контейнер, который скроллится
+  @ViewChild('slider', { static: false })
+  slider!: ElementRef<HTMLDivElement>;
 
-    @ViewChild('slider', { static: false })
-    slider!: ElementRef<HTMLDivElement>;
+  // Инжектим зону для оптимизации производительности
+  private zone = inject(NgZone);
 
-    // Флаги видимости кнопок
-    showLeftBtn = false;
-    showRightBtn = false;
+  showLeftBtn = false;
+  showRightBtn = false;
 
-    ngAfterViewInit() {
-        // Первичная проверка не требуется, кнопки появятся при наведении
-    }
-
-    ngOnChanges() {
-        // Сбрасываем кнопки при изменении данных
-        this.hideButtons();
-    }
-
-    // Основная логика при движении мыши
-    onMouseMove(e: MouseEvent) {
-        if (!this.slider) return;
-        const el = this.slider.nativeElement;
-
-        // Получаем размеры контейнера и координаты курсора
-        const rect = (
-            e.currentTarget as HTMLElement
-        ).getBoundingClientRect();
-        const x = e.clientX - rect.left; // X относительно контейнера
-        const width = rect.width;
-
-        // Проверяем возможность скролла в принципе
-        const canScrollLeft = el.scrollLeft > 0;
-        // Math.ceil используется для исправления багов с дробными пикселями при масштабировании
-        const canScrollRight =
-            Math.ceil(el.scrollLeft + el.clientWidth) <
-            el.scrollWidth;
-
-        // Логика разделения зон
-        if (x < width / 2) {
-            // Мышь в левой половине
-            this.showLeftBtn = canScrollLeft;
-            this.showRightBtn = false;
-        } else {
-            // Мышь в правой половине
-            this.showLeftBtn = false;
-            this.showRightBtn = canScrollRight;
-        }
-    }
-
-    // Скрытие кнопок при уходе мыши с компонента
-    hideButtons() {
-        this.showLeftBtn = false;
-        this.showRightBtn = false;
-    }
-
-    scrollLeft(container: HTMLElement) {
-        container.scrollBy({
-            left: -250,
-            behavior: 'smooth',
+  ngAfterViewInit() {
+    // ВАЖНО: Подписываемся на скролл вне зоны Angular [cite: 2025-12-14]
+    // Это предотвращает лишние циклы Change Detection на каждое движение колеса
+    this.zone.runOutsideAngular(() => {
+      if (this.slider && this.slider.nativeElement) {
+        this.slider.nativeElement.addEventListener('wheel', this.onWheel, {
+          passive: false, // Разрешаем preventDefault()
         });
-        // Небольшой таймаут, чтобы обновить состояние, если мы доскроллили до края
-        setTimeout(
-            () =>
-                this.updateButtonStateAfterScroll(
-                    container,
-                ),
-            350,
-        );
-    }
+      }
+    });
+  }
 
-    scrollRight(container: HTMLElement) {
-        container.scrollBy({
-            left: 250,
-            behavior: 'smooth',
-        });
-        setTimeout(
-            () =>
-                this.updateButtonStateAfterScroll(
-                    container,
-                ),
-            350,
-        );
-    }
+  ngOnChanges() {
+    this.hideButtons();
+  }
 
-    // Проверка после клика (если дошли до края, кнопка должна исчезнуть даже под курсором)
-    private updateButtonStateAfterScroll(el: HTMLElement) {
-        const canScrollLeft = el.scrollLeft > 0;
-        const canScrollRight =
-            Math.ceil(el.scrollLeft + el.clientWidth) <
-            el.scrollWidth;
-
-        if (this.showLeftBtn && !canScrollLeft)
-            this.showLeftBtn = false;
-        if (this.showRightBtn && !canScrollRight)
-            this.showRightBtn = false;
+  ngOnDestroy() {
+    // Обязательно удаляем слушатель, чтобы избежать утечек памяти
+    if (this.slider && this.slider.nativeElement) {
+      this.slider.nativeElement.removeEventListener('wheel', this.onWheel);
     }
+  }
 
-    @HostListener('wheel', ['$event'])
-    onWheel(e: WheelEvent) {
-        if (Math.abs(e.deltaX) > Math.abs(e.deltaY))
-            e.preventDefault();
-    }
+  /**
+   * УМНЫЙ СКРОЛЛ (Smart Wheel Handler)
+   * 1. Если это тачпад — разрешаем нативный скролл (он плавный и инерционный).
+   * 2. Если это мышь (вертикальное колесо) — блокируем скролл страницы и крутим слайдер горизонтально.
+   */
+  private onWheel = (e: WheelEvent) => {
+    // Эвристика для определения Тачпада:
+    // Тачпады обычно шлют deltaMode 0 (пиксели) и маленькие значения deltaY (< 50)
+    const isTouchpad = Math.abs(e.deltaY) < 50 && e.deltaMode === 0;
 
-    onNavigate(item: any) {
-        if (item.songs)
-            this.router.navigate(['/album', item.id]);
-        else this.router.navigate(['/song', item.id]);
+    // Если это тачпад или горизонтальный скролл (например, shift + wheel) — выходим.
+    // Пусть браузер обрабатывает это нативно.
+    if (isTouchpad || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+
+    // Если это вертикальный скролл МЫШКОЙ:
+    if (e.deltaY !== 0) {
+      // 1. Останавливаем прокрутку страницы вниз
+      e.preventDefault();
+
+      // 2. Сами крутим слайдер вбок (транслируем Y в X)
+      if (this.slider && this.slider.nativeElement) {
+        this.slider.nativeElement.scrollLeft += e.deltaY;
+
+        // Опционально: можно добавить логику обновления кнопок, но лучше это делать через debounce
+      }
     }
+  };
+
+  // --- ЛОГИКА КНОПОК И МЫШИ (Оставлена без изменений, она корректна) ---
+
+  onMouseMove(e: MouseEvent) {
+    if (!this.slider) return;
+    const el = this.slider.nativeElement;
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const width = rect.width;
+
+    const canScrollLeft = el.scrollLeft > 0;
+    const canScrollRight =
+      Math.ceil(el.scrollLeft + el.clientWidth) < el.scrollWidth;
+
+    if (x < width / 2) {
+      this.showLeftBtn = canScrollLeft;
+      this.showRightBtn = false;
+    } else {
+      this.showLeftBtn = false;
+      this.showRightBtn = canScrollRight;
+    }
+  }
+
+  hideButtons() {
+    this.showLeftBtn = false;
+    this.showRightBtn = false;
+  }
+
+  scrollLeft(container: HTMLElement) {
+    container.scrollBy({
+      left: -250,
+      behavior: 'smooth',
+    });
+    setTimeout(() => this.updateButtonStateAfterScroll(container), 350);
+  }
+
+  scrollRight(container: HTMLElement) {
+    container.scrollBy({
+      left: 250,
+      behavior: 'smooth',
+    });
+    setTimeout(() => this.updateButtonStateAfterScroll(container), 350);
+  }
+
+  private updateButtonStateAfterScroll(el: HTMLElement) {
+    const canScrollLeft = el.scrollLeft > 0;
+    const canScrollRight =
+      Math.ceil(el.scrollLeft + el.clientWidth) < el.scrollWidth;
+
+    if (this.showLeftBtn && !canScrollLeft) this.showLeftBtn = false;
+    if (this.showRightBtn && !canScrollRight) this.showRightBtn = false;
+  }
 }

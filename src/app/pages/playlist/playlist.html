@@ -50,8 +50,16 @@
         />
         <div class="album_info">
           <h1>{{ album.title }}</h1>
-          <p class="active">{{ album.description }}</p>
-          <p>{{ album.songs.length }} songs</p>
+          @if (album.description) {
+            <p
+            class="description active"
+        
+              (click)="onArtistClick($event)"
+            >
+              {{ album.description }}
+            </p>
+          }
+          <p class="description-lenght">{{ album.songs.length }} songs</p>
         </div>
       </div>
     </div>

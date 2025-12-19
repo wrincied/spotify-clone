@@ -30,7 +30,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.dataSubscription = this.musicStore.albums$.subscribe({
       next: (albums) => {
         this.albums = albums;
-        this.categories = this.musicStore.currentCategories; // Или подписка на categories$
+        this.categories = this.musicStore.currentCategories(); // Или подписка на categories$
         this.hasError = false;
         this.cdr.detectChanges();
       },

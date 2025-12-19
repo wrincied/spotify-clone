@@ -134,6 +134,14 @@
           margin: 0;
           font-size: 14px;
           font-weight: 500;
+          &.description {
+            cursor: pointer;
+            &:hover {
+              text-decoration: underline;
+            }
+          }
+          &.description-lenght {
+          }
         }
       }
     }
@@ -151,7 +159,7 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     align-items: center;
-    padding: 0 8px 0px 26px;
+    padding: 0 22px 0px 26px;
     height: 32px;
     color: #b3b3b3;
     font-size: 14px;
@@ -162,7 +170,7 @@
       width: 30px;
       min-width: 30px;
       text-align: center;
-      margin-right: 10px;
+      margin-right: 15px;
       flex-shrink: 0;
     }
     .col-placeholder {
@@ -183,7 +191,6 @@
       justify-content: flex-end;
       img {
         width: 16px;
-        filter: invert(0.7);
       }
     }
   }

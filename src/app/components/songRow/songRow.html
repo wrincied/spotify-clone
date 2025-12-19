@@ -181,7 +181,7 @@
         @if (song.artistId) {
           <a
             class="artist-link"
-            (click)="goToArtist($event, song.artistId)"
+            (click)="onCardClick(song.artistId)"
           >
             <span>{{ song.artist }}</span>
           </a>

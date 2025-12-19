@@ -2,8 +2,11 @@
   class="spotify__albumCard"
   [class.top-result-mode]="isTopResult"
   [class.fixed-width]="fixedSize"
+  (click)="onCardClick()"
+  role="button"
+  tabindex="0"
 >
-  <a [routerLink]="link">
+  <div class="card-inner">
     <div
       class="spotify__albumCard_thumbnail"
       [style.background-color]="backgroundColor"
@@ -15,8 +18,7 @@
           loading="lazy"
           alt="Cover"
         />
-      }
-      @if (!playlistThumbnail && backgroundColor) {
+      } @else if (backgroundColor) {
         <div
           class="category-title-overlay"
           appFitText
@@ -39,11 +41,30 @@
       </p>
 
       @if (description) {
-        <p class="description">{{ description }}</p>
+        <p
+          class="description"
+          (click)="onArtistClick($event)"
+        >
+          {{ description }}
+        </p>
       }
 
-      @if (getYear(); as year) {
-        <div class="album-meta">{{ year }} • Album</div>
+      @if (type !== 'category') {
+        @if (isTopResult) {
+          <div class="entity-badge">
+            <span class="chip">{{ type || 'album' | titlecase }}</span>
+          </div>
+
+        } @else if (getYear(); as year) {
+          <div class="album-meta">
+            {{ year }} • {{ type || 'album' | titlecase }}
+          </div>
+
+        } @else {
+          <div class="album-meta">
+            {{ type || 'album' | titlecase }}
+          </div>
+        }
       }
     </div>
 
@@ -52,6 +73,7 @@
         <button
           class="play-btn"
           (click)="handlePlay($event)"
+          aria-label="Play"
         >
           @if (isPlaying) {
             <img
@@ -70,5 +92,5 @@
         </button>
       </div>
     }
-  </a>
+  </div>
 </div>

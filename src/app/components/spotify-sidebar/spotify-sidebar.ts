@@ -10,19 +10,24 @@ import { SpotifyService } from '../../services/spotifyService/spotify-service';
 })
 export class SpotifySidebar {
   @Input() isActiveSearch = false;
-  constructor(private spotifyService: SpotifyService, private router: Router) {}
+  constructor(
+    private spotifyService: SpotifyService,
+    private router: Router,
+  ) {}
 
   goToHome() {
     this.spotifyService.clearSearch();
     this.router.navigate(['/']);
   }
   goToLibrary() {
-  this.spotifyService.clearSearch();
-  this.router.navigate(['/library']);
-}
-
-goToCreatePlaylist() {
-  this.spotifyService.clearSearch();
-  this.router.navigate(['/create-playlist']);
-}
+    this.spotifyService.clearSearch();
+    this.router.navigate(['/library']);
+  }
+  goToSearch() {
+    this.router.navigate(['/search']);
+  }
+  goToCreatePlaylist() {
+    this.spotifyService.clearSearch();
+    this.router.navigate(['/create-playlist']);
+  }
 }

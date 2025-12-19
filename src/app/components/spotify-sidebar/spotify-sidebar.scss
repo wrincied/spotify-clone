@@ -1,42 +1,122 @@
 .spotify-sidebar {
-            height: 100%;
-            background-color: #000;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
+  /* --- DESKTOP --- */
+  height: 100%;
+  background-color: #000;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  width: 100%;
 
-            &::-webkit-scrollbar {
-                width: 8px;
-            }
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #5a5a5a;
+    border-radius: 4px;
+  }
 
-            &::-webkit-scrollbar-thumb {
-                background-color: #5a5a5a;
-                border-radius: 4px;
-            }
+  .spotify-sidebar-logo {
+    padding: 24px;
+    margin-bottom: 10px;
+    img {
+      display: block;
+    }
+  }
 
-            .spotify-sidebar-logo {
-                padding: 16px;
-            }
+  .spotify-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    padding: 0 8px;
+  }
 
-            .spotify-sidebar-item {
-                padding: 12px;
+  .spotify-sidebar-item {
+    margin-bottom: 8px;
 
-                a {
-                    display: flex;
-                    align-items: center;
-                    height: 40px;
-                    padding-left: 12px;
-                    color: #b3b3b3;
-                    font-size: 16px;
-                    font-weight: 700;
-                    text-decoration: none;
-                    transition: color 0.25s ease;
-                    border-radius: 4px;
-                    cursor: pointer;
+    /* Скрываем кнопку поиска на ПК */
+    &.mobile-only {
+      display: none;
+    }
 
-                    &:hover {
-                        color: white;
-                    }
-                }
-            }
+    a {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      height: 40px;
+      padding: 0 16px;
+      color: #b3b3b3;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: color 0.25s ease;
+      border-radius: 4px;
+      cursor: pointer;
+
+      svg {
+        min-width: 24px;
+        transition: fill 0.2s;
+      }
+      &:hover {
+        color: white;
+      }
+    }
+  }
+
+  /* --- MOBILE ADAPTIVE (< 768px) --- */
+  @media (max-width: 768px) {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px; /* Высота таббара */
+    flex-direction: row;
+    z-index: 1000;
+    border-top: 1px solid #282828;
+    background-color: rgba(0, 0, 0, 0.95); /* Чуть прозрачности */
+    padding: 0;
+    overflow: hidden;
+
+    .spotify-sidebar-logo {
+      display: none;
+    }
+
+    .spotify-sidebar-nav {
+      flex-direction: row;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .spotify-sidebar-item {
+      margin: 0;
+      flex: 1;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      /* Показываем поиск на мобильных */
+      &.mobile-only {
+        display: flex;
+      }
+
+      a {
+        justify-content: center;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+
+        /* Скрываем текст, оставляем иконки */
+        span {
+          display: none;
         }
+        svg {
+          width: 28px;
+          height: 28px;
+          color: white;
+        }
+      }
+    }
+  }
+}
