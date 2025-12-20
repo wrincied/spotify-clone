@@ -55,6 +55,7 @@ export class AdminComponent implements OnInit {
       artistId: [''],
       categoryId: [''],
       description: [''], // Artist name text
+      albumId: [''],
     });
 
     this.albumForm = this.fb.group({
@@ -128,6 +129,7 @@ export class AdminComponent implements OnInit {
       payload.url = val.url;
       payload.thumbnail = val.thumbnail;
       payload.artist = val.description; // SongInterface.artist
+      payload.albumId = val.albumId;
     } else if (type === 'albums') {
       payload.title = val.name;
       payload.cover = val.thumbnail;

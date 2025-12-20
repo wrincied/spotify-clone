@@ -2,61 +2,64 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
 export const AuthController = {
-  /**
-   * Вход в админ-панель [cite: 2025-12-14]
-   */
   login: async (req, res) => {
     try {
-      const { password } = req.body;
+      const { username, password } = req.body; // Добавили username
+      const adminUsername = process.env.ADMIN_USERNAME; // Должно быть в .env
       const adminHash = process.env.ADMIN_PASSWORD_HASH;
       const jwtSecret = process.env.JWT_SECRET;
 
-      // 1. Валидация входных данных [cite: 2025-12-14]
-      if (!password) {
+      // 1. Валидация входных данных
+      if (!username || !password) {
         return res
           .status(400)
-          .json({ error: true, message: 'Password is required' });
+          .json({ error: true, message: 'Username and password are required' });
       }
 
-      // 2. Проверка конфигурации сервера [cite: 2025-12-14]
-      if (!adminHash || !jwtSecret) {
+      // 2. Проверка конфигурации сервера
+      if (!adminUsername || !adminHash || !jwtSecret) {
         console.error(
-          '[AUTH] Critical: Missing environment variables (HASH or SECRET)',
+          '[AUTH] Critical: Missing environment variables (USER, HASH or SECRET)',
         );
         return res
           .status(500)
           .json({ error: true, message: 'Server configuration error' });
       }
 
-      // 3. Безопасное сравнение хешей [cite: 2025-12-14]
-      const isValid = await bcrypt.compare(password, adminHash);
+      // 3. Проверка логина и пароля
+      // Сначала проверяем логин (строгое соответствие)
+      const isUsernameValid = username === adminUsername;
 
-      if (!isValid) {
+      // Затем проверяем пароль через bcrypt
+      const isPasswordValid = await bcrypt.compare(password, adminHash);
+
+      // Если хотя бы одно поле неверно — выдаем общую ошибку 401
+      if (!isUsernameValid || !isPasswordValid) {
         console.warn(
-          `[AUTH] Failed login attempt at ${new Date().toISOString()}`,
+          `[AUTH] Failed login attempt for user: "${username}" at ${new Date().toISOString()}`,
         );
         return res
           .status(401)
-          .json({ error: true, message: 'Invalid credentials' });
+          .json({ error: true, message: 'Invalid username or password' });
       }
 
-      // 4. Генерация JWT [cite: 2025-12-14]
+      // 4. Генерация JWT (добавляем username в токен)
       const token = jwt.sign(
-        { role: 'admin', timestamp: Date.now() },
+        { username: adminUsername, role: 'admin' },
         jwtSecret,
         { expiresIn: '24h' },
       );
 
-      // 5. Установка HttpOnly куки [cite: 2025-12-14]
+      // 5. Установка HttpOnly куки
       res.cookie('admin_token', token, {
-        httpOnly: true, // Защита от XSS
-        sameSite: 'lax', // Защита от CSRF
-        maxAge: 86400000, // 24 часа
-        secure: process.env.NODE_ENV === 'production', // Только HTTPS в проде
+        httpOnly: true,
+        sameSite: 'lax',
+        maxAge: 86400000,
+        secure: process.env.NODE_ENV === 'production',
         path: '/',
       });
 
-      console.log('[AUTH] Admin logged in successfully');
+      console.log(`[AUTH] Admin "${adminUsername}" logged in successfully`);
       return res.json({ error: false, isAdmin: true });
     } catch (error) {
       console.error(
@@ -69,22 +72,16 @@ export const AuthController = {
     }
   },
 
-  /**
-   * Выход: очистка куки [cite: 2025-12-14]
-   */
   logout: (req, res) => {
     res.clearCookie('admin_token', { path: '/' });
     res.json({ error: false, message: 'Logged out successfully' });
   },
 
-  /**
-   * Проверка текущего статуса (используется при F5 в Angular) [cite: 2025-12-14]
-   */
   getMe: (req, res) => {
-    // Если middleware adminAuth пропустил запрос сюда, значит isAdmin гарантированно true [cite: 2025-12-14]
     res.json({
       error: false,
       isAdmin: true,
+      username: req.admin?.username || 'admin', // Если middleware прокидывает данные из JWT
       checkTime: new Date().toISOString(),
     });
   },

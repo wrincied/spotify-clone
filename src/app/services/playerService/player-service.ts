@@ -3,7 +3,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { SongInterface } from '../../interface/models';
 
 @Injectable({
-  providedIn: 'root', // Синглтон на уровне всего приложения
+  providedIn: 'root',
 })
 export class PlayerService {
   private injector = inject(Injector);
@@ -15,13 +15,14 @@ export class PlayerService {
   readonly currentTime = signal<number>(0);
   readonly duration = signal<number>(0);
   readonly isBuffering = signal<boolean>(false);
-  readonly isLooping = signal<boolean>(false);
+  readonly isLooping = signal<boolean>(false); // Повтор одного трека
+  readonly isShuffling = signal<boolean>(false); // <--- НОВЫЙ СИГНАЛ (Shuffle)
   readonly currentCover = signal<string>('');
 
   private audio = new Audio();
   private readonly API_URL = 'http://localhost:3000/';
 
-  // === ПУБЛИЧНЫЕ ПОТОКИ (для async pipe) ===
+  // === ПУБЛИЧНЫЕ ПОТОКИ ===
   readonly currentTrack$ = toObservable(this.currentTrack, {
     injector: this.injector,
   });
@@ -35,14 +36,17 @@ export class PlayerService {
   readonly currentCover$ = toObservable(this.currentCover, {
     injector: this.injector,
   });
-  // Вычисляемое свойство для рендера плеера в app.html
-  readonly isVisible = computed(() => !!this.currentTrack());
   readonly isBuffering$ = toObservable(this.isBuffering, {
     injector: this.injector,
   });
   readonly isLooping$ = toObservable(this.isLooping, {
     injector: this.injector,
   });
+  readonly isShuffling$ = toObservable(this.isShuffling, {
+    injector: this.injector,
+  }); // <--- ПОТОК
+
+  readonly isVisible = computed(() => !!this.currentTrack());
 
   private queue = signal<SongInterface[]>([]);
   private currentIndex = signal<number>(0);
@@ -51,11 +55,9 @@ export class PlayerService {
     this.audio.volume = 1;
     this.audio.preload = 'metadata';
     this.initAudioListeners();
-    console.log('!!! PlayerService Engine Started. ID:', this.instanceId);
   }
 
   private initAudioListeners() {
-    // Синхронизация физического Audio API с Angular Signals
     this.audio.addEventListener('play', () => this.isPlaying.set(true));
     this.audio.addEventListener('pause', () => this.isPlaying.set(false));
     this.audio.addEventListener('timeupdate', () =>
@@ -66,59 +68,47 @@ export class PlayerService {
     );
     this.audio.addEventListener('waiting', () => this.isBuffering.set(true));
     this.audio.addEventListener('playing', () => this.isBuffering.set(false));
+
+    // Логика окончания трека
     this.audio.addEventListener('ended', () => {
       if (this.isLooping()) {
+        // Если включен повтор одной песни
         this.audio.currentTime = 0;
         this.audio.play();
       } else {
+        // Иначе переключаем
         this.nextTrack();
       }
     });
   }
 
-  /**
-   * Умный запуск трека
-   */
   play(song: SongInterface, coverUrl?: string) {
     const current = this.currentTrack();
-
     if (current && String(current.id) === String(song.id)) {
       this.togglePlay();
       return;
     }
-
-    // Проверка на валидность URL перед запуском
-    if (!song.url) {
-      console.error('❌ [Player] Ошибка: У песни нет URL!', song);
-      return;
-    }
+    if (!song.url) return;
 
     this.audio.pause();
     this.currentTrack.set(song);
     this.currentCover.set(coverUrl || song.thumbnail || '');
 
-    // Умное формирование пути [cite: 2025-12-14]
     let fullUrl: string;
     if (song.url.startsWith('http')) {
       fullUrl = song.url;
     } else {
-      // Убираем 'public/' или 'music/' из начала строки, чтобы не дублировать их
-      // Это решает проблему http://localhost:3000/public/music/public/music/song.mp3
       const cleanPath = song.url
-        .replace(/^\/+/, '') // убираем слэш в начале
-        .replace(/^public\//, '') // убираем public/
-        .replace(/^music\//, ''); // убираем music/
-
+        .replace(/^\/+/, '')
+        .replace(/^public\//, '')
+        .replace(/^music\//, '');
       fullUrl = `${this.API_URL}public/music/${cleanPath}`;
     }
-
-    console.log('🎵 [Player] Loading Source:', fullUrl);
 
     this.audio.src = fullUrl;
     this.audio.load();
     this.audio.play().catch((err) => {
-      console.error('❌ Playback Error:', err);
-      // Сбрасываем состояние, если файл не загрузился
+      console.error('Playback Error:', err);
       this.isPlaying.set(false);
     });
   }
@@ -139,13 +129,31 @@ export class PlayerService {
     this.play(tracks[startIndex], coverUrl);
   }
 
+  // --- ОБНОВЛЕННАЯ ЛОГИКА СЛЕДУЮЩЕГО ТРЕКА ---
   nextTrack() {
     const q = this.queue();
-    const nextIdx = this.currentIndex() + 1;
+    if (q.length === 0) return;
+
+    let nextIdx: number;
+
+    // Если включен Shuffle
+    if (this.isShuffling()) {
+      // Генерируем случайный индекс
+      // Если треков > 1, стараемся не выбирать текущий трек повторно
+      do {
+        nextIdx = Math.floor(Math.random() * q.length);
+      } while (q.length > 1 && nextIdx === this.currentIndex());
+    } else {
+      // Обычный порядок
+      nextIdx = this.currentIndex() + 1;
+    }
+
+    // Проверка границ (для обычного порядка) или воспроизведение (для Shuffle)
     if (nextIdx < q.length) {
       this.currentIndex.set(nextIdx);
       this.play(q[nextIdx]);
     } else {
+      // Конец списка (только если не Shuffle и не Loop)
       this.isPlaying.set(false);
     }
   }
@@ -154,15 +162,16 @@ export class PlayerService {
     if (this.audio.currentTime > 3) {
       this.audio.currentTime = 0;
     } else if (this.currentIndex() > 0) {
+      // Тут можно оставить логику "предыдущий по списку",
+      // даже если включен шафл, это ожидаемое поведение (вернуться назад по истории),
+      // но для простоты пока просто уменьшаем индекс
       this.currentIndex.update((i) => i - 1);
       this.play(this.queue()[this.currentIndex()]);
     }
   }
 
   seekTo(time: number) {
-    if (!isNaN(this.audio.duration)) {
-      this.audio.currentTime = time;
-    }
+    if (!isNaN(this.audio.duration)) this.audio.currentTime = time;
   }
 
   setVolume(vol: number) {
@@ -171,5 +180,10 @@ export class PlayerService {
 
   toggleLoop() {
     this.isLooping.update((v) => !v);
+  }
+
+  // --- НОВЫЙ МЕТОД ---
+  toggleShuffle() {
+    this.isShuffling.update((v) => !v);
   }
 }

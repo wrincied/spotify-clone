@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { PlayerService } from '../../services/playerService/player-service';
 import { SongInterface } from '../../interface/models';
 import { Observable } from 'rxjs';
+import { NavigationService } from '../../services/navigationService/navigation-service';
 
 @Component({
   selector: 'app-player',
@@ -14,7 +15,7 @@ import { Observable } from 'rxjs';
 export class PlayerComponent {
   // Внедряем синглтон
   public playerService = inject(PlayerService);
-
+  private nav = inject(NavigationService);
   // === ИСПРАВЛЕННЫЕ ПОТОКИ ===
   currentTrack$: Observable<SongInterface | null> =
     this.playerService.currentTrack$;
@@ -23,7 +24,7 @@ export class PlayerComponent {
   duration$: Observable<number> = this.playerService.duration$;
   isBuffering$: Observable<boolean> = this.playerService.isBuffering$;
   isLooping$: Observable<boolean> = this.playerService.isLooping$;
-
+  isSchuffling$: Observable<boolean> = this.playerService.isShuffling$;
   // ФИКС: Теперь это поток строки URL из сигнала сервиса
   currentCover$: Observable<string> = this.playerService.currentCover$;
 
@@ -46,7 +47,9 @@ export class PlayerComponent {
   toggleLoop() {
     this.playerService.toggleLoop();
   }
-
+  toggleShuffle() {
+    this.playerService.toggleShuffle();
+  }
   onVolumeChange(e: Event) {
     // Если слайдер от 0 до 100, делим на 100. Если от 0 до 1, используем как есть.
     const val = Number((e.target as HTMLInputElement).value);
@@ -58,5 +61,15 @@ export class PlayerComponent {
     const m = Math.floor(time / 60);
     const s = Math.floor(time % 60);
     return `${m}:${s < 10 ? '0' : ''}${s}`;
+  }
+  navToArtist(id: string) {
+    if (id) {
+      this.nav.goToArtist(id);
+    }
+  }
+  navToAlbum(id: string) {
+    if (id) {
+      this.nav.goToAlbum(String(id));
+    }
   }
 }

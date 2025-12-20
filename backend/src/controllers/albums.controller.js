@@ -34,10 +34,45 @@ export const AlbumsController = {
     }
   },
   getOne: (req, res) => {
-    const albums = loadJson('albums.json');
-    const album = albums.find((a) => a.id === req.params.id);
-    if (!album) return res.status(404).json({ error: true });
-    res.json({ error: false, data: album });
+    try {
+      const albums = loadJson('albums.json');
+      const allSongs = loadJson('songs.json'); // Загружаем все песни для поиска
+
+      const album = albums.find((a) => a.id === req.params.id);
+
+      if (!album) {
+        return res
+          .status(404)
+          .json({ error: true, message: 'Album not found' });
+      }
+
+      // Если в альбоме есть массив ID песен, превращаем его в массив объектов
+      const populatedSongs = (album.songs || [])
+        .map((songId) => {
+          const originalSong = allSongs.find((s) => s.id === songId);
+          if (!originalSong) return null;
+
+          // Возвращаем объект песни, дополненный данными альбома
+          return {
+            ...originalSong,
+            artist: album.description || originalSong.artist, // Берем имя артиста из альбома
+            artistId: album.artistId,
+            thumbnail: album.cover || originalSong.thumbnail, // Обложка альбома для всех его песен
+            albumId: album.id, // Гарантируем привязку к альбому для навигации в плеере
+          };
+        })
+        .filter(Boolean); // Очищаем от null, если песня была удалена из songs.json
+
+      // Формируем финальный ответ
+      const result = {
+        ...album,
+        songs: populatedSongs,
+      };
+
+      res.json({ error: false, data: result });
+    } catch (e) {
+      res.status(500).json({ error: true, message: e.message });
+    }
   },
 
   create: (req, res) => {

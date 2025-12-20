@@ -1,92 +1,76 @@
-<div class="container">
-  <form
-    [formGroup]="userForm"
-    (ngSubmit)="submit()"
-  >
-    <div class="login__container">
+<div class="main-container">
+  <div class="auth-wrapper">
+    <div class="auth-header">
       <img
-        width="300"
         src="assets/spotify-logo_green.png"
-        alt="spotify light logo"
+        alt="Spotify Logo"
+        class="brand-logo"
       />
-      <hr />
+    </div>
 
-      @if (errorMessage()) {
-        <div
-          class="error-banner"
-          [style.color]="'#ef4444'"
-          [style.marginBottom.px]="15"
-        >
-          <strong>{{ errorMessage() }}</strong>
+    <form
+      [formGroup]="userForm"
+      (ngSubmit)="submit()"
+      class="auth-form"
+    >
+      @if (errorMessage() !== null) {
+        <div class="error-banner">
+          <span>{{ errorMessage() }}</span>
         </div>
       }
 
-      <div>
-        <label><strong>Email address or username</strong></label>
-        <br />
+      <div class="input-group">
+        <label for="username">Email address or username</label>
         <input
-          [formControl]="userNameFormControl"
+          id="username"
+          [formControl]="username"
           type="text"
           placeholder="Email address or username"
-          [class.invalid]="
-            userNameFormControl.touched && userNameFormControl.invalid
-          "
+          [class.invalid]="username.touched && username.invalid"
         />
       </div>
 
-      <div>
-        <label><strong>Password</strong></label
-        ><br />
+      <div class="input-group">
+        <label for="password">Password</label>
         <input
-          [formControl]="passwordFormControl"
+          id="password"
+          [formControl]="password"
           type="password"
           placeholder="Password"
-          [class.invalid]="
-            passwordFormControl.touched && passwordFormControl.invalid
-          "
-        /><br />
-
-        <label class="mt-2">
-          <a [style.textDecoration]="'underline'"
-            ><b>Forgot your Password?</b></a
-          >
-        </label>
+          [class.invalid]="password.touched && password.invalid"
+        />
+        <a class="forgot-link">Forgot your password?</a>
       </div>
 
-      <div class="login-under__container">
-        <span
-          [style.display]="'flex'"
-          [style.justifyContent]="'flex-start'"
-          [style.gap]="'5px'"
-        >
+      <div class="actions-row">
+        <div class="toggle-wrapper">
           <input
             type="checkbox"
             id="remember_me"
           />
-          <label for="remember_me"
-            ><span><strong>Remember Me</strong></span></label
-          >
-        </span>
-
-        <div>
-          <button
-            class="login__btn"
-            type="submit"
-            [disabled]="isLoading()"
-          >
-            {{ isLoading() ? 'LOGGING IN...' : 'LOG IN' }}
-          </button>
+          <label for="remember_me">Remember me</label>
         </div>
+
+        <button
+          class="btn-primary"
+          type="submit"
+          [disabled]="isLoading()"
+        >
+          {{ isLoading() ? 'LOGGING IN...' : 'LOG IN' }}
+        </button>
       </div>
 
-      <hr [style.width]="'30%'" />
-      <h5><strong>Don't have an account?</strong></h5>
-      <button
-        class="signup__btn"
-        type="button"
-      >
-        SIGN UP FOR SPOTIFY
-      </button>
-    </div>
-  </form>
+      <div class="divider"></div>
+
+      <div class="signup-section">
+        <h3>Don't have an account?</h3>
+        <button
+          class="btn-secondary"
+          type="button"
+        >
+          SIGN UP FOR SPOTIFY
+        </button>
+      </div>
+    </form>
+  </div>
 </div>
