@@ -18,7 +18,7 @@ export class PlayerService {
   readonly isLooping = signal<boolean>(false); // Повтор одного трека
   readonly isShuffling = signal<boolean>(false); // <--- НОВЫЙ СИГНАЛ (Shuffle)
   readonly currentCover = signal<string>('');
-
+  readonly isExpanded = signal<boolean>(false);
   private audio = new Audio();
   private readonly API_URL = 'http://localhost:3000/';
 
@@ -117,7 +117,15 @@ export class PlayerService {
     if (!this.currentTrack()) return;
     this.audio.paused ? this.audio.play() : this.audio.pause();
   }
-
+  toggleExpanded(state: boolean) {
+    this.isExpanded.set(state);
+    // Можно также вешать класс на body, чтобы скрыть глобальный сайдбар через CSS
+    if (state) {
+      document.body.classList.add('fullscreen-mode-active');
+    } else {
+      document.body.classList.remove('fullscreen-mode-active');
+    }
+  }
   playTrackList(
     tracks: SongInterface[],
     startIndex: number = 0,
