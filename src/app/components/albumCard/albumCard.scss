@@ -1,5 +1,64 @@
+/* 0. МИКСИН ДЛЯ КОМПАКТНОГО ГОРИЗОНТАЛЬНОГО РЕЖИМА [cite: 2025-12-14] */
+@mixin horizontalCardLayout {
+  min-height: 64px;
+  max-height: 64px;
+  padding: 0;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.07);
+
+  .card-inner {
+    flex-direction: row; // Элементы в ряд [cite: 2025-12-14]
+    align-items: center;
+    gap: 0;
+  }
+
+  .spotify__albumCard_thumbnail {
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    border-radius: 4px 0 0 4px; // Скругление только слева
+    box-shadow: none;
+  }
+
+  .spotify__albumCard_text {
+    padding: 0 12px;
+    flex: 1;
+    justify-content: center;
+
+    .title {
+      font-size: 13px;
+      font-weight: 700;
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2; // Ограничение в 2 строки [cite: 2025-12-14]
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Скрываем мета-данные в компактном режиме [cite: 2025-12-14] */
+    .description,
+    .album-meta,
+    .entity-badge {
+      display: none !important;
+    }
+  }
+
+  .play-button-overlay {
+    position: relative;
+    right: 12px;
+    bottom: auto;
+    opacity: 0;
+    transform: none;
+
+    button {
+      width: 32px;
+      height: 32px;
+    }
+  }
+}
+
 .spotify__albumCard {
-  /* --- БАЗОВЫЕ СТИЛИ КОНТЕЙНЕРА --- */
+  /* --- БАЗОВЫЕ СТИЛИ (DESKTOP) --- */
   max-width: 100%;
   background-color: var(--background-album-card);
   border-radius: 6px;
@@ -8,44 +67,35 @@
   transition: background-color 0.3s ease;
   position: relative;
   min-height: 260px;
+  display: flex;
+  flex-direction: column;
 
-  /* Ссылки внутри карточки */
-  a {
-    text-decoration: none;
-    color: inherit;
-  }
-
-  /* Ховер эффект на саму карточку */
   &:hover {
     background-color: var(--decorative-subdued);
-
-    /* Показываем кнопку Play при наведении на карточку */
     .play-button-overlay {
       opacity: 1 !important;
       transform: translateY(0) !important;
     }
   }
 
-  /* --- ВНУТРЕННЯЯ ОБЕРТКА (DOM Fix) --- */
   .card-inner {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     height: 100%;
-    position: relative; /* Чтобы кнопка Play позиционировалась внутри контента */
+    position: relative;
   }
 
-  /* 1. КАРТИНКА */
   .spotify__albumCard_thumbnail {
     width: 100%;
-    aspect-ratio: 1/1; /* Квадрат */
+    aspect-ratio: 1/1;
     border-radius: 4px;
     overflow: hidden;
     box-shadow: 0 8px 24px var(--shadow-dark-50);
     position: relative;
-    background-color: var(--background-fallback-dark); /* Фолбэк цвет */
+    background-color: var(--background-fallback-dark);
     display: flex;
-    align-items: end;
+    align-items: flex-end;
 
     img {
       width: 100%;
@@ -53,7 +103,6 @@
       object-fit: cover;
     }
 
-    /* Текст поверх цвета (если нет картинки) */
     .category-title-overlay {
       position: absolute;
       bottom: 10px;
@@ -65,7 +114,6 @@
     }
   }
 
-  /* 2. ТЕКСТ */
   .spotify__albumCard_text {
     padding-top: 5px;
     display: flex;
@@ -79,8 +127,6 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-bottom: 4px !important; /* Чуть уменьшил отступ для компактности */
-      cursor: pointer;
     }
 
     .description {
@@ -90,27 +136,22 @@
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-
       &:hover {
         text-decoration: underline;
       }
     }
+
     .album-meta {
       font-size: 14px;
       color: var(--text-subdued);
     }
   }
 
-  /* 3. КНОПКА PLAY (Базовые стили) */
   .play-button-overlay {
     display: flex;
     position: absolute;
-    bottom: 0px; /* Позиционируем в правом нижнем углу card-inner */
+    bottom: 0px;
     right: 0px;
-
-    /* Скрыта по умолчанию для обычных карточек, если не TopResult (логика ниже) */
-    /* Но в твоем HTML для обычных карточек кнопка вообще не рендерится через @if */
-
     opacity: 0;
     transform: translateY(8px);
     transition: all 0.3s ease;
@@ -121,17 +162,14 @@
       height: 48px;
       border-radius: 50%;
       background-color: var(--essential-bright-accent);
-      color: var(--text-black);
+      color: #000;
       border: none;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
       cursor: pointer;
       box-shadow: 0 8px 8px var(--shadow-dark-30);
-      transition:
-        transform 0.2s ease,
-        background-color 0.2s;
+      transition: transform 0.2s ease;
 
       &:hover {
         transform: scale(1.05);
@@ -140,87 +178,108 @@
     }
   }
 
-  /* ============================================= */
-  /* MODIFIER: TOP RESULT (ТОП РЕЗУЛЬТАТ)          */
-  /* ============================================= */
+  /* Режим горизонтальной карточки по классу */
+  &.horizontal-mode {
+    @include horizontalCardLayout;
+  }
+
+  /* Режим ТОП РЕЗУЛЬТАТ */
   &.top-result-mode {
-    grid-column: 1 / -1; /* Растягиваем на всю ширину сетки */
+    grid-column: 1 / -1;
     min-height: 240px;
     padding: 20px;
 
-    /* Обновляем отступы внутри card-inner для Top Result */
     .card-inner {
       gap: 20px;
       justify-content: flex-start;
     }
-
-    /* Уменьшаем картинку */
     .spotify__albumCard_thumbnail {
       width: 92px;
       height: 92px;
-      flex-grow: 0;
-      box-shadow: 0 8px 24px var(--shadow-dark-50);
     }
-
-    /* Увеличиваем текст и добавляем стили бейджа */
     .spotify__albumCard_text {
-      padding-top: 0; /* Убираем лишний паддинг, так как есть gap */
       justify-content: center;
-
       .title {
         font-size: 32px;
-        font-weight: 700;
         white-space: normal;
-        line-height: 1.2;
-        margin-bottom: 6px !important;
       }
-
-      .description {
-        font-size: 14px;
-        color: #b3b3b3;
-        font-weight: 500;
-      }
-
-      /* --- НОВОЕ: Стили для типа сущности (ALBUM/SONG) --- */
-      .entity-badge {
-        margin-top: 12px;
-
-        .chip {
-          background-color: var(--background-entity-badge);
-          color: #fff;
-          padding: 6px 12px;
-          border-radius: 500px; /* Pill shape */
-          font-size: 12px;
-          font-weight: 700;
-          letter-spacing: 0.5px;
-          text-transform: uppercase;
-          display: inline-block;
-        }
+      .entity-badge .chip {
+        background-color: var(--background-entity-badge);
+        padding: 6px 12px;
+        border-radius: 500px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
       }
     }
-
-    /* Позиция кнопки Play для Top Result */
     .play-button-overlay {
       bottom: 0px;
       right: 0px;
-      /* В Top Result кнопка должна быть видна всегда или при ховере? 
-         В оригинале Spotify на десктопе она появляется при ховере, 
-         но если isPlaying, то видна всегда. */
     }
   }
 
-  /* ============================================= */
-  /* MODIFIER: FIXED WIDTH (для слайдеров)         */
-  /* ============================================= */
   &.fixed-width {
     width: 210px;
     min-width: 210px;
     flex-shrink: 0;
+  }
+}
 
-    .spotify__albumCard_thumbnail {
-      width: 100%;
-      height: auto;
-      aspect-ratio: 1/1;
+/* ============================================= */
+/* ADAPTIVE DESIGN [cite: 2025-12-14]            */
+/* ============================================= */
+@media (max-width: 768px) {
+  .spotify__albumCard {
+    /* Обычные карточки в сетке становятся горизонтальными плашками [cite: 2025-12-14] */
+    &:not(.top-result-mode):not(.fixed-width) {
+      @include horizontalCardLayout;
+
+      .spotify__albumCard_text .description {
+        display: none !important;
+      }
     }
+
+    /* На мобильных кнопка Play скрыта для всех типов [cite: 2025-12-14] */
+    .play-button-overlay {
+      // display: none !important;
+    }
+
+    &.top-result-mode {
+      min-height: auto;
+      padding: 16px;
+      .spotify__albumCard_thumbnail {
+        width: 80px;
+        height: 80px;
+      }
+      .spotify__albumCard_text {
+        .title {
+          font-size: 24px;
+        }
+        .description {
+          display: none !important;
+        }
+      }
+    }
+
+    &.fixed-width {
+      width: 160px;
+      min-width: 160px;
+      padding: 12px;
+      min-height: 220px;
+      /* В слайдерах (fixed-width) оставляем вертикальный вид, но без описания [cite: 2025-12-14] */
+      .description {
+        display: none !important;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .spotify__albumCard.fixed-width {
+    width: 140px;
+    min-width: 140px;
+  }
+  .spotify__albumCard.top-result-mode .spotify__albumCard_text .title {
+    font-size: 20px;
   }
 }

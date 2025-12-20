@@ -4,11 +4,12 @@ import { PlayerService } from '../../services/playerService/player-service';
 import { SongInterface } from '../../interface/models';
 import { Observable } from 'rxjs';
 import { NavigationService } from '../../services/navigationService/navigation-service';
+import { Song } from '../../pages/song/song';
 
 @Component({
   selector: 'app-player',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, Song],
   templateUrl: './player.html',
   styleUrls: ['./player.scss'],
 })
@@ -27,49 +28,81 @@ export class PlayerComponent {
   isSchuffling$: Observable<boolean> = this.playerService.isShuffling$;
   // ФИКС: Теперь это поток строки URL из сигнала сервиса
   currentCover$: Observable<string> = this.playerService.currentCover$;
+  handlePlayerClick(event: Event) {
+    // Проверяем ширину экрана, чтобы не срабатывало на десктопе
+    if (window.innerWidth <= 768) {
+      this.playerService.isExpanded.set(true);
+    }
+  }
 
-  togglePlay() {
+  /**
+   * Кнопка расширения (для десктопа)
+   */
+  expandPlayer(event: Event) {
+    event.stopPropagation();
+    this.playerService.isExpanded.set(true);
+  }
+
+  // === УПРАВЛЕНИЕ (с защитой от всплытия событий) ===
+
+  togglePlay(event?: Event) {
+    event?.stopPropagation();
     this.playerService.togglePlay();
   }
 
-  nextTrack() {
+  nextTrack(event?: Event) {
+    event?.stopPropagation();
     this.playerService.nextTrack();
   }
 
-  prevTrack() {
+  prevTrack(event?: Event) {
+    event?.stopPropagation();
     this.playerService.prevTrack();
   }
 
+  toggleLoop(event?: Event) {
+    event?.stopPropagation();
+    this.playerService.toggleLoop();
+  }
+
+  toggleShuffle(event?: Event) {
+    event?.stopPropagation();
+    this.playerService.toggleShuffle();
+  }
+
   onSeek(e: Event) {
+    e.stopPropagation(); // Важно, чтобы слайдер не вызывал открытие окна
     this.playerService.seekTo(Number((e.target as HTMLInputElement).value));
   }
 
-  toggleLoop() {
-    this.playerService.toggleLoop();
-  }
-  toggleShuffle() {
-    this.playerService.toggleShuffle();
-  }
   onVolumeChange(e: Event) {
-    // Если слайдер от 0 до 100, делим на 100. Если от 0 до 1, используем как есть.
+    e.stopPropagation();
     const val = Number((e.target as HTMLInputElement).value);
     this.playerService.setVolume(val > 1 ? val / 100 : val);
   }
+
+  // === НАВИГАЦИЯ ===
+
+  navToArtist(id: string, event?: Event) {
+    event?.stopPropagation();
+    if (id) {
+      this.nav.goToArtist(id);
+    }
+  }
+
+  navToAlbum(id: string, event?: Event) {
+    event?.stopPropagation();
+    if (id) {
+      this.nav.goToAlbum(String(id));
+    }
+  }
+
+  // === УТИЛИТЫ ===
 
   formatTime(time: number | null): string {
     if (!time || isNaN(time)) return '0:00';
     const m = Math.floor(time / 60);
     const s = Math.floor(time % 60);
     return `${m}:${s < 10 ? '0' : ''}${s}`;
-  }
-  navToArtist(id: string) {
-    if (id) {
-      this.nav.goToArtist(id);
-    }
-  }
-  navToAlbum(id: string) {
-    if (id) {
-      this.nav.goToAlbum(String(id));
-    }
   }
 }
