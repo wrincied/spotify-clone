@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SpotifyService } from '../../services/spotifyService/spotify-service';
 import { LayoutService } from '../../services/layoutService/layout-service';
-
+import { PlayerService } from '../../services/playerService/player-service';
 @Component({
   selector: 'app-spotify-sidebar',
   standalone: true,
@@ -20,6 +20,7 @@ export class SpotifySidebar {
   @Input() isActiveSearch = false;
 
   public layoutService = inject(LayoutService);
+  public readonly playerService = inject(PlayerService);
   private spotifyService = inject(SpotifyService);
   private router = inject(Router);
 

@@ -1,36 +1,53 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common'; // Обязательно для async и control flow
 import { ActivatedRoute } from '@angular/router';
-import { AlbumInterface, SongInterface } from '../../interface/models';
-import { MusicStoreService } from '../../services/music-store/music-store'; // Предполагаем наличие стора
+import { SongInterface, AlbumInterface } from '../../interface/models';
+import { MusicStoreService } from '../../services/music-store/music-store';
+import { PlayerService } from '../../services/playerService/player-service';
 
 @Component({
   selector: 'app-song',
   standalone: true,
+  imports: [CommonModule],
   templateUrl: './song.html',
   styleUrl: './song.scss',
 })
-export class SongComponent implements OnInit {
-  private route = inject(ActivatedRoute);
-  private musicStore = inject(MusicStoreService);
+export class Song implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly musicStore = inject(MusicStoreService);
+  public readonly playerService = inject(PlayerService);
 
   album: AlbumInterface | null = null;
   song: SongInterface | null = null;
 
   ngOnInit() {
+    // Сохраняем логику роутинга для прямой навигации
     const collectionId = this.route.snapshot.paramMap.get('collectionId');
     const songId = this.route.snapshot.paramMap.get('songId');
 
     if (collectionId && songId) {
-      // 1. Получаем все песни из стора (чтобы иметь полные данные: url, title)
       const allSongs = this.musicStore.currentSongs();
       const allAlbums = this.musicStore.currentAlbums();
 
-      // 2. Находим нужный альбом
-      this.album = allAlbums.find(a => a.id === collectionId) || null;
-
-      // 3. Находим песню по ID [cite: 2025-12-14]
-      // Исправляем синтаксическую ошибку: s.id
-      this.song = allSongs.find(s => String(s.id) === String(songId)) || null;
+      this.album =
+        allAlbums.find((a) => String(a.id) === String(collectionId)) || null;
+      this.song = allSongs.find((s) => String(s.id) === String(songId)) || null;
     }
+  }
+
+  close() {
+    this.playerService.toggleExpanded(false);
+  }
+
+  onSeek(e: Event) {
+    const val = Number((e.target as HTMLInputElement).value);
+    this.playerService.seekTo(val);
+  }
+
+  formatTime(time: number | null): string {
+    if (time === null || isNaN(time)) return '0:00';
+    const m = Math.floor(time / 60);
+    const s = Math.floor(time % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
   }
 }
