@@ -1,15 +1,20 @@
 <div class="search-container">
   <div class="mobile-search-header">
     <div class="search-box">
-      <img src="assets/search.svg" alt="Search" class="search-icon">
-      <input 
-        type="search" 
-        placeholder="What do you want to listen to?" 
-        [ngModel]="query" 
+      <img
+        src="assets/search.svg"
+        alt="Search"
+        class="search-icon"
+      />
+      <input
+        type="search"
+        placeholder="What do you want to listen to?"
+        [ngModel]="query"
         (ngModelChange)="onMobileSearch($event)"
-      >
+      />
     </div>
   </div>
+
   @if (
     filteredAlbums.length > 0 ||
     filteredTracks.length > 0 ||
@@ -31,9 +36,12 @@
             [isTopResult]="true"
             [fixedSize]="false"
             [isPlaying]="isTopResultPlaying"
-            (playRequest)="handlePlay(topAlbumResult.songs[0])"
+            (playRequest)="
+              topAlbumFullSongs.length > 0
+                ? handlePlay(topAlbumFullSongs[0])
+                : null
+            "
           ></app-albumCard>
-
         } @else if (topTrack) {
           <app-albumCard
             [id]="topTrack.albumId"
@@ -46,20 +54,6 @@
             [fixedSize]="false"
             [isPlaying]="isTopResultPlaying"
             (playRequest)="handlePlay(topTrack)"
-          ></app-albumCard>
-
-        } @else if (filteredAlbums.length > 0 && filteredAlbums[0]?.id) {
-          <app-albumCard
-            [id]="filteredAlbums[0].id"
-            [artistId]="filteredAlbums[0].artistId"
-            [type]="'album'"
-            [title]="filteredAlbums[0].title"
-            [description]="filteredAlbums[0].description"
-            [playlistThumbnail]="filteredAlbums[0].cover"
-            [isTopResult]="true"
-            [fixedSize]="false"
-            [isPlaying]="isTopResultPlaying"
-            (playRequest)="handlePlay(filteredAlbums[0].songs[0])"
           ></app-albumCard>
         }
       </div>
@@ -99,11 +93,13 @@
     </div>
   } @else {
     <div class="empty-state">
-      @if (query) {
-        <p>No results found for "{{ query }}"</p>
-      } @else {
-        <p>Please search for something</p>
-      }
+      <p>
+        {{
+          query
+            ? 'No results found for "' + query + '"'
+            : 'Please search for something'
+        }}
+      </p>
     </div>
   }
 </div>

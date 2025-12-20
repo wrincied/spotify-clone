@@ -7,9 +7,14 @@ const router = express.Router();
 // Публичный доступ
 router.get('/', SongsController.getAll);
 
-// Только для администратора [cite: 2025-12-14]
+// --- МИГРАЦИЯ (Временно открытый доступ) ---
+// Мы ставим это ПЕРЕД маршрутами с :id, чтобы express не подумал, что "assign-album" это id
+router.post('/assign-album', SongsController.assignAlbum);
+
+// Только для администратора
 router.post('/', adminAuth, SongsController.create);
 router.put('/:id', adminAuth, SongsController.update);
+// router. <--- Эту ошибку я убрал
 router.delete('/:id', adminAuth, SongsController.delete);
 
 export default router;

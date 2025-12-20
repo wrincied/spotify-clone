@@ -6,6 +6,7 @@ export interface SongInterface {
   thumbnail: string | null;
   duration: number;
   url: string;
+  albumId?: string; // ID альбома, если применимо
 }
 
 export interface PlayerState {
@@ -23,7 +24,7 @@ export interface AlbumInterface {
   cover: string | null;
   artistId: string;
   thumbnail: any; // <--- ТВОЕ НОВОЕ ПОЛЕ
-  songs: SongInterface[];
+  songs: SongInterface[] | string[];
   releaseYear?: string;
   type?: 'album' | 'single' | 'ep' | 'compilation';
 }

@@ -1,8 +1,13 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../services/authService/auth-service'; // Путь к вашему сервису
+import { AuthService } from '../../../services/authService/auth-service';
 
 @Component({
   selector: 'app-login',
@@ -11,28 +16,36 @@ import { AuthService } from '../../../services/authService/auth-service'; // П�
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
-export class Login implements OnInit {
-  // Инъекции зависимостей (Angular 21 style)
+export class Login {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  // Состояния UI через Signals
+  // Состояния через Signals
   public isLoading = signal(false);
   public errorMessage = signal<string | null>(null);
 
-  // Контролы формы
-  public userNameFormControl = new FormControl('', [Validators.required]);
-  public passwordFormControl = new FormControl('', [Validators.required, Validators.minLength(6)]);
-  public userForm!: FormGroup;
+  // Форма с использованием строго типизированных контролов (NonNullable)
+  public userForm = new FormGroup({
+    username: new FormControl('', {
+      validators: [Validators.required],
+      nonNullable: true,
+    }),
+    password: new FormControl('', {
+      validators: [Validators.required, Validators.minLength(6)],
+      nonNullable: true,
+    }),
+  });
 
-  ngOnInit() {
-    this.userForm = new FormGroup({
-      username: this.userNameFormControl,
-      password: this.passwordFormControl
-    });
+  // Геттеры для краткости в шаблоне
+  get username() {
+    return this.userForm.controls.username;
+  }
+  get password() {
+    return this.userForm.controls.password;
   }
 
   submit() {
+    // 1. Проверка валидности перед отправкой
     if (this.userForm.invalid) {
       this.userForm.markAllAsTouched();
       return;
@@ -41,20 +54,23 @@ export class Login implements OnInit {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    // Извлекаем только пароль, так как наш текущий бэкенд 
-    // проверяет админа по хешу пароля
-    const { password } = this.userForm.value;
+    // 2. Получаем объект { username, password }
+    const credentials = this.userForm.getRawValue();
 
-    this.authService.login(password).subscribe({
+    // 3. Отправляем полный объект на бэкенд
+    this.authService.login(credentials).subscribe({
       next: () => {
         this.isLoading.set(false);
-        this.router.navigate(['/admin']); // Переход в панель управления
+        this.router.navigate(['/admin']);
       },
       error: (err) => {
         this.isLoading.set(false);
-        // Обработка ошибки 401 или проблем с сетью
-        this.errorMessage.set(err.error?.message || 'Invalid credentials or server error');
-      }
+        // Безопасное сообщение об ошибке (не уточняем, что именно неверно)
+        this.errorMessage.set('Invalid username or password');
+
+        // Логируем ошибку только для разработки (в проде желательно убрать или заменить на логгер)
+        console.error('[LOGIN_ERROR]', err);
+      },
     });
   }
 }

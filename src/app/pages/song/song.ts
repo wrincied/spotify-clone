@@ -1,38 +1,36 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AlbumInterface, SongInterface } from '../../interface/models';
-import { ApiService } from '../../services/ApiService/api';
+import { MusicStoreService } from '../../services/music-store/music-store'; // Предполагаем наличие стора
 
 @Component({
   selector: 'app-song',
-  imports: [],
+  standalone: true,
   templateUrl: './song.html',
   styleUrl: './song.scss',
 })
-
-export class SongComponent {
-  collectionId: string = '';
-  songId: string = '';
+export class SongComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private musicStore = inject(MusicStoreService);
 
   album: AlbumInterface | null = null;
   song: SongInterface | null = null;
 
-  constructor(
-    private route: ActivatedRoute,
-    private api: ApiService
-  ) { }
-
   ngOnInit() {
-    // 1. Получение параметров маршрута
-    this.collectionId = this.route.snapshot.paramMap.get('collectionId') ?? '';
-    this.songId = this.route.snapshot.paramMap.get('songId') ?? '';
+    const collectionId = this.route.snapshot.paramMap.get('collectionId');
+    const songId = this.route.snapshot.paramMap.get('songId');
 
-    // 2. Загрузить альбом по ID
-    this.api.getPlaylistById(this.collectionId).subscribe((album: AlbumInterface) => {
-      this.album = album;
+    if (collectionId && songId) {
+      // 1. Получаем все песни из стора (чтобы иметь полные данные: url, title)
+      const allSongs = this.musicStore.currentSongs();
+      const allAlbums = this.musicStore.currentAlbums();
 
-      // 3. Найти песню внутри альбома
-      this.song = album.songs.find(s => s.id === this.songId) || null;
-    });
+      // 2. Находим нужный альбом
+      this.album = allAlbums.find(a => a.id === collectionId) || null;
+
+      // 3. Находим песню по ID [cite: 2025-12-14]
+      // Исправляем синтаксическую ошибку: s.id
+      this.song = allSongs.find(s => String(s.id) === String(songId)) || null;
+    }
   }
 }

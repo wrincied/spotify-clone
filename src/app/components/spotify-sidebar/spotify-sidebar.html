@@ -1,10 +1,48 @@
 <div class="spotify-sidebar">
-  <div class="spotify-sidebar-logo">
-    <img
-      width="150"
-      src="assets/spotify-logo_light.png"
-      alt="Spotify"
-    />
+  <div class="spotify-sidebar-header">
+    <div
+      class="logo-wrapper"
+      (click)="goToHome()"
+    >
+      @if (layoutService.isSidebarCollapsed()) {
+        <img
+          width="32"
+          src="assets/favicon-spotify-white.png"
+          alt="Spotify"
+        />
+      } @else {
+        <img
+          width="130"
+          src="assets/spotify-logo_light.png"
+          alt="Spotify"
+        />
+      }
+    </div>
+
+    <button
+      class="toggle-btn"
+      (click)="toggleCollapse()"
+      [title]="
+        layoutService.isSidebarCollapsed()
+          ? 'Expand Library'
+          : 'Collapse Library'
+      "
+    >
+      <svg
+        data-encore-id="icon"
+        role="img"
+        aria-hidden="true"
+        viewBox="0 0 16 16"
+        fill="currentColor"
+      >
+        <path
+          d="M10.97 5.47a.75.75 0 1 1 1.06 1.06L10.56 8l1.47 1.47a.75.75 0 1 1-1.06 1.06l-2-2a.75.75 0 0 1 0-1.06z"
+        ></path>
+        <path
+          d="M1 0a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V1a1 1 0 0 0-1-1zm.5 1.5H5v13H1.5zm13 13h-8v-13h8z"
+        ></path>
+      </svg>
+    </button>
   </div>
 
   <div class="spotify-sidebar-nav">
@@ -23,7 +61,9 @@
             d="M12.5 3.247a1 1 0 0 0-1 0L4 8.5V20h5v-6h6v6h5V8.5l-7.5-5.253z"
           />
         </svg>
-        <span>Home</span>
+        @if (!layoutService.isSidebarCollapsed()) {
+          <span>Home</span>
+        }
       </a>
     </div>
 
@@ -61,7 +101,9 @@
             d="M3 22a1 1 0 0 1-1-1V3a1 1 0 0 1 2 0v18a1 1 0 0 1-1 1zM15.5 2.134A1 1 0 0 0 14 3v18a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6.464a1 1 0 0 0-.5-.866l-6-3.464zM9 2a1 1 0 0 0-1 1v18a1 1 0 1 0 2 0V3a1 1 0 0 0-1-1z"
           />
         </svg>
-        <span>Your Library</span>
+        @if (!layoutService.isSidebarCollapsed()) {
+          <span>Your Library</span>
+        }
       </a>
     </div>
 
@@ -83,8 +125,15 @@
             d="M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10zm-1.5 0a8.5 8.5 0 1 0-17 0 8.5 8.5 0 0 0 17 0z"
           />
         </svg>
-        <span>Create Playlist</span>
+        @if (!layoutService.isSidebarCollapsed()) {
+          <span>Create Playlist</span>
+        }
       </a>
     </div>
   </div>
+
+  <div
+    class="resizer-handle"
+    (mousedown)="startResizing($event)"
+  ></div>
 </div>

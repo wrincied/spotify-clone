@@ -1,8 +1,13 @@
 // src/app/services/auth.service.ts
-import { inject, Injectable, signal, Injector } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, of, tap } from 'rxjs';
+
+export interface LoginCredentials {
+  username: string;
+  password: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -13,12 +18,14 @@ export class AuthService {
   isAdmin = signal<boolean>(false);
   isLoaded = signal<boolean>(false); // Флаг окончания проверки
 
-  login(password: string) {
+  login(credentials: LoginCredentials) {
+    // ИСПРАВЛЕНО: Передаем весь объект credentials (username + password),
+    // а не создаем новый объект { password }, который терял username.
     return this.http
       .post<{
         error: boolean;
         message: string;
-      }>(`${this.API_URL}/login`, { password }, { withCredentials: true })
+      }>(`${this.API_URL}/login`, credentials, { withCredentials: true })
       .pipe(
         tap((res) => {
           if (!res.error) this.isAdmin.set(true);
@@ -40,6 +47,7 @@ export class AuthService {
         },
       });
   }
+
   checkAuthStatus() {
     return this.http
       .get<{
@@ -51,10 +59,11 @@ export class AuthService {
           this.isLoaded.set(true);
         }),
         catchError(() => {
-          // Если сервер недоступен, мы всё равно помечаем загрузку как "оконченную" [cite: 2025-12-14]
+          // Если сервер недоступен или ошибка 401, снимаем права админа,
+          // но помечаем загрузку завершенной, чтобы снять блокировку UI.
           this.isAdmin.set(false);
           this.isLoaded.set(true);
-          return of({ isAdmin: false }); // Возвращаем объект, чтобы приложение продолжило загрузку
+          return of({ isAdmin: false });
         }),
       );
   }

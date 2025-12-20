@@ -17,10 +17,10 @@ export class TopNavComponent implements OnInit {
   constructor(
     private router: Router,
     private location: Location,
-    private service: SpotifyService
+    private spotifyService: SpotifyService,
   ) {}
   ngOnInit() {
-    this.service.searchQuery$.subscribe((q) => {
+    this.spotifyService.searchQuery$.subscribe((q) => {
       this.query = q;
     });
   }
@@ -38,5 +38,16 @@ export class TopNavComponent implements OnInit {
   }
   onNagivateToLogin() {
     this.router.navigate(['/login']);
+  }
+  onNavigateToSignUp() {
+    this.router.navigate(['/signup']);
+  }
+  onNagivateToMobileAuth() {
+    // Мобильная страница, где есть и Login, и Sign Up
+    this.router.navigate(['/auth']);
+  }
+  goToHome() {
+    this.spotifyService.clearSearch();
+    this.router.navigate(['/']);
   }
 }
