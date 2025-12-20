@@ -11,6 +11,8 @@ import { filter, map, Observable } from 'rxjs';
 import { PlayerComponent } from './components/player/player';
 import { PlayerService } from './services/playerService/player-service';
 import { AuthService } from './services/authService/auth-service';
+import { Song } from './pages/song/song';
+
 @Component({
   selector: 'app-root',
   standalone: true,

@@ -1,4 +1,4 @@
-<div class="spotify-sidebar">
+<div class="spotify-sidebar" [class.hidden-for-fullscreen]="playerService.isExpanded()">
   <div class="spotify-sidebar-header">
     <div
       class="logo-wrapper"
