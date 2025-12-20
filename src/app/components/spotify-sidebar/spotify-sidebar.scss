@@ -1,38 +1,170 @@
-.spotify-sidebar {
-  /* --- DESKTOP --- */
+/* --- HOST CONFIGURATION --- */
+:host {
+  display: block;
   height: 100%;
-  background-color: #000;
+  background-color: var(--background-dark);
+  position: relative;
+  transition: width 0.3s cubic-bezier(0.3, 0, 0, 1);
+
+  &.is-resizing {
+    transition: none;
+    cursor: col-resize;
+    user-select: none;
+  }
+
+  /* ========================================= */
+  /* СЖАТОЕ СОСТОЯНИЕ (COLLAPSED)              */
+  /* ========================================= */
+  &.collapsed-host {
+    width: 72px;
+    min-width: 72px;
+
+    /* 1. ХЕДЕР: Строгое центрирование */
+    .spotify-sidebar-header {
+      padding: 0;
+      justify-content: center; /* Центрируем .logo-wrapper по горизонтали */
+      position: relative; /* База для кнопки */
+    }
+
+    /* 2. ЛОГОТИП (ОБЕРТКА) */
+    .logo-wrapper {
+      width: 100%; /* Занимает всю ширину (72px) */
+      height: 100%; /* Занимает всю высоту хедера */
+      display: flex;
+      align-items: center; /* Вертикальный центр */
+      justify-content: center; /* Горизонтальный центр */
+
+      opacity: 1;
+      transform: scale(1);
+      transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+
+      /* Сама картинка внутри */
+      img {
+        display: block;
+        /* Убедимся, что нет margin-ов */
+        margin: 0;
+      }
+    }
+
+    /* 3. КНОПКА TOGGLE (Поверх логотипа) */
+    .toggle-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      /* Центруем точку отсчета кнопки */
+      transform: translate(-50%, -50%) scaleX(-1);
+
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* 4. ВЗАИМОДЕЙСТВИЕ (HOVER НА ХЕДЕР) */
+    .spotify-sidebar-header:hover {
+      /* Скрываем логотип */
+      .logo-wrapper {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      /* Показываем кнопку */
+      .toggle-btn {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+
+    /* 5. НАВИГАЦИЯ (Тоже центруем) */
+    .spotify-sidebar-item a {
+      justify-content: center;
+      padding: 0;
+      gap: 0;
+    }
+  }
+
+  /* Мобильный */
+  @media (max-width: 768px) {
+    width: 100% !important;
+    min-width: 0;
+    height: 60px;
+    z-index: 200;
+  }
+}
+
+/* --- ОБЩИЕ СТИЛИ (НЕ COLLAPSED) --- */
+.spotify-sidebar {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
   width: 100%;
 
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: #5a5a5a;
-    border-radius: 4px;
+  /* HEADER */
+  .spotify-sidebar-header {
+    height: 72px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Лого слева, кнопка справа */
+    transition: padding 0.2s;
   }
 
-  .spotify-sidebar-logo {
-    padding: 24px;
-    margin-bottom: 10px;
+  .logo-wrapper {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
     img {
       display: block;
     }
   }
 
+  /* BUTTON */
+  .toggle-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: var(--text-subdued);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    &:hover {
+      background-color: var(--background-elevated-base);
+      color: var(--text-base);
+    }
+  }
+
+  /* ЛОГИКА ДЛЯ РАЗВЕРНУТОГО (EXPANDED) */
+  :host:not(.collapsed-host) .toggle-btn {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+
+  :host:not(.collapsed-host) .spotify-sidebar-header:hover .toggle-btn {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* NAV ITEMS */
   .spotify-sidebar-nav {
     display: flex;
     flex-direction: column;
     padding: 0 8px;
+    flex: 1;
   }
 
   .spotify-sidebar-item {
     margin-bottom: 8px;
-
-    /* Скрываем кнопку поиска на ПК */
     &.mobile-only {
       display: none;
     }
@@ -41,80 +173,89 @@
       display: flex;
       align-items: center;
       gap: 16px;
-      height: 40px;
+      height: 48px;
       padding: 0 16px;
-      color: #b3b3b3;
-      font-size: 16px;
+      color: var(--text-subdued);
       font-weight: 700;
       text-decoration: none;
-      transition: color 0.25s ease;
       border-radius: 4px;
       cursor: pointer;
+      white-space: nowrap;
+      transition:
+        background-color 0.2s,
+        color 0.2s;
 
+      &:hover {
+        color: var(--text-base);
+        background-color: var(--background-elevated-base);
+      }
       svg {
         min-width: 24px;
-        transition: fill 0.2s;
-      }
-      &:hover {
-        color: white;
+        flex-shrink: 0;
       }
     }
   }
 
-  /* --- MOBILE ADAPTIVE (< 768px) --- */
-  @media (max-width: 768px) {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 60px; /* Высота таббара */
-    flex-direction: row;
-    z-index: 1000;
-    border-top: 1px solid #282828;
-    background-color: rgba(0, 0, 0, 0.95); /* Чуть прозрачности */
-    padding: 0;
-    overflow: hidden;
+  /* RESIZER */
+  .resizer-handle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 5px;
+    height: 100%;
+    cursor: col-resize;
+    z-index: 10;
+    background: transparent;
+    transition: background-color 0.2s;
+    &:hover {
+      background-color: hsla(0, 0%, 100%, 0.3);
+    }
+    :host.is-resizing & {
+      background-color: hsla(0, 0%, 100%, 0.5);
+    }
+  }
 
-    .spotify-sidebar-logo {
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .resizer-handle {
       display: none;
     }
-
+    position: relative;
+    width: 100%;
+    height: 100%;
+    flex-direction: row;
+    border-top: 1px solid var(--background-elevated-highlight);
+    background: rgba(0, 0, 0, 0.95);
+    padding: 0;
+    .spotify-sidebar-header {
+      display: none;
+    }
     .spotify-sidebar-nav {
       flex-direction: row;
-      width: 100%;
-      height: 100%;
-      padding: 0;
       justify-content: space-around;
       align-items: center;
+      padding: 0;
     }
-
     .spotify-sidebar-item {
       margin: 0;
       flex: 1;
       height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-
-      /* Показываем поиск на мобильных */
       &.mobile-only {
-        display: flex;
+        display: block;
       }
-
       a {
+        height: 100%;
+        flex-direction: column;
         justify-content: center;
         padding: 0;
-        width: 100%;
-        height: 100%;
-
-        /* Скрываем текст, оставляем иконки */
+        gap: 4px;
         span {
           display: none;
         }
         svg {
-          width: 28px;
-          height: 28px;
-          color: white;
+          width: 26px;
+          height: 26px;
+          color: var(--text-base);
         }
       }
     }

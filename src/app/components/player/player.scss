@@ -1,16 +1,16 @@
 .player-container {
   width: 100%;
   height: 100%; /* Заполняет родителя (.spotify-app__player) */
-  background-color: #181818;
-  border-top: 1px solid #282828;
+  background-color: var(--background-highlight);
+  border-top: 1px solid var(--border-player);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
   box-sizing: border-box;
-  color: white;
+  color: var(--text-base);
   input[type='range'] {
-    accent-color: #1db954; /* Зеленый цвет */
+    accent-color: var(--essential-bright-accent); /* Зеленый цвет */
   }
   /* Мобильный адаптив контейнера */
   @media (max-width: 768px) {
@@ -41,7 +41,7 @@
     object-fit: cover;
     margin-right: 12px;
     border-radius: 4px;
-    background-color: #333;
+    background-color: var(--background-fallback-dark);
 
     /* На мобильном чуть меньше */
     @media (max-width: 768px) {
@@ -59,19 +59,29 @@
     .track-title {
       font-size: 14px;
       font-weight: 500;
-      color: #fff;
+      color: var(--text-base);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      cursor: pointer;
+      .nav-link {
+      }
     }
 
     .artist-name {
-      font-size: 12px;
-      color: #b3b3b3;
-      margin-top: 4px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      .artist-link {
+        font-size: 12px;
+        color: var(--text-subdued);
+        margin-top: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-decoration: none;
+        cursor: pointer;
+        &:hover {
+          text-decoration: underline;
+        }
+      }
     }
   }
 }
@@ -105,7 +115,7 @@
     .control-btn {
       background: none;
       border: none;
-      color: #b3b3b3;
+      color: var(--text-subdued);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -113,7 +123,7 @@
       padding: 0;
 
       &:hover {
-        color: #fff;
+        color: var(--text-base);
         transform: scale(1.05);
       }
 
@@ -128,7 +138,7 @@
 
         @media (max-width: 768px) {
           background-color: transparent; /* Убираем белый круг */
-          color: white; /* Белая иконка */
+          color: var(--text-base); /* Белая иконка */
           width: auto;
           height: auto;
 
@@ -144,8 +154,9 @@
       }
 
       /* Активный Loop */
-      &.loop-btn.active {
-        color: #1db954;
+      &.loop-btn.active,
+      &.shuffle-btn.active {
+        color: var(--essential-bright-accent);
         position: relative;
         &::after {
           content: '';
@@ -155,7 +166,7 @@
           transform: translateX(-50%);
           width: 4px;
           height: 4px;
-          background-color: #1db954;
+          background-color: var(--essential-bright-accent);
           border-radius: 50%;
         }
       }
@@ -168,7 +179,7 @@
     align-items: center;
     gap: 8px;
     font-size: 11px;
-    color: #b3b3b3;
+    color: var(--text-subdued);
 
     .seek-slider {
       flex: 1;

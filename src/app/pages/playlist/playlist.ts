@@ -9,7 +9,6 @@ import {
   Output,
   EventEmitter,
   inject,
-  Input,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
@@ -40,58 +39,61 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('albumHeaderRef') albumHeaderRef!: ElementRef;
   @Output() playRequest = new EventEmitter<void>();
 
-  // Инъекции сервисов [cite: 2025-12-14]
+  // Инъекции сервисов через inject() для Angular 21 [cite: 2025-12-14]
   public playerService = inject(PlayerService);
   private route = inject(ActivatedRoute);
   private api = inject(ApiService);
   private cdr = inject(ChangeDetectorRef);
   public musicStore = inject(MusicStoreService);
+  private nav = inject(NavigationService);
 
   private observer?: IntersectionObserver;
   private subs: Subscription = new Subscription();
-  private nav = inject(NavigationService);
+  
   currentTrack: SongInterface | null = null;
   isPlayerPlaying: boolean = false;
 
   ngOnInit() {
-    // 1. ПОДПИСКА НА ПАРАМЕТРЫ URL И ЗАГРУЗКА АЛЬБОМА [cite: 2025-12-14]
+    // 1. Подписка на параметры URL и загрузка альбома [cite: 2025-12-14]
     this.subs.add(
       this.route.paramMap.subscribe((params) => {
         const id = params.get('id');
         if (!id) return;
 
-        // Сброс старого состояния перед загрузкой нового альбома [cite: 2025-12-14]
         this.isSticky = false;
         this.album = null;
 
         this.api.getPlaylistById(id).subscribe({
-          next: (albumData) => {
-            // «Склейка»: получаем полные данные песен из Store [cite: 2025-12-14]
-            const allSongs = this.musicStore.currentSongs();
+          next: (albumData: AlbumInterface) => {
+            const allSongsInStore = this.musicStore.currentSongs();
 
-            const enrichedSongs = albumData.songs.map((albumSong: any) => {
+            // Трансформация: превращаем ID или неполные объекты в SongInterface [cite: 2025-12-14]
+            const enrichedSongs: SongInterface[] = albumData.songs.map((albumSong: any) => {
               const songId = albumSong.id || albumSong;
-              const fullSong = allSongs.find(
+              const fullSong = allSongsInStore.find(
                 (s) => String(s.id) === String(songId),
               );
-              // Возвращаем полную версию или оригинал, если не нашли [cite: 2025-12-14]
-              return fullSong || albumSong;
+
+              // Возвращаем полный объект из стора или создаем минимально валидный [cite: 2025-12-14]
+              if (fullSong) return fullSong;
+              
+              return typeof albumSong === 'object' 
+                ? (albumSong as SongInterface) 
+                : ({ id: albumSong, title: '', artist: '', url: '', thumbnail: null, duration: 0 } as SongInterface);
             });
+
+            // Фильтруем только те песни, у которых есть название (успешно найденные) [cite: 2025-12-14]
+            const finalSongs = enrichedSongs.filter((s): s is SongInterface => !!s.title);
 
             this.album = {
               ...albumData,
-              songs: enrichedSongs.filter((s) => s.title || s.name),
+              songs: finalSongs
             };
 
-            // Обработка цвета обложки [cite: 2025-12-14]
-            if (this.album?.cover) {
-              const coverUrl = this.album.cover.startsWith('http')
-                ? this.album.cover
-                : `http://localhost:3000/${this.album.cover.replace(/^\//, '')}`;
-              this.setDominantColor(coverUrl);
+            if (this.album.cover) {
+              this.setDominantColor(this.album.cover);
             }
 
-            // Важно: Ждем отрисовку @if(album) в DOM и вешаем Observer [cite: 2025-12-14]
             this.cdr.detectChanges();
             this.initObserver();
           },
@@ -100,7 +102,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
       }),
     );
 
-    // 2. ПОДПИСКА НА СТАТУС ПЛЕЕРА [cite: 2025-12-14]
+    // 2. Синхронизация статуса плеера [cite: 2025-12-14]
     this.subs.add(
       this.playerService.isPlaying$.subscribe((isPlaying) => {
         this.isPlayerPlaying = isPlaying;
@@ -108,7 +110,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
       }),
     );
 
-    // 3. ПОДПИСКА НА ТЕКУЩИЙ ТРЕК [cite: 2025-12-14]
+    // 3. Синхронизация текущего трека [cite: 2025-12-14]
     this.subs.add(
       this.playerService.currentTrack$.subscribe((track) => {
         this.currentTrack = track;
@@ -117,44 +119,49 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
     );
   }
 
+  /**
+   * Запуск воспроизведения. Явно приводим songs к SongInterface[] [cite: 2025-12-14]
+   */
   handlePlay(song: SongInterface) {
-    if (!this.album || !this.album.songs.length) return;
+    if (!this.album || !this.album.songs || this.album.songs.length === 0) return;
 
-    const trackIndex = this.album.songs.findIndex(
+    const songsList = this.album.songs as SongInterface[];
+    const trackIndex = songsList.findIndex(
       (s) => String(s.id) === String(song.id),
     );
 
     this.playerService.playTrackList(
-      this.album.songs,
+      songsList,
       trackIndex >= 0 ? trackIndex : 0,
       this.album.cover || '',
     );
   }
 
+  /**
+   * Проверка, проигрывается ли сейчас какой-либо трек из этого альбома [cite: 2025-12-14]
+   */
   get isAlbumPlaying(): boolean {
-    if (!this.album || !this.currentTrack) return false;
-    const isTrackInAlbum = this.album.songs.some(
+    if (!this.album || !this.currentTrack || !this.album.songs) return false;
+    
+    const songsList = this.album.songs as SongInterface[];
+    const isTrackInAlbum = songsList.some(
       (s) => String(s.id) === String(this.currentTrack?.id),
     );
+    
     return isTrackInAlbum && this.isPlayerPlaying;
   }
-  onArtistClick(event: Event): void {
-    // Данные об артисте находятся внутри загруженного объекта album [cite: 2025-12-14]
-    const idToNavigate = this.album?.artistId;
 
+  onArtistClick(event: Event): void {
+    const idToNavigate = this.album?.artistId;
     if (idToNavigate) {
       event.stopPropagation();
-      console.log('🚀 [Playlist] Navigating to artist:', idToNavigate);
       this.nav.goToArtist(idToNavigate);
-    } else {
-      console.error('❌ [Playlist] artistId not found in album data');
     }
   }
 
   private setDominantColor(imageUrl: string) {
     const fac = new FastAverageColor();
-    fac
-      .getColorAsync(imageUrl)
+    fac.getColorAsync(imageUrl)
       .then((color) => {
         this.mainColor = color.hex;
         this.gradientColor = `linear-gradient(to bottom, ${color.hex}, #121212)`;
@@ -167,30 +174,20 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
-  /**
-   * Инициализация IntersectionObserver для Sticky-эффекта [cite: 2025-12-14]
-   */
   initObserver() {
     if (this.observer) this.observer.disconnect();
 
-    const scrollContainer =
-      document.querySelector('.spotify-main') ||
-      document.querySelector('.main-view');
-
-    // Если элемент еще не в DOM (из-за @if), выходим [cite: 2025-12-14]
+    const scrollContainer = document.querySelector('.spotify-main') || document.querySelector('.main-view');
     if (!this.albumHeaderRef) return;
 
     const options = {
       root: scrollContainer,
       threshold: 0,
-      rootMargin: '-90px 0px 0px 0px', // Учитываем высоту хедера
+      rootMargin: '-90px 0px 0px 0px',
     };
 
     this.observer = new IntersectionObserver(([entry]) => {
-      // Логика переключения видимости липкого хедера [cite: 2025-12-14]
-      const shouldBeSticky =
-        !entry.isIntersecting && entry.boundingClientRect.top < 90;
-
+      const shouldBeSticky = !entry.isIntersecting && entry.boundingClientRect.top < 90;
       if (this.isSticky !== shouldBeSticky) {
         this.isSticky = shouldBeSticky;
         this.cdr.detectChanges();
@@ -201,7 +198,6 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // Резервный вызов, если данные загрузились мгновенно [cite: 2025-12-14]
     if (this.album) this.initObserver();
   }
 

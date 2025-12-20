@@ -9,7 +9,8 @@ import { CreatePlaylist } from './pages/create-playlist/create-playlist';
 import { PageArtistComponent } from './pages/artist-page/artist-page';
 import { AdminComponent } from './pages/admin/admin'; // Предполагаемый путь к админке
 import { adminGuard } from './guards/admin/admin-guard'; // Наш созданный Guard
-
+import { User } from './pages/Auth/user/user';
+import { Singup } from './pages/Auth/signup/singup';
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'library', component: Library },
@@ -18,14 +19,15 @@ export const routes: Routes = [
   { path: 'album/:id', component: PlaylistComponent },
   { path: 'album/:collectionId/song/:songId', component: SongComponent },
   { path: 'login', component: Login, data: { noLayout: true } },
+  { path: 'signup', component: Singup, data: { noLayout: true } },
   { path: 'artist/:id', component: PageArtistComponent },
-  
-  // Защищенный маршрут админ-панели [cite: 2025-12-14]
-  { 
-    path: 'admin', 
-    component: AdminComponent, 
-    canActivate: [adminGuard], // Проверка прав [cite: 2025-12-14]
-    data: { noLayout: true } 
+  { path: 'auth', component: User },
+  // Защищенный маршрут админ-панели
+  {
+    path: 'admin',
+    component: AdminComponent,
+    canActivate: [adminGuard],
+    data: { noLayout: true },
   },
 
   { path: '**', redirectTo: '' },

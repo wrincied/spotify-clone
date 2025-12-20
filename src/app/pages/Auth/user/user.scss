@@ -1,0 +1,85 @@
+.auth-page-wrapper {
+  // Фиксация на весь экран для исключения серых зон [cite: 2025-12-14]
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  // Глубокий черный с мягким радиальным градиентом [cite: 2025-12-14]
+  background-color: var(--background-base, #121212);
+  background: radial-gradient(
+    circle at top,
+    var(--background-highlight, #1a1a1a) 0%,
+    var(--background-base, #121212) 80%
+  );
+
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.auth-content {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+}
+
+.logo-container {
+  .spotify-logo {
+    width: 180px;
+    height: auto;
+  }
+}
+
+.actions-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// Зеленая кнопка (основная) [cite: 2025-12-14]
+.btn-primary {
+  background-color: var(--essential-bright-accent, #1ed760);
+  color: var(--text-black, #000000);
+  border: none;
+  padding: 16px;
+  border-radius: 500px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: transform 0.1s;
+
+  &:hover {
+    background-color: var(--essential-bright-accent-hover, #1fdf64);
+    transform: scale(1.04);
+  }
+}
+
+// Кнопка с рамкой (вторичная) [cite: 2025-12-14]
+.btn-secondary {
+  background-color: transparent;
+  color: var(--text-base, #f0f0f0);
+  border: 1px solid var(--text-subdued, #b3b3b3);
+  padding: 16px;
+  border-radius: 500px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--text-base);
+    transform: scale(1.04);
+  }
+}

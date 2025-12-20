@@ -12,7 +12,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
-import { FormsModule } from '@angular/forms'; // 1. ИМПОРТИРУЕМ МОДУЛЬ [cite: 2025-12-14]
+import { FormsModule } from '@angular/forms';
 
 import { MusicStoreService } from '../../services/music-store/music-store';
 import { PlayerService } from '../../services/playerService/player-service';
@@ -28,7 +28,6 @@ import { SongRow } from '../../components/songRow/songRow';
 @Component({
   selector: 'app-search',
   standalone: true,
-  // 2. ДОБАВЛЯЕМ FormsModule В ИМПОРТЫ [cite: 2025-12-14]
   imports: [CommonModule, RouterModule, SongRow, albumCard, FormsModule],
   templateUrl: './search.html',
   styleUrls: ['./search.scss'],
@@ -47,10 +46,13 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
 
   filteredAlbums: AlbumInterface[] = [];
   filteredTracks: TrackWithContext[] = [];
-  topAlbumSongs: TrackWithContext[] = [];
 
   topTrack: TrackWithContext | null = null;
   topAlbumResult: AlbumInterface | null = null;
+
+  // Список ТОЛЬКО рабочих песен (с URL)
+  topAlbumFullSongs: SongInterface[] = [];
+  topAlbumSongs: TrackWithContext[] = [];
 
   currentTrack$: Observable<SongInterface | null> =
     this.playerService.currentTrack$;
@@ -59,8 +61,7 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
   ngOnInit(): void {
     this.subs.add(
       this.route.queryParams.subscribe((params) => {
-        const q = (params['q'] ?? '').toString();
-        this.query = q;
+        this.query = (params['q'] ?? '').toString();
         this.runFilter();
       }),
     );
@@ -97,6 +98,7 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
 
     this.topTrack = null;
     this.topAlbumResult = null;
+    this.topAlbumFullSongs = [];
     this.filteredAlbums = [];
     this.filteredTracks = [];
     this.topAlbumSongs = [];
@@ -106,23 +108,20 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
+    // Собираем все треки для поиска
     const allTracks: TrackWithContext[] = [];
-
     allAlbums.forEach((album) => {
-      if (album?.songs && Array.isArray(album.songs)) {
-        album.songs.forEach((songId: any, index: number) => {
+      if (album?.songs) {
+        album.songs.forEach((songId: any) => {
           const id = typeof songId === 'string' ? songId : songId?.id;
           const fullSong = allSongsInStore.find(
             (s) => String(s.id) === String(id),
           );
-
           if (fullSong) {
             allTracks.push({
               ...fullSong,
-              id: fullSong.id,
               albumId: album.id,
-              coverFromAlbum:
-                album.cover || album.thumbnail || fullSong.thumbnail || null,
+              coverFromAlbum: album.cover || fullSong.thumbnail || null,
               thumbnail:
                 fullSong.thumbnail || album.cover || 'assets/no-album.png',
             });
@@ -131,70 +130,94 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
       }
     });
 
-    this.filteredAlbums = allAlbums.filter((album) => {
-      const title = (album?.title || '').toLowerCase();
-      const desc = (album?.description || '').toLowerCase();
-      return title.includes(term) || desc.includes(term);
-    });
-
-    const matchingTracks = allTracks.filter((track) => {
-      const title = (track?.title || '').toLowerCase();
-      const artist = (track?.artist || '').toLowerCase();
-      return title.includes(term) || artist.includes(term);
-    });
-
-    const exactAlbumMatch = this.filteredAlbums.find(
-      (a) => (a.title || '').toLowerCase() === term,
+    this.filteredAlbums = allAlbums.filter(
+      (a) =>
+        a.title.toLowerCase().includes(term) ||
+        a.description.toLowerCase().includes(term),
     );
 
+    const matchingTracks = allTracks.filter(
+      (t) =>
+        t.title.toLowerCase().includes(term) ||
+        t.artist.toLowerCase().includes(term),
+    );
+
+    // ПРИОРИТЕТ АЛЬБОМУ: Если имя совпадает с альбомом, игнорируем одиночный трек [cite: 2025-12-14]
+    const exactAlbumMatch = this.filteredAlbums.find(
+      (a) => a.title.toLowerCase() === term,
+    );
     const exactTrackMatch = matchingTracks.find(
-      (t) => (t.title || '').toLowerCase() === term,
+      (t) => t.title.toLowerCase() === term,
     );
 
     if (exactAlbumMatch) {
       this.topAlbumResult = exactAlbumMatch;
-      this.topTrack = null;
     } else if (exactTrackMatch) {
       this.topTrack = exactTrackMatch;
-      this.topAlbumResult = null;
     } else {
-      if (matchingTracks.length > 0) {
-        this.topTrack = matchingTracks[0];
-      } else if (this.filteredAlbums.length > 0) {
+      if (this.filteredAlbums.length > 0)
         this.topAlbumResult = this.filteredAlbums[0];
-      }
+      else if (matchingTracks.length > 0) this.topTrack = matchingTracks[0];
+    }
+
+    // Подготовка списка рабочих песен (только с URL)
+    if (this.topAlbumResult) {
+      this.topAlbumFullSongs = (this.topAlbumResult.songs || [])
+        .map((id) => {
+          const sId = typeof id === 'string' ? id : (id as any).id;
+          return allSongsInStore.find((s) => String(s.id) === String(sId));
+        })
+        .filter(
+          (s): s is SongInterface => !!s && !!s.url && s.url.trim() !== '',
+        );
     }
 
     this.filteredTracks = this.topTrack
       ? matchingTracks.filter((t) => t.id !== this.topTrack?.id).slice(0, 4)
       : matchingTracks.slice(0, 4);
 
-    if (this.filteredTracks.length < 4 && this.filteredAlbums.length > 0) {
-      const targetAlbum = this.topAlbumResult || this.filteredAlbums[0];
+    this.cdr.markForCheck();
+  }
 
-      if (targetAlbum) {
-        const rawIds = (targetAlbum.songs || []) as any[];
+  handlePlay(trackOrId: TrackWithContext | SongInterface | string): void {
+    if (!trackOrId) return;
+    const trackId = typeof trackOrId === 'string' ? trackOrId : trackOrId.id;
 
-        this.topAlbumSongs = rawIds
-          .map((id) =>
-            allSongsInStore.find(
-              (s) =>
-                String(s.id) === String(typeof id === 'string' ? id : id?.id),
-            ),
-          )
-          .filter((s): s is SongInterface => !!s)
-          .map((s, idx) => ({
-            ...s,
-            id: s.id,
-            albumId: targetAlbum.id,
-            coverFromAlbum: targetAlbum.cover || targetAlbum.thumbnail || null,
-            thumbnail:
-              s.thumbnail || targetAlbum.cover || 'assets/no-album.png',
-          }))
-          .slice(0, 4 - this.filteredTracks.length);
+    // Проверяем, относится ли трек к текущему ТОП-альбому [cite: 2025-12-14]
+    const isPartOfAlbum = (this.topAlbumResult?.songs || []).some((id) => {
+      const sId = typeof id === 'string' ? id : (id as any).id;
+      return String(sId) === String(trackId);
+    });
+
+    if (
+      isPartOfAlbum &&
+      this.topAlbumResult &&
+      this.topAlbumFullSongs.length > 0
+    ) {
+      const validSong = this.topAlbumFullSongs.find(
+        (s) => String(s.id) === String(trackId),
+      );
+      const startIndex = validSong
+        ? this.topAlbumFullSongs.indexOf(validSong)
+        : 0;
+
+      this.playerService.playTrackList(
+        this.topAlbumFullSongs,
+        startIndex,
+        this.topAlbumResult.cover || '',
+      );
+    } else {
+      const fullSong = this.musicStore
+        .currentSongs()
+        .find((s) => String(s.id) === String(trackId));
+      if (fullSong?.url) {
+        this.playerService.playTrackList(
+          [fullSong],
+          0,
+          fullSong.thumbnail || '',
+        );
       }
     }
-
     this.cdr.markForCheck();
   }
 
@@ -207,46 +230,12 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
       return String(current.id) === String(this.topTrack.id);
     }
 
-    if (this.topAlbumResult && this.topAlbumResult.songs?.length > 0) {
-      const firstSongId = this.topAlbumResult.songs[0];
-      const idToCheck =
-        typeof firstSongId === 'string'
-          ? firstSongId
-          : (firstSongId as any)?.id;
-      return String(current.id) === String(idToCheck);
+    if (this.topAlbumResult && this.topAlbumFullSongs.length > 0) {
+      return this.topAlbumFullSongs.some(
+        (s) => String(s.id) === String(current.id),
+      );
     }
 
     return false;
-  }
-
-  handlePlay(trackOrId: TrackWithContext | SongInterface | string): void {
-    if (!trackOrId) return;
-
-    let trackId: string;
-    let providedThumbnail: string | undefined;
-
-    if (typeof trackOrId === 'string') {
-      trackId = trackOrId;
-    } else {
-      trackId = trackOrId.id;
-      providedThumbnail =
-        (trackOrId as TrackWithContext).coverFromAlbum ??
-        trackOrId.thumbnail ??
-        undefined;
-    }
-
-    const allSongs = this.musicStore.currentSongs();
-    const fullSong = allSongs.find((s) => String(s.id) === String(trackId));
-
-    if (!fullSong) {
-      console.error(`❌ [Search] Песня ID "${trackId}" не найдена.`);
-      return;
-    }
-
-    const finalCover: string =
-      providedThumbnail ?? fullSong.thumbnail ?? 'assets/no-album.png';
-
-    console.log(`▶️ [Search] Запуск: "${fullSong.title}"`);
-    this.playerService.play(fullSong, finalCover);
   }
 }
