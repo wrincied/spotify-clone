@@ -234,7 +234,7 @@
     border-radius: 8px;
     font-family: monospace;
     font-size: 0.75rem;
-    color: #33ff00;
+    color: var(--chart-accent);
     max-height: 200px;
     overflow-y: auto;
     div {

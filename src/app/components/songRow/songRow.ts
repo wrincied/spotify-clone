@@ -13,7 +13,6 @@ import { NavigationService } from '../../services/navigationService/navigation-s
   styleUrl: './songRow.scss',
 })
 export class SongRow {
-  private router = inject(Router);
   private nav = inject(NavigationService);
 
   @Input({ required: true }) song!: SongInterface;

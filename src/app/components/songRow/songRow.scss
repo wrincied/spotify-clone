@@ -44,7 +44,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      color: #b3b3b3;
+      color: var(--text-base);
       font-variant: tabular-nums;
       border-radius: 4px; // Чуть мягче углы
       // А) КОНТЕЙНЕР ДЛЯ НОМЕРА / GIF / СТАТИЧНОЙ ИКОНКИ
@@ -79,7 +79,7 @@
         transform: translate(-50%, -50%);
         background: transparent;
         border: none;
-        color: #fff;
+        color: var(--text-base);
         padding: 0;
         cursor: pointer;
         border-radius: 4px; // Чуть мягче углы
@@ -120,7 +120,7 @@
           transition: opacity 0.2s ease;
           align-items: center;
           justify-content: center;
-          color: #fff;
+          color: var(--text-base);
           border: none;
           cursor: pointer;
 
@@ -141,7 +141,7 @@
 
       .title {
         font-size: 16px;
-        color: #fff;
+        color: var(--text-base);
         font-weight: 400;
         white-space: nowrap;
         overflow: hidden;
@@ -157,7 +157,7 @@
 
       .artist {
         font-size: 14px;
-        color: #b3b3b3;
+        color: var(--text-subdued);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -165,7 +165,7 @@
         transition: color 0.2s ease;
         position: relative;
         .artist-link {
-          color: #b3b3b3;
+          color: var(--text-subdued);
           text-decoration: none;
           position: relative;
           z-index: 100; /* Ссылка должна быть выше всего в строке */
@@ -183,7 +183,7 @@
   // ==========================================
   .row__duration {
     font-size: 14px;
-    color: #b3b3b3;
+    color: var(--text-subdued);
     font-variant: tabular-nums;
     margin-left: auto;
     padding-left: 16px;
@@ -199,10 +199,10 @@
 
     .row__info {
       .index-col .index-number {
-        color: #1ed760; // Зеленая цифра (если не гифка)
+        color: var(--essential-bright-accent); // Зеленая цифра (если не гифка)
       }
       .row__text .title {
-        color: #1ed760; // Зеленое название
+        color: var(--essential-bright-accent); // Зеленое название
       }
     }
   }
@@ -242,7 +242,7 @@
     // Цвет времени и артиста становится белым при наведении (как в Spotify)
     .row__duration,
     .row__info .row__text .artist {
-      color: #fff;
+      color: var(--text-base);
     }
   }
 }

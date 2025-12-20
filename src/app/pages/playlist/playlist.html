@@ -13,7 +13,7 @@
       <div class="sticky-content">
         <button
           class="play-btn"
-          (click)="handlePlay(album.songs[0])"
+          (click)="handlePlay($any(album.songs[0]))"
         >
           <div class="play-icon">
             @if (isAlbumPlaying) {
@@ -43,7 +43,7 @@
       class="album_header"
       #albumHeaderRef
     >
-      <div class="album-heade__inside">
+      <div class="album-header__inside">
         <img
           [src]="album.cover"
           class="album_cover"
@@ -52,8 +52,7 @@
           <h1>{{ album.title }}</h1>
           @if (album.description) {
             <p
-            class="description active"
-        
+              class="description active"
               (click)="onArtistClick($event)"
             >
               {{ album.description }}
@@ -67,7 +66,7 @@
     <div
       class="table-header"
       [style.background-color]="isSticky ? '#1f1f1f' : 'transparent'"
-      [style.box-shadow]="'0 4px 10px rgba(0, 0, 0, 0.5);'"
+      [style.box-shadow]="isSticky ? '0 4px 10px rgba(0, 0, 0, 0.5)' : 'none'"
     >
       <span class="col-index">#</span>
       <span class="col-title">Titel</span>
@@ -80,13 +79,13 @@
     </div>
 
     <div class="songs_list">
-      @for (s of album.songs; track s.id) {
+      @for (s of album.songs; track $any(s).id) {
         <app-songRow
-          [song]="s"
+          [song]="$any(s)"
           [index]="$index + 1"
           [currentTrack]="playerService.currentTrack$ | async"
           [isPlaying]="(playerService.isPlaying$ | async) || false"
-          (playRequest)="handlePlay(s)"
+          (playRequest)="handlePlay($any(s))"
         ></app-songRow>
       }
     </div>
