@@ -4,6 +4,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  background-color: #121212; // Базовый фон страницы
 
   .gradient-background {
     position: absolute;
@@ -26,9 +27,10 @@
     );
   }
 
+  /* === STICKY HEADER (Название альбома при скролле) === */
   .sticky-header {
     position: sticky;
-    top: 10px;
+    top: 0; // Клеим к самому верху
     z-index: 50;
     margin-bottom: -70px;
     height: 70px;
@@ -44,6 +46,7 @@
     &.visible {
       opacity: 1;
       pointer-events: auto;
+      transform: translateY(0);
       box-shadow: 0 4px 10px var(--shadow-dark-50);
     }
 
@@ -53,6 +56,7 @@
       gap: 16px;
       width: 100%;
     }
+
     .play-btn {
       width: 48px;
       height: 48px;
@@ -69,6 +73,7 @@
         transform: scale(1.05);
       }
     }
+
     .sticky-text h2 {
       font-size: 20px;
       font-weight: 700;
@@ -76,6 +81,7 @@
     }
   }
 
+  /* === ALBUM HEADER (Основная инфо) === */
   .album_header {
     position: relative;
     z-index: 1;
@@ -85,6 +91,7 @@
       display: flex;
       align-items: flex-end;
       gap: 24px;
+
       .album_cover {
         width: 190px;
         height: 190px;
@@ -92,36 +99,42 @@
         box-shadow: 0 4px 60px var(--shadow-dark-50);
         border-radius: 4px;
       }
+
       .album_info {
         display: flex;
         flex-direction: column;
         gap: 10px;
         h1 {
-          font-size: 48px;
+          font-size: clamp(28px, 5vw, 48px);
           font-weight: 900;
           margin: 0;
-          line-height: 1;
+          line-height: 1.1;
         }
         p {
           color: var(--text-playlist-header);
           margin: 0;
           font-size: 14px;
           font-weight: 500;
+          &.description:hover {
+            text-decoration: underline;
+            cursor: pointer;
+          }
         }
       }
     }
   }
 
+  /* === TABLE HEADER (Заголовки колонок) === */
   .table-header {
     position: sticky;
-    top: 70px;
+    top: 70px; // Сразу под sticky-header
     z-index: 40;
     transition: background-color 0.3s ease;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     align-items: center;
-    padding: 0 22px 0px 26px;
-    height: 32px;
+    padding: 0 16px;
+    height: 36px;
     color: var(--text-playlist-description);
     font-size: 14px;
     margin-bottom: 8px;
@@ -153,9 +166,9 @@
     z-index: 1;
   }
 
-  /* --- ADAPTIVE DESIGN [cite: 2025-12-14] --- */
+  /* === ADAPTIVE DESIGN === */
   @media (max-width: 768px) {
-    padding: 0 16px 16px;
+    padding: 0;
 
     .gradient-background {
       height: 320px;
@@ -163,7 +176,6 @@
 
     .sticky-header {
       height: 60px;
-      top: 0;
       padding: 0 16px;
       margin-bottom: -60px;
       .play-btn {
@@ -176,7 +188,7 @@
     }
 
     .album_header {
-      padding-top: 60px;
+      padding: 60px 16px 24px;
       .album-header__inside {
         flex-direction: column;
         align-items: center;
@@ -186,21 +198,24 @@
           width: 160px;
           height: 160px;
         }
-        .album_info {
-          align-items: center;
-          h1 {
-            font-size: 28px;
-          }
+        .album_info h1 {
+          font-size: 28px;
         }
       }
     }
 
     .table-header {
-      top: 50px;
-      padding: 0 12px;
+      top: 60px; // Высота мобильного sticky-header
+      padding: 0px 10px 0px 26px;
+
       .col-index {
+        /* ТЕПЕРЬ ПОКАЗЫВАЕМ ИНДЕКС НА МОБИЛКАХ [cite: 2025-12-14] */
         display: none;
-      } // Скрываем # на мобилках [cite: 2025-12-14]
+        width: 24px; // Синхронизировано с songRow
+        margin-right: 12px;
+        font-size: 12px;
+      }
+
       .col-title {
         font-size: 11px;
       }

@@ -46,7 +46,7 @@
           <app-albumCard
             [id]="topTrack.albumId"
             [artistId]="topTrack.artistId"
-            [type]="'album'"
+            [type]="'song'"
             [title]="topTrack.title"
             [description]="topTrack.artist"
             [playlistThumbnail]="topTrack.coverFromAlbum"
@@ -63,30 +63,16 @@
         <div class="track-list">
           @for (track of filteredTracks; track track.id) {
             <app-songRow
+              [context]="'search'"
               [song]="track"
+              [class.track-disabled]="!track.url"
               [index]="
                 track.thumbnail || track.coverFromAlbum || 'assets/no-album.png'
               "
               [currentTrack]="currentTrack$ | async"
               [isPlaying]="(isPlaying$ | async) || false"
-              (playRequest)="handlePlay(track)"
+              (playRequest)="track.url ? handlePlay(track) : null"
             ></app-songRow>
-          }
-
-          @if (filteredTracks.length < 4) {
-            @for (track of topAlbumSongs; track track.id) {
-              <app-songRow
-                [song]="track"
-                [index]="
-                  track.thumbnail ||
-                  track.coverFromAlbum ||
-                  'assets/no-album.png'
-                "
-                [currentTrack]="currentTrack$ | async"
-                [isPlaying]="(isPlaying$ | async) || false"
-                (playRequest)="handlePlay(track)"
-              ></app-songRow>
-            }
           }
         </div>
       </div>

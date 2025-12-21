@@ -1,45 +1,50 @@
+/* === ГЛОБАЛЬНЫЙ КОНТЕЙНЕР (FULLSCREEN) === */
 .spotify-fullscreen-container {
   position: fixed;
-  inset: 0; /* Растягиваем на весь экран */
-  width: 100vw;
-  height: 100dvh;
-  z-index: 10000; /* Перекрываем Sidebar и Player */
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10000;
   background: #121212;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  box-sizing: border-box;
 
-  /* Фон */
+  /* Размытый фон */
   .dynamic-bg {
     position: absolute;
     inset: 0;
     z-index: -1;
     background-size: cover;
     background-position: center;
-    filter: blur(80px) brightness(0.4);
-    opacity: 0.6;
+    filter: blur(60px) brightness(0.3);
+    transform: scale(1.1);
   }
 }
 
-// HEADER
+/* === ВЕРХНЯЯ ПАНЕЛЬ === */
 .top-nav {
+  flex-shrink: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 32px;
-  z-index: 10;
-  padding-top: max(16px, env(safe-area-inset-top)); // Для iPhone челки
+  padding: 20px 24px;
+  padding-top: max(20px, env(safe-area-inset-top));
+  box-sizing: border-box;
 
   .context {
     text-align: center;
     .label {
       font-size: 10px;
+      font-weight: 700;
       letter-spacing: 1px;
-      color: #b3b3b3;
+      color: rgba(255, 255, 255, 0.7);
+      text-transform: uppercase;
     }
     .title {
       display: block;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       margin-top: 4px;
     }
@@ -50,196 +55,247 @@
     background: none;
     border: none;
     color: #fff;
+    padding: 10px;
     cursor: pointer;
-    padding: 8px;
     &:hover {
       opacity: 0.8;
     }
   }
 }
 
-// MAIN CONTENT (ЦЕНТРИРОВАНИЕ)
+/* === ЦЕНТРАЛЬНАЯ ЧАСТЬ (ОБЛОЖКА) === */
 .content-body {
-  flex: 1; /* Занимает все место между хедером и футером */
+  flex: 1;
   display: flex;
-  flex-direction: column; // Гарантирует вертикальную ось
-  align-items: center; // Центр по горизонтали
-  justify-content: center; // Центр по вертикали
+  align-items: center;
+  justify-content: center;
   padding: 20px;
-  width: 100%;
   box-sizing: border-box;
+  min-height: 0;
 
   .art-wrapper {
-    // vmin гарантирует, что обложка впишется и в вертикальный, и в горизонтальный экран
-    width: 80vmin;
-    max-width: 450px;
-    aspect-ratio: 1 / 1;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    width: 100%;
+    max-width: 350px; /* Чуть увеличил макс размер */
+    aspect-ratio: 1/1;
 
     .main-art {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 8px;
-      box-shadow: 0 12px 60px rgba(0, 0, 0, 0.6);
+      border-radius: 12px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     }
   }
 }
 
-// FOOTER (ПРИЖАТ К НИЗУ)
+/* === НИЖНЯЯ ПАНЕЛЬ === */
 .bottom-bar {
-  /* Flex-контейнер .spotify-fullscreen-container сам прижмет это вниз */
-  width: 100%;
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.9),
-    transparent
-  ); // Мягкий градиент
-  height: auto;
-  min-height: 140px; // Минимальная высота для удобства
-  display: flex;
-  flex-direction: column; // Элементы друг под другом (инфо, прогресс, кнопки)
-  justify-content: flex-end;
+  flex-shrink: 0;
   padding: 24px;
-  padding-bottom: max(
-    32px,
-    env(safe-area-inset-bottom)
-  ); // Отступ для полоски iPhone
+  padding-bottom: max(32px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 24px; /* Увеличил отступ между элементами для красоты */
   box-sizing: border-box;
-  z-index: 10;
 
-  // Стиль Desktop-like футера
-  @media (min-width: 769px) {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    height: 100px;
-    background: rgba(0, 0, 0, 0.3);
-    padding-bottom: 0;
-  }
-
-  .track-info-side {
-    width: 100%;
+  /* 1. Инфо о треке */
+  .info-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-
-    @media (min-width: 769px) {
-      width: 30%;
-      margin-bottom: 0;
-    }
 
     .titles {
       overflow: hidden;
+      width: 100%;
       .name {
-        font-size: 20px;
-        font-weight: 700;
+        font-size: 24px;
+        font-weight: 800;
         margin: 0;
         white-space: nowrap;
+        overflow: hidden;
         text-overflow: ellipsis;
       }
       .artist {
-        font-size: 16px;
-        color: #b3b3b3;
-        margin: 4px 0 0;
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.7);
+        margin: 6px 0 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
-    }
-    .heart-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #1db954;
     }
   }
 
-  .player-controls-center {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-
-    @media (min-width: 769px) {
-      flex: 1;
-    }
-
-    .progress-wrap {
+  /* 2. Слайдер */
+  .timeline-block {
+    .seek-bar {
       width: 100%;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      .time {
-        font-size: 11px;
-        color: #b3b3b3;
-        min-width: 35px;
-        font-variant-numeric: tabular-nums;
-      }
-      .seek-bar {
-        flex: 1;
-        accent-color: #fff;
-        height: 4px;
-        border-radius: 2px;
-        cursor: pointer;
-      }
-    }
+      height: 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
 
-    .playback-buttons {
-      width: 100%;
-      display: flex;
-      justify-content: space-between; // Раскидать кнопки на мобилке
-      align-items: center;
-
-      @media (min-width: 769px) {
-        justify-content: center;
-        gap: 24px;
-      }
-
-      button {
-        background: none;
-        border: none;
-        color: #b3b3b3;
-        cursor: pointer;
-        padding: 10px;
-        &:hover {
-          color: #fff;
-        }
-      }
-      .play-circle {
+      &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 12px;
+        height: 12px;
         background: #fff;
-        color: #000;
-        width: 64px;
-        height: 64px;
         border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        @media (min-width: 769px) {
-          width: 32px;
-          height: 32px;
-        }
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        border: none;
+        margin-top: 0; /* Иногда нужно для выравнивания */
       }
-      .sub-btn.active {
-        color: #1db954;
-      }
+      &::-moz-range-thumb {
+      width: 12px;
+      height: 12px;
+      background: #fff;
+      border-radius: 50%;
+      border: none;
+    }
+    }
+    .time-stamps {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.6);
+      font-variant-numeric: tabular-nums;
     }
   }
 
-  .volume-side {
-    display: none; // Скрываем на мобилках
-    @media (min-width: 769px) {
-      display: flex;
-      width: 30%;
-      justify-content: flex-end;
-    }
-    .side-icon {
+  /* 3. КНОПКИ УПРАВЛЕНИЯ (Main Controls) */
+  .main-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0; /* Убрал боковые паддинги, чтобы кнопки разъехались */
+    width: 100%;
+    box-sizing: border-box;
+
+    /* Общий сброс стилей кнопок */
+    button {
       background: none;
       border: none;
-      color: #b3b3b3;
+      color: rgba(255, 255, 255, 0.7);
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      position: relative; /* Важно для псевдоэлементов */
+      transition:
+        transform 0.2s cubic-bezier(0.3, 0, 0, 1),
+        color 0.2s;
+
+      &:hover {
+        color: #fff;
+        transform: scale(1.1);
+      }
+      &:active {
+        transform: scale(0.95);
+        opacity: 0.7;
+      }
     }
+
+    /* Центральная кнопка Play */
+    .play-trigger {
+      background: #fff;
+      color: #000;
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+
+      /* Убираем стандартные ховеры, делаем свои */
+      &:hover {
+        color: #000;
+        transform: scale(1.05);
+        background: #fff;
+      }
+
+      .svg-icon {
+        width: 32px;
+        height: 32px;
+        display: block; // Фикс отступов у картинок
+      }
+    }
+
+    /* Кнопки Prev/Next */
+    .nav-btn {
+      color: #fff;
+      padding: 8px;
+      svg {
+        width: 36px;
+        height: 36px;
+      } /* Чуть крупнее */
+    }
+
+    /* === КНОПКИ SHUFFLE И LOOP === */
+    .sub-btn {
+      width: 48px;
+      height: 48px;
+
+      /* Чтобы точка точно позиционировалась */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      svg {
+        width: 22px;
+        height: 22px;
+      }
+
+      /* СОСТОЯНИЕ ACTIVE */
+      &.active {
+        /* Принудительно зеленый цвет (Spotify Green) */
+        color: #1db954 !important;
+        opacity: 1 !important;
+
+        /* Точка под иконкой */
+        &::after {
+          content: '';
+          display: block;
+          width: 4px;
+          height: 4px;
+          background-color: #1db954;
+          border-radius: 50%;
+
+          /* Абсолютное позиционирование, чтобы не сдвигать иконку */
+          position: absolute;
+          bottom: 8px;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+      }
+    }
+  }
+}
+
+/* === АДАПТИВНОСТЬ === */
+@media (max-width: 768px) {
+  .art-wrapper {
+    max-width: 280px !important;
+  }
+  .bottom-bar {
+    gap: 16px; // На мобилках плотнее
+    .titles .name {
+      font-size: 20px;
+    }
+  }
+}
+
+@media (min-width: 1024px) {
+  .spotify-fullscreen-container {
+    align-items: center;
+  }
+  .top-nav,
+  .content-body,
+  .bottom-bar {
+    width: 100%;
+    max-width: 600px;
   }
 }

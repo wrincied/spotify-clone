@@ -1,35 +1,34 @@
-@let track = playerService.currentTrack();
-@let cover = (playerService.currentCover$ | async) || 'assets/no-album.png';
+@if (currentTrack$ | async; as track) {
+  @let current = (playerService.currentTime$ | async) || 0;
+  @let total = (playerService.duration$ | async) || 1;
+  @let progressPercent = (current / total) * 100;
+  @let cover = (playerService.currentCover$ | async) || 'assets/no-album.png';
 
-<div
-  class="spotify-fullscreen-container"
-  [class.mini-visible]="!playerService.isExpanded()"
->
-  <div
-    class="dynamic-bg"
-    [style.background-image]="'url(' + cover + ')'"
-  ></div>
+  <div class="spotify-fullscreen-container">
+    <div
+      class="dynamic-bg"
+      [style.background-image]="'url(' + cover + ')'"
+    ></div>
 
-  <header class="top-nav">
-    <button
-      class="close-btn"
-      (click)="close()"
-    >
-      <svg
-        viewBox="0 0 24 24"
-        width="24"
+    <header class="top-nav">
+      <button
+        class="close-btn"
+        (click)="close()"
       >
-        <path
-          fill="currentColor"
-          d="M12 15.5l-6-6 1.41-1.41L12 12.67l4.59-4.58L18 9.5z"
-        />
-      </svg>
-    </button>
-    <div class="context">
-      <span class="label">PLAYING FROM ALBUM</span>
-      <span class="title">{{ album?.title || 'Current Queue' }}</span>
-    </div>
-    <div class="actions-top">
+        <svg
+          viewBox="0 0 24 24"
+          width="24"
+        >
+          <path
+            fill="currentColor"
+            d="M12 15.5l-6-6 1.41-1.41L12 12.67l4.59-4.58L18 9.5z"
+          />
+        </svg>
+      </button>
+      <div class="context">
+        <span class="label">PLAYING FROM ALBUM</span>
+        <span class="title">{{ album?.title || 'Current Queue' }}</span>
+      </div>
       <button class="icon-btn">
         <svg
           viewBox="0 0 24 24"
@@ -41,57 +40,74 @@
           />
         </svg>
       </button>
-    </div>
-  </header>
+    </header>
 
-  <main class="content-body">
-    <div class="art-wrapper">
-      <img
-        [src]="cover"
-        class="main-art"
-        alt="Album Art"
-      />
-    </div>
-  </main>
-
-  <footer class="bottom-bar">
-    <div class="track-info-side">
-      <div class="titles">
-        <h1 class="name">{{ track?.title }}</h1>
-        <p class="artist">{{ track?.artist }}</p>
+    <main class="content-body">
+      <div class="art-wrapper">
+        <img
+          [src]="cover"
+          class="main-art"
+          alt="Album Art"
+        />
       </div>
-      <button class="heart-btn">
-        <svg
-          viewBox="0 0 24 24"
-          width="24"
-          fill="#1db954"
-        >
-          <path
-            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-          />
-        </svg>
-      </button>
-    </div>
+    </main>
 
-    <div class="player-controls-center">
-      <div class="playback-buttons">
+    <footer class="bottom-bar">
+      <div class="info-row">
+        <div class="titles">
+          <h1 class="name">{{ track?.title }}</h1>
+          <p class="artist">{{ track?.artist }}</p>
+        </div>
+      </div>
+
+      <div class="timeline-block">
+        <input
+          type="range"
+          class="seek-bar"
+          [max]="total"
+          [value]="current"
+          (input)="onSeek($event)"
+          [style.background]="
+            'linear-gradient(to right, #1db954 ' +
+            progressPercent +
+            '%, rgba(255, 255, 255, 0.2) ' +
+            progressPercent +
+            '%)'
+          "
+        />
+        <div class="time-stamps">
+          <span>{{ formatTime(current) }}</span>
+          <span>{{ formatTime(total) }}</span>
+        </div>
+      </div>
+
+      <div class="main-controls">
         <button
           class="sub-btn"
           [class.active]="playerService.isShuffling()"
+          (click)="playerService.toggleShuffle()"
         >
           <svg
-            width="18"
             viewBox="0 0 16 16"
+            width="16"
+            height="16"
+            fill="currentColor"
           >
             <path
-              fill="currentColor"
-              d="M13.151.922a.75.75 0 1 0-1.06 1.06L13.109 3H11.16a3.75 3.75 0 0 0-2.873 1.34l-6.173 7.356A2.25 2.25 0 0 1 .39 12.5H0V14h.391a3.75 3.75 0 0 0 2.873-1.34l6.173-7.356a2.25 2.25 0 0 1 1.724-.804h1.947l-1.017 1.018a.75.75 0 0 0 1.06 1.06L15.98 3.75z"
-            />
+              d="M13.151.922a.75.75 0 1 0-1.06 1.06L13.109 3H11.16a3.75 3.75 0 0 0-2.873 1.34l-6.173 7.356A2.25 2.25 0 0 1 .39 12.5H0V14h.391a3.75 3.75 0 0 0 2.873-1.34l6.173-7.356a2.25 2.25 0 0 1 1.724-.804h1.947l-1.017 1.018a.75.75 0 0 0 1.06 1.06L15.98 3.75zM.391 3.5H0V2h.391c1.109 0 2.16.49 2.873 1.34L4.89 5.277l-.979 1.167-1.796-2.14A2.25 2.25 0 0 0 .39 3.5z"
+            ></path>
+            <path
+              d="m7.5 10.723.98-1.167.957 1.14a2.25 2.25 0 0 0 1.724.804h1.947l-1.017-1.018a.75.75 0 1 1 1.06-1.06l2.829 2.828-2.829 2.828a.75.75 0 1 1-1.06-1.06L13.109 13H11.16a3.75 3.75 0 0 1-2.873-1.34l-.787-.938z"
+            ></path>
           </svg>
         </button>
-        <button (click)="playerService.prevTrack()">
+
+        <button
+          class="nav-btn"
+          (click)="playerService.prevTrack()"
+        >
           <svg
-            width="24"
+            width="32"
             viewBox="0 0 24 24"
           >
             <path
@@ -100,29 +116,34 @@
             />
           </svg>
         </button>
+
         <button
-          class="play-circle"
+          class="play-trigger"
           (click)="playerService.togglePlay()"
         >
           @if (playerService.isPlaying()) {
             <svg
               viewBox="0 0 24 24"
-              width="24"
+              width="40"
             >
               <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
             </svg>
           } @else {
             <svg
               viewBox="0 0 24 24"
-              width="24"
+              width="40"
             >
               <path d="M8 5v14l11-7z" />
             </svg>
           }
         </button>
-        <button (click)="playerService.nextTrack()">
+
+        <button
+          class="nav-btn"
+          (click)="playerService.nextTrack()"
+        >
           <svg
-            width="24"
+            width="32"
             viewBox="0 0 24 24"
           >
             <path
@@ -131,50 +152,24 @@
             />
           </svg>
         </button>
+
         <button
           class="sub-btn"
           [class.active]="playerService.isLooping()"
+          (click)="playerService.toggleLoop()"
         >
           <svg
-            width="18"
             viewBox="0 0 16 16"
+            width="16"
+            height="16"
+            fill="currentColor"
           >
             <path
-              fill="currentColor"
               d="M0 4.75A3.75 3.75 0 0 1 3.75 1h8.5A3.75 3.75 0 0 1 16 4.75v5a3.75 3.75 0 0 1-3.75 3.75H9.81l1.018 1.018a.75.75 0 1 1-1.06 1.06L6.939 12.75l2.829-2.828a.75.75 0 1 1 1.06 1.06L9.811 12h2.439a2.25 2.25 0 0 0 2.25-2.25v-5a2.25 2.25 0 0 0-2.25-2.25h-8.5A2.25 2.25 0 0 0 1.5 4.75v5A2.25 2.25 0 0 0 3.75 12H5v1.5H3.75A3.75 3.75 0 0 1 0 9.75z"
-            />
+            ></path>
           </svg>
         </button>
       </div>
-      <div class="progress-wrap">
-        <span class="time">{{
-          formatTime(playerService.currentTime$ | async)
-        }}</span>
-        <input
-          type="range"
-          class="seek-bar"
-          [max]="playerService.duration$ | async"
-          [value]="playerService.currentTime$ | async"
-          (input)="onSeek($event)"
-        />
-        <span class="time">{{
-          formatTime(playerService.duration$ | async)
-        }}</span>
-      </div>
-    </div>
-
-    <div class="volume-side">
-      <button class="side-icon">
-        <svg
-          viewBox="0 0 24 24"
-          width="20"
-        >
-          <path
-            fill="currentColor"
-            d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z"
-          />
-        </svg>
-      </button>
-    </div>
-  </footer>
-</div>
+    </footer>
+  </div>
+}
