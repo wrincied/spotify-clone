@@ -1,12 +1,12 @@
 <div
   class="songRow__container"
-  [class.search-mode]="isSearchMode"
   [class.active]="isCurrent"
+  [attr.context]="context"
   (click)="handlePlay($event)"
 >
   <div class="row__info">
     <div class="index-col">
-      @if (thumbnailUrl) {
+      @if (isThumbnailMode && thumbnailUrl) {
         <div class="thumbnail-wrapper">
           <img
             [src]="thumbnailUrl"
@@ -56,14 +56,12 @@
                     values="15;5;15"
                     dur="1s"
                     repeatCount="indefinite"
-                    begin="0s"
                   />
                   <animate
                     attributeName="height"
                     values="9;19;9"
                     dur="1s"
                     repeatCount="indefinite"
-                    begin="0s"
                   />
                 </rect>
                 <rect
@@ -176,7 +174,6 @@
       >
         <span>{{ song.title }}</span>
       </div>
-
       <div class="artist">
         @if (song.artistId) {
           <a

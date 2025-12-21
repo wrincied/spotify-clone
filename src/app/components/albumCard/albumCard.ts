@@ -33,7 +33,7 @@ export class albumCard {
   @Input() fixedSize = false;
   @Input() isPlaying = false;
   @Input() releaseYear?: string;
-  @Input() type: 'album' | 'category' | 'artist' = 'album';
+  @Input() type: 'album' | 'category' | 'artist' | 'song' = 'album';
 
   // === OUTPUTS ===
   @Output() playRequest = new EventEmitter<void>();
@@ -51,6 +51,13 @@ export class albumCard {
         break;
       case 'artist':
         this.nav.goToArtist(this.id);
+        break;
+        case 'song':
+        // Если это песня в поиске, обычно id это id альбома 
+        // Если id в карточке это id песни, лучше перенаправлять на альбом
+        if (this.id) {
+          this.nav.goToAlbum(this.id);
+        }
         break;
     }
   }
@@ -70,7 +77,7 @@ export class albumCard {
   }
   getYear(): string | null {
     if (this.releaseYear) return this.releaseYear;
-    
+
     if (this.description) {
       const yearMatch = this.description.match(/\d{4}/);
       if (yearMatch) return yearMatch[0];

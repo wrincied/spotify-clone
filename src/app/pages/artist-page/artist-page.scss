@@ -4,202 +4,224 @@
   width: 100%;
   color: var(--text-base);
   padding-bottom: 32px;
+  background-color: #121212; // Базовый фон
+  /* Чтобы избежать белых полос при оверскролле */
+  min-height: 100vh;
 }
 
-/* === HERO HEADER === */
+/* === 1. HERO HEADER (Parallax-ready) === */
 .artist-header {
   position: relative;
-  height: 40vh; /* Занимает 40% высоты экрана */
+  /* Высота зависит от вьюпорта, но имеет разумные ограничения */
+  height: 40vh;
   min-height: 340px;
-  max-height: 500px;
-
-  background-size: cover;
-  background-position: center 20%; /* Центрируем, но чуть выше */
-  background-repeat: no-repeat;
+  max-height: 600px;
 
   display: flex;
-  align-items: flex-end; /* Контент прижат к низу */
-  padding: 0 32px 24px;
+  align-items: flex-end;
+  padding: 0 32px 32px;
 
-  /* Затемнение поверх картинки, чтобы текст читался */
+  /* Фоновое изображение (аватар артиста) */
+  background-size: cover;
+  background-position: center 20%; // Чуть выше центра, чтобы лицо артиста не резалось
+  background-repeat: no-repeat;
+  box-sizing: border-box;
+
+  /* Тень от шапки, чтобы отделить от контента */
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+
+  @media (max-width: 768px) {
+    height: 35vh;
+    padding: 0 16px 20px;
+    background-position: center center;
+  }
+
+  /* Затемнение фона для читаемости текста */
   .header-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(transparent 0, var(--shadow-dark-50) 100%);
-    z-index: 0;
+    /* Градиент: прозрачный сверху -> черный внизу */
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 0.2) 50%,
+      rgba(0, 0, 0, 0.8) 100%
+    );
+    z-index: 1;
   }
 
   .header-content {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     width: 100%;
 
+    /* Бейдж "Verified Artist" */
     .verified-badge {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       font-size: 14px;
+      font-weight: 700;
       margin-bottom: 8px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 
       .verified-icon {
-        display: block; // Убираем лишние отступы SVG
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+      }
+
+      @media (max-width: 480px) {
+        font-size: 12px;
       }
     }
 
     .artist-name {
-      /* Адаптивный шрифт: минимум 48px, максимум 96px */
-      font-size: clamp(48px, 8vw, 96px);
+      /* Адаптивный размер шрифта: от 36px до 96px */
+      font-size: clamp(32px, 8vw, 96px);
       font-weight: 900;
       margin: 0;
-      line-height: 1;
+      line-height: 1.1;
       letter-spacing: -0.02em;
       padding-bottom: 12px;
+      word-break: break-word; /* Перенос длинных имен */
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
 
     .listeners {
       font-size: 16px;
-      font-weight: 400;
+      font-weight: 500;
       margin: 0;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
     }
   }
 }
 
-/* === BODY GRADIENT & CONTENT === */
+/* === 2. BODY CONTENT & GRADIENT === */
 .artist-body {
   position: relative;
-  /* Темно-серый градиент, имитирующий "фирменный цвет" артиста, уходящий в черный */
-  background: linear-gradient(rgba(34, 34, 34, 1) 0%, #121212 250px);
+  z-index: 2;
+  /* Плавный переход от фона шапки к основному цвету */
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6) 0%, #121212 250px);
   padding: 24px 32px;
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
 }
 
-/* === ACTION BAR === */
+/* === 3. ACTION BAR (Play, Follow) === */
 .action-bar {
   display: flex;
   align-items: center;
   gap: 32px;
   margin-bottom: 32px;
+  position: relative; // Для z-index
+
+  @media (max-width: 480px) {
+    gap: 20px;
+    margin-bottom: 24px;
+  }
 
   .play-btn-big {
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background-color: var(--essential-bright-accent); /* Spotify Green */
+    background-color: var(--essential-bright-accent);
     border: none;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition:
-      transform 0.1s ease,
-      background-color 0.1s;
-    color: black; /* Иконка внутри черная */
+      transform 0.2s cubic-bezier(0.3, 0, 0, 1),
+      background-color 0.2s;
+    color: #000;
+    flex-shrink: 0;
+    box-shadow: 0 8px 8px rgba(0, 0, 0, 0.3);
 
     &:hover {
       transform: scale(1.05);
       background-color: var(--essential-bright-accent-hover);
     }
+
     &:active {
-      transform: scale(1);
-      background-color: var(--essential-bright-accent-darker);
+      transform: scale(0.95);
     }
+
+    svg {
+      display: block;
+    } // Фикс для выравнивания иконки
   }
 
   .follow-btn {
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.3);
-    color: var(--text-base);
-    border-radius: 18px; /* Капсула */
-    padding: 7px 15px;
+    color: #fff;
+    border-radius: 500px;
+    padding: 7px 20px;
     font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.1em;
     cursor: pointer;
-    letter-spacing: 1px;
+    transition: all 0.2s;
 
     &:hover {
-      border-color: white;
+      border-color: #fff;
+      transform: scale(1.02);
     }
   }
 
   .more-btn {
-    background: transparent;
     border: none;
-    color: #b3b3b3;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7);
     font-size: 24px;
     cursor: pointer;
+    padding: 0 8px;
     &:hover {
-      color: var(--text-base);
+      color: #fff;
     }
   }
 }
 
-/* === SECTIONS === */
+/* === 4. SECTIONS (Popular, Discography) === */
 .section {
-  margin-bottom: 40px;
+  margin-bottom: 48px;
 
   h2 {
     font-size: 24px;
     font-weight: 700;
     margin-bottom: 20px;
+    letter-spacing: -0.02em;
+    color: #fff;
   }
 }
 
-.tracks-list {
-  display: flex;
-  flex-direction: column;
-}
-
-/* === GRID АЛЬБОМОВ === */
+/* СЕТКА ДЛЯ АЛЬБОМОВ */
 .albums-grid {
   display: grid;
-  /* Адаптивная сетка: карточки не уже 180px */
+  /* Адаптивная ширина колонок [cite: 2025-12-14] */
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 24px;
 
-  .album-card {
-    background: var(--background-highlight);
-    padding: 16px;
-    border-radius: 6px;
-    transition: background-color 0.3s ease;
-    cursor: pointer;
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+  }
 
-    &:hover {
-      background-color: var(--background-elevated-highlight);
-    }
-
-    .img-wrapper {
-      width: 100%;
-      aspect-ratio: 1/1; /* Квадрат */
-      margin-bottom: 16px;
-
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 4px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-      }
-    }
-
-    .card-text {
-      .album-name {
-        font-size: 16px;
-        font-weight: 700;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        margin-bottom: 4px;
-      }
-      .album-meta {
-        font-size: 14px;
-        color: var(--text-subdued);
-      }
-    }
+  @media (max-width: 480px) {
+    /* 2 колонки на телефонах */
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
   }
 }
 
 .loading {
-  padding: 50px;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
   color: var(--text-subdued);
+  font-weight: 500;
+  font-size: 14px;
 }
