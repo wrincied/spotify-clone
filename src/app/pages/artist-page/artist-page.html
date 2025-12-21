@@ -2,57 +2,28 @@
   <div class="artist-container">
     <div
       class="artist-header"
-      [style.background-image]="
-        'url(' + (artist.avatar || 'assets/no-artist.png') + ')'
-      "
+      [style.background-image]="'url(' + (artist.avatar || 'assets/no-artist.png') + ')'"
     >
       <div class="header-overlay"></div>
       <div class="header-content">
         <div class="verified-badge">
-          <svg
-            viewBox="0 0 24 24"
-            width="24"
-            height="24"
-            fill="#3d91f4"
-            class="verified-icon"
-          >
-            <path
-              d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-1.25 17.292l-4.5-4.364 1.857-1.858 2.643 2.506 5.643-5.784 1.857 1.857-7.5 7.643z"
-            ></path>
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="#3d91f4" class="verified-icon">
+            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-1.25 17.292l-4.5-4.364 1.857-1.858 2.643 2.506 5.643-5.784 1.857 1.857-7.5 7.643z"></path>
           </svg>
           <span>Verified Artist</span>
         </div>
         <h1 class="artist-name">{{ artist.name }}</h1>
-        <p class="listeners">
-          {{ artist.followers | number }} monthly listeners
-        </p>
+        <p class="listeners">{{ artist.followers | number }} monthly listeners</p>
       </div>
     </div>
 
     <div class="artist-body">
       <div class="action-bar">
-        <button
-          class="play-btn-big"
-          (click)="togglePlayArtist($event, artist)"
-        >
+        <button class="play-btn-big" (click)="togglePlayArtist($event, artist)">
           @if (isArtistPlaying$ | async) {
-            <svg
-              height="28"
-              width="28"
-              viewBox="0 0 24 24"
-              fill="black"
-            >
-              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-            </svg>
+            <svg height="28" width="28" viewBox="0 0 24 24" fill="black"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg>
           } @else {
-            <svg
-              height="28"
-              width="28"
-              viewBox="0 0 24 24"
-              fill="black"
-            >
-              <path d="M8 5v14l11-7z" />
-            </svg>
+            <svg height="28" width="28" viewBox="0 0 24 24" fill="black"><path d="M8 5v14l11-7z" /></svg>
           }
         </button>
         <button class="follow-btn">Follow</button>
@@ -65,7 +36,9 @@
           @for (track of artist.topTracks; track track.id; let i = $index) {
             <app-songRow
               [song]="track"
-              [index]="track.thumbnail || 'https://placehold.co/600x400/png'"
+              [index]="track.thumbnail || 'assets/no-album.png'"
+              [context]="'artist'" 
+              [forceShowIndex]="true"
               [currentTrack]="playerService.currentTrack$ | async"
               [isPlaying]="(playerService.isPlaying$ | async) ?? false"
               (playRequest)="playerService.playTrackList(artist.topTracks, i)"
@@ -85,9 +58,8 @@
               [type]="$any(album.type || 'album')"
               [title]="album.title"
               [description]="album.description"
-              [playlistThumbnail]="
-                album.cover || album.thumbnail || 'assets/no-album.png'"
-              [releaseYear]="album.releaseYear"
+              [playlistThumbnail]="album.cover || album.thumbnail || 'assets/no-album.png'"
+              [releaseYear]="getYear(album)"
             ></app-albumCard>
           } @empty {
             <div class="empty-state">No albums available</div>

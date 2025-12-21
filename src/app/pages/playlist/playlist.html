@@ -83,6 +83,7 @@
         <app-songRow
           [song]="$any(s)"
           [index]="$index + 1"
+          [context]="'playlist'"
           [currentTrack]="playerService.currentTrack$ | async"
           [isPlaying]="(playerService.isPlaying$ | async) || false"
           (playRequest)="handlePlay($any(s))"

@@ -1,17 +1,24 @@
-import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
-import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { Component, OnInit, inject } from '@angular/core';
+import {
+  NavigationEnd,
+  Router,
+  RouterModule,
+  ActivatedRoute,
+} from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'; // Essential for memory management [cite: 2025-12-14]
+import { filter, map, Observable } from 'rxjs';
 import { User } from 'firebase/auth';
 
+// Components
 import { SpotifySidebar } from './components/spotify-sidebar/spotify-sidebar';
 import { TopNavComponent } from './components/top-nav/top-nav';
+import { PlayerComponent } from './components/player/player';
 
+// Services
 import { SpotifyService } from './services/spotifyService/spotify-service';
 import { MusicStoreService } from './services/music-store/music-store';
-import { filter, map, Observable } from 'rxjs';
-import { PlayerComponent } from './components/player/player';
 import { PlayerService } from './services/playerService/player-service';
 import { AuthService } from './services/authService/auth-service';
-import { Song } from './pages/song/song';
 
 @Component({
   selector: 'app-root',
@@ -21,52 +28,84 @@ import { Song } from './pages/song/song';
   styleUrls: ['./app.scss'],
 })
 export class App implements OnInit {
+  // Dependency Injection: Using 'inject' is the modern Angular standard [cite: 2025-12-14]
+  private readonly spotifyService = inject(SpotifyService);
+  private readonly musicStore = inject(MusicStoreService);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute); // Used instead of window.location for SSR safety
+
+  // Public services accessed directly in the template
+  public readonly playerService = inject(PlayerService);
+
+  // State properties
   searchQuery = '';
   user: User | null = null;
   currentView: 'home' | 'search' = 'home';
-  isNoLayout: boolean = false;
+  isNoLayout = false;
+
+  // Observables
   isPlayerVisible$: Observable<boolean>;
-  private authService = inject(AuthService);
-  public playerService = inject(PlayerService);
-  constructor(
-    private spotifyService: SpotifyService,
-    private musicStore: MusicStoreService,
-    private cdr: ChangeDetectorRef,
-    private router: Router,
-  ) {
+
+  constructor() {
+    // Initialize the player visibility stream based on current track existence
     this.isPlayerVisible$ = this.playerService.currentTrack$.pipe(
       map((track) => !!track),
     );
+
+    // 1. Subscribe to search query changes.
+    // 'takeUntilDestroyed()' automatically unsubscribes when the component is destroyed.
+    // This fixes the memory leak detected by Code Assist. [cite: 2025-12-14]
+    this.spotifyService.searchQuery$
+      .pipe(takeUntilDestroyed())
+      .subscribe((q) => {
+        this.searchQuery = q;
+        // Note: Manual cdr.detectChanges() removed as Angular handles binding updates automatically here.
+      });
+
+    // 2. Monitor router events to toggle the layout (Sidebar/Player visibility).
+    this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        takeUntilDestroyed(), // Prevents memory leaks
+      )
+      .subscribe(() => {
+        this.checkLayoutMode();
+      });
   }
 
   ngOnInit() {
-    // Глобальная загрузка альбомов
+    // Load initial data (Global albums)
     this.musicStore.loadAlbums();
 
-    // Проверяем статус при каждой инициализации приложения (в т.ч. после F5) [cite: 2025-12-18]
+    // Check authentication status on app initialization (e.g., after F5 refresh)
+    // We assume checkAuthStatus handles its own subscription lifecycle or completes immediately.
     this.authService.checkAuthStatus().subscribe();
 
-    // Подписка на поиск
-    this.spotifyService.searchQuery$.subscribe((q) => {
-      this.searchQuery = q;
-      this.cdr.detectChanges();
-    });
-    // Сброс поиска, если нет q в URL
-    const url = new URL(window.location.href);
-    if (!url.searchParams.get('q')) {
+    // Check URL parameters safely without accessing 'window' object
+    const queryParam = this.route.snapshot.queryParamMap.get('q');
+
+    // If no query parameter is present, reset the search state
+    if (!queryParam) {
       this.spotifyService.setSearch('');
     }
-    this.router.events
-      .pipe(filter((event) => event instanceof NavigationEnd))
-      .subscribe(() => {
-        // Проверяем текущий маршрут на наличие флага noLayout
-        let currentRoute = this.router.routerState.root;
-        while (currentRoute.firstChild) {
-          currentRoute = currentRoute.firstChild;
-        }
-        this.isNoLayout = currentRoute.snapshot.data['noLayout'] === true;
-      });
   }
+
+  /**
+   * Helper method to determine if the current route requires a "No Layout" mode (e.g., Login page).
+   * Traverses the route tree to find the 'noLayout' data property.
+   */
+  private checkLayoutMode(): void {
+    let currentRoute = this.router.routerState.root;
+    while (currentRoute.firstChild) {
+      currentRoute = currentRoute.firstChild;
+    }
+    this.isNoLayout = currentRoute.snapshot.data['noLayout'] === true;
+  }
+
+  /**
+   * Resets the search and returns the user to the default view.
+   */
   goHome() {
     this.spotifyService.setSearch('');
   }

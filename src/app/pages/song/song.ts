@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { SongInterface, AlbumInterface } from '../../interface/models';
 import { MusicStoreService } from '../../services/music-store/music-store';
 import { PlayerService } from '../../services/playerService/player-service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-song',
@@ -16,7 +17,8 @@ export class Song implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly musicStore = inject(MusicStoreService);
   public readonly playerService = inject(PlayerService);
-
+  currentTrack$: Observable<SongInterface | null> =
+    this.playerService.currentTrack$;
   album: AlbumInterface | null = null;
   song: SongInterface | null = null;
 

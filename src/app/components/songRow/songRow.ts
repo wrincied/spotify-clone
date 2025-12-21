@@ -1,6 +1,5 @@
 import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { SongInterface } from '../../interface/models';
 import { FormatTimePipe } from '../../pipes/format-time-pipe';
 import { NavigationService } from '../../services/navigationService/navigation-service';
@@ -16,33 +15,45 @@ export class SongRow {
   private nav = inject(NavigationService);
 
   @Input({ required: true }) song!: SongInterface;
-  // ИСПРАВЛЕНИЕ: Тип теперь поддерживает и числа, и ссылки [cite: 2025-12-14]
   @Input() index: number | string = 0;
   @Input() currentTrack: SongInterface | null = null;
   @Input() isPlaying: boolean = false;
 
+  // Контекст страницы для управления стилями и логикой [cite: 2025-12-14]
+  @Input() context: 'album' | 'artist' | 'playlist' | 'search' = 'album';
+
+  // Флаг принудительного показа индекса (например, для Artist Page на мобилках)
+  @Input() forceShowIndex: boolean = false;
+
   @Output() playRequest = new EventEmitter<SongInterface>();
 
   /**
-   * Определяет, нужно ли рендерить обложку вместо цифры [cite: 2025-12-14]
+   * Показываем колонку если:
+   * 1. Принудительно попросили (forceShowIndex)
+   * 2. ИЛИ это не плейлист (в плейлистах на мобилках скрываем по умолчанию через CSS, но в DOM оставляем для десктопа)
+   * Логика: мы всегда рендерим колонку, кроме случаев, когда контекст явно требует её удаления из DOM для оптимизации.
+   * Но в данном случае лучше управлять видимостью через CSS, а здесь вернуть true, чтобы элементы были доступны.
+   * Однако, для чистоты DOM:
    */
-  get thumbnailUrl(): string | null {
-    if (
-      typeof this.index === 'string' &&
-      (this.index.includes('/') ||
-        this.index.includes('assets') ||
-        this.index.startsWith('http'))
-    ) {
-      return this.index;
-    }
-    return null;
+  get shouldShowIndexCol(): boolean {
+    return true; // Рендерим всегда, скрываем через CSS (лучше для адаптива) [cite: 2025-12-14]
   }
 
   /**
-   * Флаг режима поиска для применения CSS-классов [cite: 2025-12-14]
+   * Режим отображения обложки вместо цифры
    */
-  get isSearchMode(): boolean {
-    return !!this.thumbnailUrl;
+  get isThumbnailMode(): boolean {
+    return this.context === 'search' || this.context === 'artist';
+  }
+
+  /**
+   * URL обложки (берем из index, если это строка URL)
+   */
+  get thumbnailUrl(): string | null {
+    if (this.isThumbnailMode && typeof this.index === 'string') {
+      return this.index;
+    }
+    return null;
   }
 
   get isCurrent(): boolean {
@@ -53,7 +64,7 @@ export class SongRow {
   }
 
   handlePlay(event: MouseEvent) {
-    event.stopPropagation(); // Предотвращаем всплытие клика [cite: 2025-12-14]
+    event.stopPropagation();
     this.playRequest.emit(this.song);
   }
 
