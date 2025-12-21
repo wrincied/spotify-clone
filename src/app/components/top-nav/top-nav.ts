@@ -1,29 +1,50 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { Location } from '@angular/common'; // 1. Импортируем Location
-import { SpotifyService } from '../../services/spotifyService/spotify-service';
+import { Component, inject, OnInit, computed } from '@angular/core';
+import { CommonModule, Location } from '@angular/common';
+import { Router, NavigationEnd, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { filter, map } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { SpotifyService } from '../../services/spotifyService/spotify-service';
 
 @Component({
   selector: 'app-top-nav',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './top-nav.html',
   styleUrls: ['./top-nav.scss'],
 })
 export class TopNavComponent implements OnInit {
+  private readonly router = inject(Router);
+  private readonly location = inject(Location);
+  private readonly spotifyService = inject(SpotifyService);
+
   query = '';
-  constructor(
-    private router: Router,
-    private location: Location,
-    private spotifyService: SpotifyService,
-  ) {}
+
+  // Реактивное отслеживание текущего URL [cite: 2025-12-14]
+  private readonly currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => event.urlAfterRedirects),
+    ),
+    { initialValue: this.router.url },
+  );
+
+  // Сигнал для управления видимостью истории на мобилках [cite: 2025-12-14]
+  readonly showMobileHistory = computed(() => {
+    const url = this.currentUrl();
+    return (
+      url.includes('/artist/') ||
+      url.includes('/playlist/') ||
+      url.includes('/album/')
+    );
+  });
+
   ngOnInit() {
     this.spotifyService.searchQuery$.subscribe((q) => {
       this.query = q;
     });
   }
+
   onInput(val: string) {
     this.router.navigate(['/search'], {
       queryParams: { q: val },
@@ -33,19 +54,23 @@ export class TopNavComponent implements OnInit {
   goBack() {
     this.location.back();
   }
+
   goForward() {
     this.location.forward();
   }
+
   onNagivateToLogin() {
     this.router.navigate(['/login']);
   }
+
   onNavigateToSignUp() {
     this.router.navigate(['/signup']);
   }
+
   onNagivateToMobileAuth() {
-    // Мобильная страница, где есть и Login, и Sign Up
     this.router.navigate(['/auth']);
   }
+
   goToHome() {
     this.spotifyService.clearSearch();
     this.router.navigate(['/']);

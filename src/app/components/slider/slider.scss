@@ -1,87 +1,116 @@
 .slider-container {
   position: relative;
-  /* Можно добавить изоляцию контекста, чтобы z-index не убегал */
+  /* Создает изолированный контекст наложения для z-index */
   isolation: isolate;
+  width: 100%;
+  margin-bottom: 40px;
 
+  /* --- КНОПКИ СКРОЛЛА (DESKTOP) --- */
   .scroll-btn {
     position: absolute;
-    top: 40%;
+    top: 50%;
     transform: translateY(-50%);
-    z-index: 10;
-    background-color: var(--shadow-dark-50);
+    z-index: 20;
+    background-color: rgba(0, 0, 0, 0.7);
     border: none;
-    color: var(--text-white);
-    width: 38px;
-    height: 38px;
-    font-size: 24px;
+    color: #ffffff;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
 
-    /* Плавное появление при наведении курсора (UX) */
-    opacity: 0.9;
+    /* Скрыты по умолчанию, появляются при наведении на слайдер */
+    opacity: 0;
+    pointer-events: none;
     transition:
-      opacity 0.2s,
-      transform 0.2s;
+      opacity 0.3s ease,
+      transform 0.2s ease,
+      background-color 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 
     &:hover {
-      opacity: 1;
-      transform: translateY(-50%) scale(1.1); /* Легкое увеличение */
-      background-color: var(--shadow-dark-50);
+      background-color: rgba(0, 0, 0, 0.9);
+      transform: translateY(-50%) scale(1.1);
     }
 
     &.left {
-      left: 10px;
+      left: -20px;
+      /* Компенсация для маленьких экранов, если кнопки еще не скрыты */
+      @media (max-width: 1024px) {
+        left: 5px;
+      }
     }
 
     &.right {
-      right: 10px;
+      right: -20px;
+      @media (max-width: 1024px) {
+        right: 5px;
+      }
     }
+  }
+
+  /* Показываем кнопки только при наведении на весь контейнер слайдера */
+  &:hover .scroll-btn {
+    opacity: 1;
+    pointer-events: auto;
   }
 
   /* --- КОНТЕЙНЕР СКРОЛЛА --- */
   .playlist_card_collections {
     display: flex;
-    gap: 20px;
+    /* Увеличенный gap для чистоты интерфейса */
+    gap: 24px;
 
-    /* Основные настройки скролла */
     overflow-x: auto;
     overflow-y: hidden;
     scroll-behavior: smooth;
-    flex: 1;
 
-    /* ВАЖНО: Фикс конфликтов скролла [cite: 2025-12-14] */
-    /* 1. Запрещает скроллить страницу, когда слайдер уперся в край */
-    /* 2. Запрещает жест "Назад" на Mac/Mobile */
+    /* Свойства для мобильного скролла */
     overscroll-behavior-x: contain;
-
-    /* Включаем аппаратное ускорение для плавности на iOS */
     -webkit-overflow-scrolling: touch;
 
-    /* Scroll Snap (Опционально: делает "прилипание" к карточкам) */
-    /* Если JS-скролл будет дергаться, попробуй отключить эту строку */
+    /* Scroll Snap: карточки «магнитятся» к краю при прокрутке */
     scroll-snap-type: x mandatory;
 
-    /* Прячем скроллбар */
+    /* Скрываем стандартные скроллбары */
     &::-webkit-scrollbar {
-      display: none; /* Chrome, Safari */
+      display: none;
     }
-    scrollbar-width: none; /* Firefox (ты забыл это добавить) */
+    scrollbar-width: none; // Firefox
 
-    & > #song_card_item {
+    /* Прямой выбор дочерних карточек */
+    & > * {
       scroll-snap-align: start;
+      /* Запрещаем сжатие карточки */
+      flex: 0 0 180px;
+      min-width: 180px;
+
+      @media (max-width: 768px) {
+        flex: 0 0 160px;
+        min-width: 160px;
+      }
+
+      @media (max-width: 480px) {
+        flex: 0 0 140px;
+        min-width: 140px;
+      }
     }
   }
 
+  /* --- АДАПТИВ (MOBILE) --- */
   @media (max-width: 768px) {
     .scroll-btn {
-      display: none;
+      display: none !important; // На тач-скринах кнопки не нужны
     }
-    /* На мобилках убеждаемся, что паддинги позволяют видеть контент */
+
     .playlist_card_collections {
-      padding-right: 20px;
+      gap: 16px;
+      /* Паддинги, чтобы контент не обрезался по краям экрана */
+      padding: 0 16px 12px;
+      margin: 0 -16px; // Вынос скролла за границы паддингов родителя
     }
   }
 }

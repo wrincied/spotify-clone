@@ -1,101 +1,44 @@
-/* 0. МИКСИН ДЛЯ КОМПАКТНОГО ГОРИЗОНТАЛЬНОГО РЕЖИМА [cite: 2025-12-14] */
-@mixin horizontalCardLayout {
-  min-height: 64px;
-  max-height: 64px;
-  padding: 0;
-  overflow: hidden;
-  background-color: rgba(255, 255, 255, 0.07);
-
-  .card-inner {
-    flex-direction: row; // Элементы в ряд [cite: 2025-12-14]
-    align-items: center;
-    gap: 0;
-  }
-
-  .spotify__albumCard_thumbnail {
-    width: 64px;
-    height: 64px;
-    min-width: 64px;
-    border-radius: 4px 0 0 4px; // Скругление только слева
-    box-shadow: none;
-  }
-
-  .spotify__albumCard_text {
-    padding: 0 12px;
-    flex: 1;
-    justify-content: center;
-
-    .title {
-      font-size: 13px;
-      font-weight: 700;
-      white-space: normal;
-      display: -webkit-box;
-      -webkit-line-clamp: 2; // Ограничение в 2 строки [cite: 2025-12-14]
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    /* Скрываем мета-данные в компактном режиме [cite: 2025-12-14] */
-    .description,
-    .album-meta,
-    .entity-badge {
-      display: none !important;
-    }
-  }
-
-  .play-button-overlay {
-    position: relative;
-    right: 12px;
-    bottom: auto;
-    opacity: 0;
-    transform: none;
-
-    button {
-      width: 32px;
-      height: 32px;
-    }
-  }
-}
-
 .spotify__albumCard {
-  /* --- БАЗОВЫЕ СТИЛИ (DESKTOP) --- */
-  max-width: 100%;
-  background-color: var(--background-album-card);
-  border-radius: 6px;
-  padding: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+  /* Переменные для быстрой правки [cite: 2025-12-14] */
+  --card-bg: #181818;
+  --card-bg-hover: #282828;
+  --text-main: #ffffff;
+  --text-sub: #b3b3b3;
+
   position: relative;
-  min-height: 260px;
   display: flex;
   flex-direction: column;
+  padding: 16px;
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  isolation: isolate; // Изолируем z-index кнопки [cite: 2025-12-14]
 
   &:hover {
-    background-color: var(--decorative-subdued);
+    background-color: var(--card-bg-hover);
     .play-button-overlay {
-      opacity: 1 !important;
-      transform: translateY(0) !important;
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 
   .card-inner {
     display: flex;
     flex-direction: column;
-    gap: 12px;
     height: 100%;
-    position: relative;
   }
 
+  /* ИЗОБРАЖЕНИЕ (Квадратное по умолчанию) */
   .spotify__albumCard_thumbnail {
+    position: relative;
     width: 100%;
-    aspect-ratio: 1/1;
+    aspect-ratio: 1 / 1;
+    margin-bottom: 16px;
     border-radius: 4px;
     overflow: hidden;
-    box-shadow: 0 8px 24px var(--shadow-dark-50);
-    position: relative;
-    background-color: var(--background-fallback-dark);
-    display: flex;
-    align-items: flex-end;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    background-color: #333;
 
     img {
       width: 100%;
@@ -103,183 +46,153 @@
       object-fit: cover;
     }
 
+    /* Для категорий (Pop, Rock и т.д.) */
     .category-title-overlay {
       position: absolute;
-      bottom: 10px;
-      left: 10px;
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text-base);
-      word-break: break-word;
+      padding: 12px;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     }
   }
 
+  /* ТЕКСТОВЫЙ БЛОК */
   .spotify__albumCard_text {
-    padding-top: 5px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-
     .title {
       font-size: 16px;
       font-weight: 700;
-      color: var(--text-base);
+      color: var(--text-main);
+      margin-bottom: 4px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    .description {
+    .description,
+    .album-meta {
       font-size: 14px;
-      color: #b3b3b3;
+      color: var(--text-sub);
+      line-height: 1.4;
+      /* Ограничение в 2 строки [cite: 2025-12-14] */
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-
-    .album-meta {
-      font-size: 14px;
-      color: var(--text-subdued);
     }
   }
 
+  /* КНОПКА PLAY (Spotify Style) */
   .play-button-overlay {
-    display: flex;
     position: absolute;
-    bottom: 0px;
-    right: 0px;
+    right: 16px;
+    bottom: 85px; // Позиционируем над текстом [cite: 2025-12-14]
     opacity: 0;
     transform: translateY(8px);
-    transition: all 0.3s ease;
-    z-index: 10;
+    transition: all 0.3s cubic-bezier(0.3, 0, 0, 1);
 
     button {
       width: 48px;
       height: 48px;
       border-radius: 50%;
       background-color: var(--essential-bright-accent);
-      color: #000;
       border: none;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 8px 8px rgba(0, 0, 0, 0.3);
       cursor: pointer;
-      box-shadow: 0 8px 8px var(--shadow-dark-30);
-      transition: transform 0.2s ease;
-
       &:hover {
         transform: scale(1.05);
-        background-color: var(--essential-bright-accent-hover);
       }
     }
   }
 
-  /* Режим горизонтальной карточки по классу */
+  /* --- СПЕЦИАЛЬНЫЕ РЕЖИМЫ --- */
   &.horizontal-mode {
-    @include horizontalCardLayout;
-  }
+    flex-direction: row;
+    padding: 0;
+    height: 64px;
+    background: rgba(255, 255, 255, 0.1);
 
-  /* Режим ТОП РЕЗУЛЬТАТ */
+    .card-inner {
+      flex-direction: row;
+      align-items: center;
+      gap: 0;
+      width: 100%;
+    }
+    .spotify__albumCard_thumbnail {
+      width: 64px;
+      margin: 0;
+      border-radius: 4px 0 0 4px;
+      box-shadow: none;
+    }
+    .spotify__albumCard_text {
+      padding: 0 12px;
+      .description {
+        display: none;
+      }
+    }
+    .play-button-overlay {
+      position: relative;
+      bottom: auto;
+      right: 8px;
+    }
+  }
   &.top-result-mode {
-    grid-column: 1 / -1;
+    grid-column: 1 / -1; // Занимает всю строку в Grid
     min-height: 240px;
     padding: 20px;
 
     .card-inner {
       gap: 20px;
       justify-content: flex-start;
+      flex-direction: column; // Важно: в Top Result на десктопе обычно колонкой
     }
+
     .spotify__albumCard_thumbnail {
       width: 92px;
       height: 92px;
+      /* Убираем aspect-ratio если нужно фиксированное превью */
     }
+
     .spotify__albumCard_text {
       justify-content: center;
       .title {
-        font-size: 32px;
-        white-space: normal;
-      }
-      .entity-badge .chip {
-        background-color: var(--background-entity-badge);
-        padding: 6px 12px;
-        border-radius: 500px;
-        font-size: 12px;
-        font-weight: 700;
-        text-transform: uppercase;
+        font-size: 32px; // Огромный заголовок
+        white-space: normal; // Разрешаем перенос строк
       }
     }
-    .play-button-overlay {
-      bottom: 0px;
-      right: 0px;
-    }
-  }
 
-  &.fixed-width {
-    width: 210px;
-    min-width: 210px;
-    flex-shrink: 0;
+    .play-button-overlay {
+      bottom: 20px;
+      right: 20px;
+    }
   }
 }
 
-/* ============================================= */
-/* ADAPTIVE DESIGN [cite: 2025-12-14]            */
-/* ============================================= */
+/* --- АДАПТИВ (Mobile) [cite: 2025-12-14] --- */
 @media (max-width: 768px) {
   .spotify__albumCard {
-    /* Обычные карточки в сетке становятся горизонтальными плашками [cite: 2025-12-14] */
-    &:not(.top-result-mode):not(.fixed-width) {
-      @include horizontalCardLayout;
+    padding: 12px;
 
-      .spotify__albumCard_text .description {
-        display: none !important;
-      }
-    }
-
-    /* На мобильных кнопка Play скрыта для всех типов [cite: 2025-12-14] */
     .play-button-overlay {
-      // display: none !important;
+      display: none;
+    } // На мобилках нет ховера [cite: 2025-12-14]
+
+    .spotify__albumCard_text {
+      .title {
+        font-size: 14px;
+      }
+      .description {
+        display: none;
+      } // Скрываем описание для компактности
     }
 
     &.top-result-mode {
-      min-height: auto;
-      padding: 16px;
-      .spotify__albumCard_thumbnail {
-        width: 80px;
-        height: 80px;
-      }
-      .spotify__albumCard_text {
-        .title {
-          font-size: 24px;
-        }
-        .description {
-          display: none !important;
-        }
+      .title {
+        font-size: 20px;
       }
     }
-
-    &.fixed-width {
-      width: 160px;
-      min-width: 160px;
-      padding: 12px;
-      min-height: 220px;
-      /* В слайдерах (fixed-width) оставляем вертикальный вид, но без описания [cite: 2025-12-14] */
-      .description {
-        display: none !important;
-      }
-    }
-  }
-}
-
-@media (max-width: 480px) {
-  .spotify__albumCard.fixed-width {
-    width: 140px;
-    min-width: 140px;
-  }
-  .spotify__albumCard.top-result-mode .spotify__albumCard_text .title {
-    font-size: 20px;
   }
 }
