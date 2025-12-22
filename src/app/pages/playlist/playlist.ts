@@ -31,6 +31,7 @@ import { NavigationService } from '../../services/navigationService/navigation-s
 })
 export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
   // Состояние компонента [cite: 2025-12-14]
+  song: SongInterface | null = null;
   album: AlbumInterface | null = null;
   gradientColor: string = 'linear-gradient(to bottom, #333, #121212)';
   mainColor: string = '#333';
@@ -49,7 +50,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private observer?: IntersectionObserver;
   private subs: Subscription = new Subscription();
-  
+
   currentTrack: SongInterface | null = null;
   isPlayerPlaying: boolean = false;
 
@@ -68,28 +69,36 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
             const allSongsInStore = this.musicStore.currentSongs();
 
             // Трансформация: превращаем ID или неполные объекты в SongInterface [cite: 2025-12-14]
-            const enrichedSongs: SongInterface[] = albumData.songs.map((albumSong: any) => {
-              const songId = albumSong.id || albumSong;
-              const fullSong = allSongsInStore.find(
-                (s) => String(s.id) === String(songId),
-              );
+            const enrichedSongs: SongInterface[] = albumData.songs.map(
+              (albumSong: any) => {
+                const songId = albumSong.id || albumSong;
+                const fullSong = allSongsInStore.find(
+                  (s) => String(s.id) === String(songId),
+                );
 
-              // Возвращаем полный объект из стора или создаем минимально валидный [cite: 2025-12-14]
-              if (fullSong) return fullSong;
-              
-              return typeof albumSong === 'object' 
-                ? (albumSong as SongInterface) 
-                : ({ id: albumSong, title: '', artist: '', url: '', thumbnail: null, duration: 0 } as SongInterface);
-            });
+                // Возвращаем полный объект из стора или создаем минимально валидный [cite: 2025-12-14]
+                if (fullSong) return fullSong;
+
+                return typeof albumSong === 'object'
+                  ? (albumSong as SongInterface)
+                  : ({
+                      id: albumSong,
+                      title: '',
+                      artist: '',
+                      url: '',
+                      thumbnail: null,
+                      duration: 0,
+                    } as SongInterface);
+              },
+            );
 
             // Фильтруем только те песни, у которых есть название (успешно найденные) [cite: 2025-12-14]
-            const finalSongs = enrichedSongs.filter((s): s is SongInterface => !!s.title);
+            const finalSongs = enrichedSongs.filter(
+              (s): s is SongInterface => !!s.title,
+            );
 
-            this.album = {
-              ...albumData,
-              songs: finalSongs
-            };
-
+            this.album = { ...albumData, songs: finalSongs };
+            this.cdr.detectChanges();
             if (this.album.cover) {
               this.setDominantColor(this.album.cover);
             }
@@ -123,7 +132,8 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
    * Запуск воспроизведения. Явно приводим songs к SongInterface[] [cite: 2025-12-14]
    */
   handlePlay(song: SongInterface) {
-    if (!this.album || !this.album.songs || this.album.songs.length === 0) return;
+    if (!this.album || !this.album.songs || this.album.songs.length === 0)
+      return;
 
     const songsList = this.album.songs as SongInterface[];
     const trackIndex = songsList.findIndex(
@@ -142,12 +152,12 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
    */
   get isAlbumPlaying(): boolean {
     if (!this.album || !this.currentTrack || !this.album.songs) return false;
-    
+
     const songsList = this.album.songs as SongInterface[];
     const isTrackInAlbum = songsList.some(
       (s) => String(s.id) === String(this.currentTrack?.id),
     );
-    
+
     return isTrackInAlbum && this.isPlayerPlaying;
   }
 
@@ -161,7 +171,8 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private setDominantColor(imageUrl: string) {
     const fac = new FastAverageColor();
-    fac.getColorAsync(imageUrl)
+    fac
+      .getColorAsync(imageUrl)
       .then((color) => {
         this.mainColor = color.hex;
         this.gradientColor = `linear-gradient(to bottom, ${color.hex}, #121212)`;
@@ -177,7 +188,9 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
   initObserver() {
     if (this.observer) this.observer.disconnect();
 
-    const scrollContainer = document.querySelector('.spotify-main') || document.querySelector('.main-view');
+    const scrollContainer =
+      document.querySelector('.spotify-main') ||
+      document.querySelector('.main-view');
     if (!this.albumHeaderRef) return;
 
     const options = {
@@ -187,7 +200,8 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
     };
 
     this.observer = new IntersectionObserver(([entry]) => {
-      const shouldBeSticky = !entry.isIntersecting && entry.boundingClientRect.top < 90;
+      const shouldBeSticky =
+        !entry.isIntersecting && entry.boundingClientRect.top < 90;
       if (this.isSticky !== shouldBeSticky) {
         this.isSticky = shouldBeSticky;
         this.cdr.detectChanges();
