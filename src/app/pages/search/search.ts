@@ -18,6 +18,7 @@ import { MusicStoreService } from '../../services/music-store/music-store';
 import { PlayerService } from '../../services/playerService/player-service';
 import {
   AlbumInterface,
+  ArtistInterface,
   SongInterface,
   TrackWithContext,
 } from '../../interface/models';
@@ -46,6 +47,7 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
 
   filteredAlbums: AlbumInterface[] = [];
   filteredTracks: TrackWithContext[] = [];
+  filteredArtists: ArtistInterface[] = [];
 
   topTrack: TrackWithContext | null = null;
   topAlbumResult: AlbumInterface | null = null;
@@ -93,12 +95,17 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
   private runFilter(albums?: AlbumInterface[]): void {
     const allAlbums = albums ?? this.musicStore.currentAlbums();
     const allSongsInStore = this.musicStore.currentSongs();
+    const allArtists = this.musicStore.currentArtists();
+
     const term = (this.query || '').trim().toLowerCase();
 
     // Сброс состояний
     this.topTrack = null;
     this.topAlbumResult = null;
     this.topAlbumFullSongs = [];
+    this.filteredArtists = allArtists.filter((a) =>
+      a.name.toLowerCase().includes(term),
+    );
     this.filteredAlbums = [];
     this.filteredTracks = [];
 
@@ -147,8 +154,19 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
     const exactTrackMatch = matchingTracks.find(
       (t) => t.title.toLowerCase() === term,
     );
-
-    if (exactAlbumMatch) {
+    const exactArtist = this.filteredArtists.find(
+      (a) => a.name.toLowerCase() === term,
+    );
+    if (exactArtist) {
+      this.topAlbumResult = {
+        id: exactArtist.id,
+        title: exactArtist.name,
+        description: 'Artist',
+        cover: exactArtist.avatar || 'assets/no-artist.png',
+        artistId: exactArtist.id,
+        type: 'artist', // Понадобится для стилей в шаблоне
+      } as any;
+    } else if (exactAlbumMatch) {
       this.topAlbumResult = exactAlbumMatch;
     } else if (exactTrackMatch) {
       this.topTrack = exactTrackMatch;
@@ -159,25 +177,33 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
       else if (matchingTracks.length > 0) this.topTrack = matchingTracks[0];
     }
 
-    // 4. Формирование списка Songs
-    // Убираем дубль, если он уже показан в Top Result
-    // Ограничиваем список 4 песнями
-    this.filteredTracks = matchingTracks
-      .filter((t) => t.id !== this.topTrack?.id)
-      .slice(0, 4);
-
-    // 5. Подготовка плейлиста для Top Album (только валидные треки)
+    // 4. Формирование списка Songs и плейлиста для Top Result
     if (this.topAlbumResult) {
-      const albumSongs = allTracks.filter(
-        (t) => String(t.albumId) === String(this.topAlbumResult?.id),
-      );
-      this.filteredTracks = albumSongs.slice(0, 4);
-      // Подготовка для проигрывания (с URL)
-      this.topAlbumFullSongs = albumSongs.filter(
-        (s) => !!s.url && s.url.trim() !== '',
+      let topResultSongs: TrackWithContext[] = [];
+
+      // Определяем, является ли топ-результат артистом или альбомом
+      if ((this.topAlbumResult as any).type === 'artist') {
+        // Это артист, ищем песни по имени артиста
+        topResultSongs = allTracks.filter(
+          (t) => t.artist.toLowerCase() === this.topAlbumResult!.title.toLowerCase()
+        );
+      } else {
+        // Это альбом, ищем песни по albumId
+        topResultSongs = allTracks.filter(
+          (t) => String(t.albumId) === String(this.topAlbumResult?.id)
+        );
+      }
+
+      // Список песен для отображения под топ-результатом
+      this.filteredTracks = topResultSongs.slice(0, 4);
+      
+      // Плейлист для проигрывания самого топ-результата (только с URL)
+      this.topAlbumFullSongs = topResultSongs.filter(
+        (s) => !!s.url && s.url.trim() !== ''
       );
     } else {
-      // Если топ-результат ПЕСНЯ -> показываем остальные найденные совпадения
+      // Если топ-результат - это песня, или нет топ-результата,
+      // показываем другие найденные песни
       this.filteredTracks = matchingTracks
         .filter((t) => t.id !== this.topTrack?.id)
         .slice(0, 4);
@@ -188,27 +214,20 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
   handlePlay(trackOrId: TrackWithContext | SongInterface | string): void {
     if (!trackOrId) return;
     const trackId = typeof trackOrId === 'string' ? trackOrId : trackOrId.id;
+    const isArtist = (this.topAlbumResult as any).type === 'artist';
 
-    // Если кликнули на Top Album Card
-    if (
-      this.topAlbumResult &&
-      this.topAlbumFullSongs.length > 0 &&
-      (this.topAlbumResult.songs || []).some((id: any) => {
-        const sId = typeof id === 'string' ? id : id.id;
-        return String(sId) === String(trackId);
-      })
-    ) {
-      const validSong = this.topAlbumFullSongs.find(
-        (s) => String(s.id) === String(trackId),
+    // Проверяем, относится ли трек к топ-результату (альбому или артисту)
+    const isTrackInTopResult = this.topAlbumFullSongs.some(s => String(s.id) === String(trackId));
+
+    if (this.topAlbumResult && this.topAlbumFullSongs.length > 0 && isTrackInTopResult) {
+      const startIndex = this.topAlbumFullSongs.findIndex(
+        (s) => String(s.id) === String(trackId)
       );
-      const startIndex = validSong
-        ? this.topAlbumFullSongs.indexOf(validSong)
-        : 0;
 
       this.playerService.playTrackList(
         this.topAlbumFullSongs,
-        startIndex,
-        this.topAlbumResult.cover || '',
+        startIndex >= 0 ? startIndex : 0,
+        isArtist? '': this.topAlbumResult.cover || ''
       );
     }
     // Если кликнули на одиночный трек в списке
@@ -221,7 +240,7 @@ export class SearchComponent implements OnInit, OnChanges, OnDestroy {
         this.playerService.playTrackList(
           [fullSong],
           0,
-          fullSong.thumbnail || '',
+          fullSong.thumbnail || ''
         );
       }
     }

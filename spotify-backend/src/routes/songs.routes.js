@@ -17,5 +17,5 @@ router.put('/:id', adminAuth, SongsController.update);
 router.post('/songs/seed', SongsController.seedPlayCounts);
 // router. <--- Эту ошибку я убрал
 router.delete('/:id', adminAuth, SongsController.delete);
-
+router.patch('/:id/remove-url', adminAuth, SongsController.removeUrl);
 export default router;

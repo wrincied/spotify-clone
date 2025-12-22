@@ -31,7 +31,7 @@ export class SongRow implements OnInit {
     this.stablePlayCount = this.song.playCount || 0;
   }
   // Контекст страницы для управления стилями и логикой
-  @Input() context: 'album' | 'artist' | 'playlist' | 'search' = 'album';
+  @Input() context: 'album' | 'artist' | 'playlist' | 'search-album' = 'album';
 
   // Флаг принудительного показа индекса (например, для Artist Page на мобилках)
   @Input() forceShowIndex: boolean = false;
@@ -54,7 +54,8 @@ export class SongRow implements OnInit {
    * Режим отображения обложки вместо цифры
    */
   get isThumbnailMode(): boolean {
-    return this.context === 'search' || this.context === 'artist';
+    return this.context === 'search-album';
+    // || this.context === 'artist'
   }
 
   /**

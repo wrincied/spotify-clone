@@ -62,4 +62,8 @@ export class AdminService {
   deleteItem(type: string, id: string) {
     return this.http.delete(`${this.API_URL}/${type}/${id}`, this.OPTS);
   }
+  removeSongUrl(id: string) {
+    // Используем метод patch, как прописали на бэкенде
+    return this.http.patch(`${this.API_URL}/songs/${id}/remove-url`, {}, this.OPTS);
+  }
 }

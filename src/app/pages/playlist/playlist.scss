@@ -189,12 +189,12 @@
       grid-template-columns: 40px 4fr 2fr 50px;
       gap: 12px;
       .col-listeners {
-        padding-right: 10px;
+        padding-right: 22px;
       }
       .col-index {
         padding-left: 10px;
       }
-      .col-duration{
+      .col- {
       }
     }
   }
@@ -257,7 +257,7 @@
       /* Убираем 3-ю колонку полностью, оставляем Index | Title | Duration */
       grid-template-columns: 3fr 1fr 50px;
       top: 60px; // Высота мобильного sticky-header
-      padding: 0 12px;
+      // padding: 0 12px;
       .col-index {
         display: none !important;
       }

@@ -5,13 +5,14 @@ import {
   AlbumInterface,
   CategoryInterface,
   SongInterface,
+  ArtistInterface,
 } from '../../interface/models';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class MusicStoreService {
   private http = inject(HttpClient);
-  private API_URL = environment.apiUrl
+  private API_URL = environment.apiUrl;
 
   // Состояния через BehaviorSubject для стримов (совместимость с async pipe) [cite: 2025-12-14]
   private songsSubject = new BehaviorSubject<SongInterface[]>([]);
@@ -23,15 +24,18 @@ export class MusicStoreService {
   private categoriesSubject = new BehaviorSubject<CategoryInterface[]>([]);
   public categories$ = this.categoriesSubject.asObservable();
 
+  private artistsSubject = new BehaviorSubject<any[]>([]);
+  public artists$ = this.artistsSubject.asObservable();
   // Сигналы для синхронного доступа (Angular 21 стандарты) [cite: 2025-12-14]
   private _songs = signal<SongInterface[]>([]);
   private _albums = signal<AlbumInterface[]>([]);
   private _categories = signal<CategoryInterface[]>([]);
-
+  private _artists = signal<any[]>([]);
   // Публичные геттеры (теперь это сигналы) [cite: 2025-12-14]
   public currentSongs = computed(() => this._songs());
   public currentAlbums = computed(() => this._albums());
   public currentCategories = computed(() => this._categories());
+  public currentArtists = computed(() => this._artists());
 
   constructor() {
     this.loadAll();
@@ -41,16 +45,36 @@ export class MusicStoreService {
     this.loadSongs();
     this.loadAlbums();
     this.loadCategories();
+    this.loadArtists();
   }
-
+    /**
+   * Загрузка исполнителей 
+   */
+  loadArtists(){
+    this.http
+    .get<{ error: boolean; data: any[] }>(`${this.API_URL}/artists`)
+    .pipe(
+      map((res) => (res.data || []).map(art => ({
+        ...art,
+        id: art.id,
+        name: art.name || 'Unknown Artist',
+        image: art.image || 'assets/no-artist.png'
+      }))),
+      tap((data) => {
+        this._artists.set(data);
+        this.artistsSubject.next(data);
+      })
+    )
+    .subscribe();
+  }
   /**
-   * Загрузка и нормализация песен [cite: 2025-12-14]
+   * Загрузка и нормализация песен 
    */
   loadSongs() {
     this.http
-    
+
       .get<{ error: boolean; data: any[] }>(`${this.API_URL}/songs`)
-      
+
       .pipe(
         map((res) =>
           (res.data || []).map(
@@ -62,7 +86,9 @@ export class MusicStoreService {
               url: s.url || '',
               thumbnail: s.thumbnail || 'assets/no-album.png',
               duration: Number(s.duration) || 0,
-              playCount: s.playCount || Math.floor(Math.random() * (5000000 - 500000 + 1)) + 500000
+              playCount:
+                s.playCount ||
+                Math.floor(Math.random() * (5000000 - 500000 + 1)) + 500000,
             }),
           ),
         ),
@@ -70,9 +96,8 @@ export class MusicStoreService {
           this._songs.set(data);
           this.songsSubject.next(data);
         }),
-        
       )
-      
+
       .subscribe();
   }
 

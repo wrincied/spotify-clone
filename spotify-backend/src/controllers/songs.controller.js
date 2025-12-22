@@ -136,4 +136,24 @@ export const SongsController = {
     saveJson('songs.json', filtered);
     res.json({ error: false, message: 'Song deleted' });
   },
+  // Удаление только ссылки на файл (url)
+  removeUrl: (req, res) => {
+    const { id } = req.params;
+    const songs = loadJson('songs.json');
+    const index = songs.findIndex((s) => s.id === id);
+
+    if (index === -1) {
+      return res.status(404).json({ error: true, message: 'Song not found' });
+    }
+
+    // Оставляем объект, но стираем URL
+    songs[index].url = '';
+
+    saveJson('songs.json', songs);
+    res.json({
+      error: false,
+      message: 'Track URL has been cleared',
+      data: songs[index],
+    });
+  },
 };
