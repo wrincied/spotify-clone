@@ -27,9 +27,9 @@ const allowedOrigins = [
   'http://localhost:4000', // SSR локально
 ];
 dotenv.config({ path: path.join(__dirname, '.env') });
-// 4. Глобальные настройки и безопасность 
+// 4. Глобальные настройки и безопасность
 
-// ОТЛАДКА: Проверьте это в консоли после запуска 
+// ОТЛАДКА: Проверьте это в консоли после запуска
 if (!process.env.ADMIN_PASSWORD_HASH) {
   console.error(
     `[CRITICAL] .env file not found or empty at: ${path.join(__dirname, '.env')}`,
@@ -65,7 +65,7 @@ app.use(
       }
     },
     credentials: true, // Разрешаем куки и заголовки авторизации
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Явно разрешаем методы
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'], // Явно разрешаем заголовки
   }),
 );
@@ -75,14 +75,14 @@ app.use(cookieParser());
 // 5. Раздача статики
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
-// 6. Регистрация API маршрутов 
+// 6. Регистрация API маршрутов
 app.use('/api/auth', authRoutes);
 app.use('/api/songs', songRoutes);
 app.use('/api/artists', artistRoutes);
 app.use('/api/albums', albumRoutes);
-app.use('/api/categories', categoryRoutes); // Добавлено 
+app.use('/api/categories', categoryRoutes); // Добавлено
 
-// 7. Обработка ошибок 
+// 7. Обработка ошибок
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;

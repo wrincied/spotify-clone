@@ -175,4 +175,14 @@ export class AdminComponent implements OnInit {
       error: (err) => this.admin.addLog(`ERROR: Clear URL failed`),
     });
   }
+  syncMetadata() {
+    this.http.post(`${environment.apiUrl}/songs/sync-metadata`, {}).subscribe({
+      next: (res: any) => {
+        alert(res.message);
+        // После обновления желательно перезагрузить список песен
+        this.admin.loadAll();
+      },
+      error: (err) => console.error('Sync failed', err),
+    });
+  }
 }

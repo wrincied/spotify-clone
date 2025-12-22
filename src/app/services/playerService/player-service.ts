@@ -1,5 +1,6 @@
 import { Injectable, signal, computed, Injector, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { HttpClient } from '@angular/common/http'; // <--- 1. Импорт
 import { SongInterface } from '../../interface/models';
 import { environment } from '../../../environments/environment';
 
@@ -8,6 +9,7 @@ import { environment } from '../../../environments/environment';
 })
 export class PlayerService {
   private injector = inject(Injector);
+  private http = inject(HttpClient); // <--- 2. Инжекция клиента
   public readonly instanceId = Math.random();
 
   // === СИГНАЛЫ СОСТОЯНИЯ ===
@@ -20,6 +22,7 @@ export class PlayerService {
   readonly isShuffling = signal<boolean>(false);
   readonly currentCover = signal<string>('');
   readonly isExpanded = signal<boolean>(false);
+
   private audio = new Audio();
   private readonly API_URL = environment.apiUrl;
 
@@ -45,7 +48,7 @@ export class PlayerService {
   });
   readonly isShuffling$ = toObservable(this.isShuffling, {
     injector: this.injector,
-  }); // <--- ПОТОК
+  });
 
   readonly isVisible = computed(() => !!this.currentTrack());
 
@@ -61,32 +64,69 @@ export class PlayerService {
   private initAudioListeners() {
     this.audio.addEventListener('play', () => this.isPlaying.set(true));
     this.audio.addEventListener('pause', () => this.isPlaying.set(false));
+
     this.audio.addEventListener('timeupdate', () =>
       this.currentTime.set(this.audio.currentTime),
     );
-    this.audio.addEventListener('loadedmetadata', () =>
-      this.duration.set(this.audio.duration),
-    );
+
+    // === 3. ГЛАВНОЕ ИЗМЕНЕНИЕ ЗДЕСЬ ===
+    this.audio.addEventListener('loadedmetadata', () => {
+      const realDuration = this.audio.duration;
+      this.duration.set(realDuration);
+
+      const currentSong = this.currentTrack();
+
+      // Если песня загружена, но в базе у нее 0, и мы получили валидное число
+      if (
+        currentSong &&
+        (currentSong.duration === 0 || !currentSong.duration) &&
+        isFinite(realDuration) &&
+        realDuration > 0
+      ) {
+        // Округляем до целого и отправляем на сервер
+        this.updateSongDurationOnServer(
+          currentSong.id,
+          Math.round(realDuration),
+        );
+      }
+    });
+
     this.audio.addEventListener('waiting', () => this.isBuffering.set(true));
     this.audio.addEventListener('playing', () => this.isBuffering.set(false));
 
-    // Обработчик ошибок загрузки или воспроизведения
     this.audio.addEventListener('error', () => {
       console.error('Audio Element Error:', this.audio.error);
       this.isBuffering.set(false);
       this.isPlaying.set(false);
     });
 
-    // Логика окончания трека
     this.audio.addEventListener('ended', () => {
       if (this.isLooping()) {
-        // Если включен повтор одной песни
         this.audio.currentTime = 0;
         this.audio.play();
       } else {
-        // Иначе переключаем
         this.nextTrack();
       }
+    });
+  }
+
+  // === 4. НОВЫЙ МЕТОД ОБНОВЛЕНИЯ ===
+  private updateSongDurationOnServer(songId: string, duration: number) {
+    // Отправляем PATCH запрос (предполагаем, что такой роут есть)
+    this.http.patch(`${this.API_URL}/songs/${songId}`, { duration }).subscribe({
+      next: () => {
+        console.log(`[Player] Duration auto-fixed for ${songId}: ${duration}s`);
+
+        // Обновляем локальную модель, чтобы не отправлять запрос снова при повторном плее
+        this.currentTrack.update((track) => {
+          if (track && track.id === songId) {
+            return { ...track, duration: duration };
+          }
+          return track;
+        });
+      },
+      error: (err) =>
+        console.error('[Player] Failed to auto-update duration:', err),
     });
   }
 
@@ -101,59 +141,49 @@ export class PlayerService {
     this.audio.pause();
     this.currentTrack.set(song);
     this.currentCover.set(coverUrl || song.thumbnail || '');
-    this.isBuffering.set(true); // Показываем индикатор загрузки немедленно
+    this.isBuffering.set(true);
 
     let fullUrl: string;
 
     if (song.url.startsWith('http')) {
-      // Если в БД уже полная ссылка (например, с Firebase Storage или S3) 
       fullUrl = song.url;
     } else {
-      // Убираем лишние префиксы, если они есть в БД, чтобы не было дублей 
       const cleanPath = song.url.replace(/^\/+/, '');
-
-      // Используем BASE_URL вместо API_URL для статических файлов (music/images) 
-      // Гарантируем наличие одного слэша между ними 
       fullUrl = `${environment.baseUrl}/${cleanPath}`;
     }
 
-    console.log('[DEBUG] Loading Audio URL:', fullUrl); // Поможет проверить в консоли 
+    console.log('[DEBUG] Loading Audio URL:', fullUrl);
 
     this.audio.src = fullUrl;
     this.audio.load();
 
-    // Убираем немедленный вызов play() и заменяем его на обработчик
     const playWhenReady = () => {
       this.audio.play().catch((err) => {
-        // Если запрос просто прервали (например, ты быстро кликнул другой трек)
-        // то это не ошибка базы или файла, это нормальное поведение браузера.
-        if (err.name === 'AbortError') {
-          return; // Просто выходим, не надо логировать и менять сигналы
-        }
-
+        if (err.name === 'AbortError') return;
         console.error('Real Playback Error:', err);
         this.isPlaying.set(false);
         this.isBuffering.set(false);
       });
-
       this.audio.removeEventListener('canplaythrough', playWhenReady);
     };
 
     this.audio.addEventListener('canplaythrough', playWhenReady);
   }
+
   togglePlay() {
     if (!this.currentTrack()) return;
     this.audio.paused ? this.audio.play() : this.audio.pause();
   }
+
   toggleExpanded(state: boolean) {
     this.isExpanded.set(state);
-    // Можно также вешать класс на body, чтобы скрыть глобальный сайдбар через CSS
     if (state) {
       document.body.classList.add('fullscreen-mode-active');
     } else {
       document.body.classList.remove('fullscreen-mode-active');
     }
   }
+
   playTrackList(
     tracks: SongInterface[],
     startIndex: number = 0,
@@ -165,31 +195,24 @@ export class PlayerService {
     this.play(tracks[startIndex], coverUrl);
   }
 
-  // --- ОБНОВЛЕННАЯ ЛОГИКА СЛЕДУЮЩЕГО ТРЕКА ---
   nextTrack() {
     const q = this.queue();
     if (q.length === 0) return;
 
     let nextIdx: number;
 
-    // Если включен Shuffle
     if (this.isShuffling()) {
-      // Генерируем случайный индекс
-      // Если треков > 1, стараемся не выбирать текущий трек повторно
       do {
         nextIdx = Math.floor(Math.random() * q.length);
       } while (q.length > 1 && nextIdx === this.currentIndex());
     } else {
-      // Обычный порядок
       nextIdx = this.currentIndex() + 1;
     }
 
-    // Проверка границ (для обычного порядка) или воспроизведение (для Shuffle)
     if (nextIdx < q.length) {
       this.currentIndex.set(nextIdx);
       this.play(q[nextIdx]);
     } else {
-      // Конец списка (только если не Shuffle и не Loop)
       this.isPlaying.set(false);
     }
   }
@@ -198,9 +221,6 @@ export class PlayerService {
     if (this.audio.currentTime > 3) {
       this.audio.currentTime = 0;
     } else if (this.currentIndex() > 0) {
-      // Тут можно оставить логику "предыдущий по списку",
-      // даже если включен шафл, это ожидаемое поведение (вернуться назад по истории),
-      // но для простоты пока просто уменьшаем индекс
       this.currentIndex.update((i) => i - 1);
       this.play(this.queue()[this.currentIndex()]);
     }
@@ -218,7 +238,6 @@ export class PlayerService {
     this.isLooping.update((v) => !v);
   }
 
-  // --- НОВЫЙ МЕТОД ---
   toggleShuffle() {
     this.isShuffling.update((v) => !v);
   }
