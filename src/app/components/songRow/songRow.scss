@@ -1,9 +1,17 @@
+/* songRow.scss */
+
 .songRow__container {
-  /* === БАЗОВАЯ СТРУКТУРА === */
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+  /* === БАЗОВАЯ СТРУКТУРА (GRID) === */
+  display: grid;
+  /* 1. Index/Image: 40fr
+     2. Title/Artist: 4 fr 
+     3. Album/PlayCount: 2 fr
+     4. Duration: мин. 60px
+  */
+  grid-template-columns: 40px 4fr 2fr minmax(60px, auto);
+  gap: 16px;
   align-items: center;
+
   min-height: var(--row-height, 56px);
   border-radius: 4px;
   position: relative;
@@ -11,45 +19,33 @@
   cursor: default;
   transition: background-color 0.2s ease;
   box-sizing: border-box;
+  color: var(--text-subdued); // Базовый цвет текста
 
-  /* === 1. РЕЖИМ SEARCH (Desktop) === */
+  /* === 1. РЕЖИМ SEARCH === */
   &.search-mode {
     height: 60px;
     padding: 0 8px;
-    .row__info {
-      padding: 0;
-    }
   }
 
-  /* === 2. ЛЕВАЯ ЧАСТЬ === */
+  /* === 2. ВНУТРЕННИЕ ЭЛЕМЕНТЫ (Flattening) === */
   .row__info {
-    display: flex;
-    align-items: center;
-    flex: 1;
-    gap: 16px;
-    overflow: hidden;
-    padding: 10px;
+    display: contents; /* Ключевое свойство: убирает этот блок из разметки визуально */
 
-    /* === КОЛОНКА ИНДЕКСА (Базовые стили) === */
+    /* --- КОЛОНКА 1: ИНДЕКС/ОБЛОЖКА --- */
     .index-col {
-      position: relative;
-      width: 32px; // Ширина Desktop
-      min-width: 32px;
-      height: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
-      color: var(--text-base);
+      width: 100%; // Занимает всю ширину ячейки грида
+      height: 100%;
+      position: relative;
       font-variant: tabular-nums;
-      flex-shrink: 0;
 
       .index-number {
-        display: flex;
-        justify-content: center;
-        align-items: center;
         font-size: 16px;
-        width: 100%;
+        color: var(--text-base);
         transition: opacity 0.2s ease;
+
         .index-icon {
           width: 16px;
           height: 16px;
@@ -57,10 +53,8 @@
         }
       }
 
-      /* Hover Effects */
       .play-icon.hover-icon {
-        display: flex;
-        opacity: 0;
+        display: none; // Скрыто по умолчанию
         position: absolute;
         top: 50%;
         left: 50%;
@@ -69,9 +63,7 @@
         border: none;
         color: var(--text-base);
         cursor: pointer;
-        transition:
-          opacity 0.2s ease,
-          transform 0.2s ease;
+
         svg,
         img {
           width: 16px;
@@ -83,33 +75,36 @@
         position: relative;
         width: 40px;
         height: 40px;
-        flex-shrink: 0;
+
         .row-thumbnail {
           width: 100%;
           height: 100%;
           object-fit: cover;
           border-radius: 4px;
         }
+
         .play-icon.overlay-icon {
           position: absolute;
           inset: 0;
           background-color: rgba(0, 0, 0, 0.5);
-          display: flex;
-          opacity: 0;
+          display: none; // Скрыто до ховера
           align-items: center;
           justify-content: center;
           border: none;
           border-radius: 4px;
+          color: #fff;
         }
       }
     }
 
-    /* === ТЕКСТОВАЯ ЧАСТЬ === */
+    /* --- КОЛОНКА 2: ТЕКСТ --- */
     .row__text {
       display: flex;
       flex-direction: column;
       justify-content: center;
-      overflow: hidden;
+      // align-items: baseline;
+      min-width: 0; /* Важно! Иначе длинный текст сломает грид */
+
       .title {
         font-size: 16px;
         color: var(--text-base);
@@ -118,106 +113,166 @@
         text-overflow: ellipsis;
         padding-right: 8px;
         transition: color 0.2s ease;
+
+        &.active-title {
+          color: var(--essential-bright-accent);
+        }
         &:hover {
           text-decoration: underline;
+          cursor: pointer;
         }
       }
+
       .artist {
         font-size: 14px;
         color: var(--text-subdued);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+
         .artist-link {
           color: inherit;
           text-decoration: none;
-          z-index: 10;
           &:hover {
             text-decoration: underline;
           }
         }
       }
-    }
-  }
-
-  /* === 3. МОБИЛЬНАЯ АДАПТАЦИЯ (Logic Fix) === */
-  /* Важно: этот блок должен быть на уровне .songRow__container, чтобы видеть атрибут [context] */
-  @media (max-width: 786px) {
-    /* 3.1 Общие правки для всех мобильных списков */
-    .row__info .index-col {
-      width: 24px;
-      min-width: 24px;
-      margin-right: -4px;
-      .index-number {
+      .play-count-col {
+        display: block !important; /* Принудительно показываем  */
+        text-align: right;
+        color: var(--text-subdued);
         font-size: 14px;
+        white-space: nowrap;
+        // Если колонка все равно "улетает", закрепи ее в 3-й ячейке
+        grid-column: 3;
       }
     }
 
-    /* 3.2 ПЛЕЙЛИСТ и ПОИСК: Скрываем колонку (текст важнее) [cite: 2025-12-14] */
+    /* --- КОЛОНКА 3: АЛЬБОМ ИЛИ ПРОСЛУШИВАНИЯ --- */
+    /* Они автоматически попадают в 3-ю ячейку благодаря порядку в HTML */
+    .listeners,
+    .play-count-col {
+      font-size: 14px;
+      color: var(--text-subdued);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: right; /* Числа равняем вправо, как в Excel/Spotify */
+      padding-right: 10px;
+    }
+  }
+
+  /* === 3. КОЛОНКА 4: ДЛИТЕЛЬНОСТЬ === */
+  .row__duration {
+    font-size: 14px;
+    color: var(--text-subdued);
+    display: flex;
+    justify-content: flex-end;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Планшетная версия и узкие десктопы */
+  /* === 4. АДАПТАЦИЯ (Updated: Hide PlayCount First) === [cite: 2025-12-14] */
+
+  /* Планшеты и средние экраны */
+  @media (max-width: 1024px) {
+    /* Сужаем мета-колонку (PlayCount/Album) */
+    grid-template-columns: 40px 4fr 1.5fr 50px;
+    gap: 12px;
+  }
+
+  /* Мобильная адаптация (index display: none) */
+  @container albumMain (max-width:510px) {
+    grid-template-columns: 3fr 1fr 50px;
+    .row__info .index-col {
+      display: none !important;
+    }
+  }
+  @media (max-width: 460px) {
+    padding: 0 12px;
+    /* Оставляем место под альбом (1fr), но скрываем числа */
+    /* 1. Скрываем прослушивания (колонка 3) */
+    grid-template-columns: 40px 1fr 60px;
+
+    .play-count-col {
+      display: none !important; // Прослушивания уходят первыми [cite: 2025-12-14]
+    }
+    /* 2. Скрываем индекс в плейлистах */
     &[context='playlist'],
+    &[context='album'],
     &[context='search'] {
+      /* Меняем сетку на 2 колонки: Текст | Время */
+      grid-template-columns: 1fr 60px;
+
       .row__info .index-col {
         display: none !important;
       }
     }
+  }
 
-    /* 3.3 АРТИСТ: Показываем (нужна обложка) и расширяем */
-    &[context='artist'] {
-      .row__info .index-col {
-        display: flex !important;
-        width: 45px; // Место под картинку
-        min-width: 45px;
-      }
-    }
+  /* Маленькие экраны (Стадия 2: Скрываем Альбом) */
+  @media (max-width: 500px) {
+    .songRow__container {
+      /* Оставляем только Индекс/Обложку, Текст и Длительность */
+      grid-template-columns: 40px 1fr 60px;
 
-    /* 3.4 АЛЬБОМ: Показываем (нужны цифры) */
-    &[context='album'] {
-      .row__info .index-col {
-        display: flex !important;
+      .listeners {
+        display: none !important; // Теперь скрывается и альбом [cite: 2025-12-14]
       }
     }
   }
 
-  /* === 4. ПРАВАЯ ЧАСТЬ (Длительность) === */
-  .row__duration {
-    font-size: 14px;
-    color: var(--text-subdued);
-    margin-left: auto;
-    padding-left: 16px;
-    @media (max-width: 480px) {
-      display: none;
+  /* Ультра-маленькие экраны (iPhone SE) */
+  @media (max-width: 400px) {
+    .songRow__container {
+      padding: 0 8px;
+      grid-template-columns: 40px 1fr; // Только обложка и название
+
+      .row__duration {
+        display: none !important;
+      }
     }
   }
-
-  /* === 5. СОСТОЯНИЯ === */
+  /* === 5. СОСТОЯНИЯ (HOVER/ACTIVE) === */
   &.active {
     background-color: hsla(0, 0%, 100%, 0.1);
-    .row__info .index-col .index-number,
-    .row__info .row__text .title {
+
+    // Принудительно красим индекс и титл в зеленый
+    .row__info .index-col .index-number {
       color: var(--essential-bright-accent);
     }
+    // .title.active-title уже покрашен выше
   }
 
   &:hover {
     background-color: hsla(0, 0%, 100%, 0.1);
+
     .row__info .index-col {
       .index-number {
         opacity: 0;
-      }
+      } // Скрываем цифру
       .play-icon.hover-icon {
+        display: flex;
         opacity: 1;
-      }
+      } // Показываем play
+
       .thumbnail-wrapper {
         .row-thumbnail {
           opacity: 0.4;
-        }
+        } // Затемняем обложку
         .play-icon.overlay-icon {
+          display: flex;
           opacity: 1;
-        }
+        } // Показываем play поверх обложки
       }
     }
+
+    /* При ховере текст становится ярче (белым) */
     .row__duration,
-    .row__info .row__text .artist {
+    .row__info .row__text .artist,
+    .row__info .play-count-col,
+    .row__info .listeners {
       color: var(--text-base);
     }
   }

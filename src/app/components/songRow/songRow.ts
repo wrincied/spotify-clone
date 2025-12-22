@@ -1,6 +1,13 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  inject,
+  OnInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SongInterface } from '../../interface/models';
+import { AlbumInterface, SongInterface } from '../../interface/models';
 import { FormatTimePipe } from '../../pipes/format-time-pipe';
 import { NavigationService } from '../../services/navigationService/navigation-service';
 
@@ -11,15 +18,19 @@ import { NavigationService } from '../../services/navigationService/navigation-s
   templateUrl: './songRow.html',
   styleUrl: './songRow.scss',
 })
-export class SongRow {
+export class SongRow implements OnInit {
   private nav = inject(NavigationService);
-
   @Input({ required: true }) song!: SongInterface;
+  @Input() album?: AlbumInterface;
   @Input() index: number | string = 0;
   @Input() currentTrack: SongInterface | null = null;
+  @Input() showAlbum: boolean = true;
   @Input() isPlaying: boolean = false;
-
-  // Контекст страницы для управления стилями и логикой [cite: 2025-12-14]
+  stablePlayCount: number = 0;
+  ngOnInit(): void {
+    this.stablePlayCount = this.song.playCount || 0;
+  }
+  // Контекст страницы для управления стилями и логикой
   @Input() context: 'album' | 'artist' | 'playlist' | 'search' = 'album';
 
   // Флаг принудительного показа индекса (например, для Artist Page на мобилках)

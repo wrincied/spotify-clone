@@ -70,24 +70,28 @@
     >
       <span class="col-index">#</span>
       <span class="col-title">Titel</span>
-      <div class="col-duration">
+      <span class="col-listeners">Plays</span>
+      <span class="col-duration">
         <img
           src="assets/icons8-uhr.svg"
           alt="time"
         />
-      </div>
+      </span>
     </div>
 
     <div class="songs_list">
       @for (s of album.songs; track $any(s).id) {
         <app-songRow
           [song]="$any(s)"
+          [album]="album"
           [index]="$index + 1"
-          [context]="'playlist'"
+          [context]="'album'"
           [currentTrack]="playerService.currentTrack$ | async"
           [isPlaying]="(playerService.isPlaying$ | async) || false"
           (playRequest)="handlePlay($any(s))"
-        ></app-songRow>
+        >
+          <!-- в context -->
+        </app-songRow>
       }
     </div>
   </div>

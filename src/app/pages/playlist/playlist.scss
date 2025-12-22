@@ -5,6 +5,8 @@
   display: flex;
   flex-direction: column;
   background-color: #121212; // Базовый фон страницы
+  container-type: inline-size;
+  container-name: albumMain;
 
   .gradient-background {
     position: absolute;
@@ -131,7 +133,11 @@
     z-index: 40;
     transition: background-color 0.3s ease;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    display: flex;
+    display: grid;
+    /* Index | Title | Plays | Duration */
+    grid-template-columns: 40px 4fr 2fr minmax(60px, auto);
+    gap: 16px;
+    align-content: center;
     align-items: center;
     padding: 0 16px;
     height: 36px;
@@ -140,13 +146,23 @@
     margin-bottom: 8px;
 
     .col-index {
+      display: flex;
+      justify-content: center;
       width: 30px;
       text-align: center;
-      margin-right: 15px;
       flex-shrink: 0;
+      padding-left: 10px;
     }
     .col-title {
-      flex: 1;
+      // flex: 1;
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+    .col-listeners {
+      /* Выравниваем заголовок Plays вправо, чтобы он был над цифрами */
+      text-align: right;
+      padding-right: 10px; // Небольшой отступ, как у цифр в songRow
       text-transform: uppercase;
       font-size: 12px;
       letter-spacing: 1px;
@@ -167,7 +183,22 @@
   }
 
   /* === ADAPTIVE DESIGN === */
-  @media (max-width: 768px) {
+  @container albumMain (max-width: 1024px) {
+    .table-header {
+      /* Сужаем колонки синхронно */
+      grid-template-columns: 40px 4fr 2fr 50px;
+      gap: 12px;
+      .col-listeners {
+        padding-right: 10px;
+      }
+      .col-index {
+        padding-left: 10px;
+      }
+      .col-duration{
+      }
+    }
+  }
+  @media (max-width: 600px) {
     padding: 0;
 
     .gradient-background {
@@ -203,21 +234,43 @@
         }
       }
     }
-
     .table-header {
-      top: 60px; // Высота мобильного sticky-header
-      padding: 0px 10px 0px 26px;
-
+      grid-template-columns: 40px 1fr 40px;
+    }
+    // .col-index {
+    //  display: none !important;
+    // }
+  }
+  @container albumMain (max-width: 599px) {
+    .table-header {
+      grid-template-columns: 40px 4fr 2fr 50px;
       .col-index {
-        /* ТЕПЕРЬ ПОКАЗЫВАЕМ ИНДЕКС НА МОБИЛКАХ [cite: 2025-12-14] */
-        display: none;
-        width: 24px; // Синхронизировано с songRow
-        margin-right: 12px;
-        font-size: 12px;
+        padding-left: 9px;
       }
-
+      .col-listeners {
+        padding-right: 7px;
+      }
+    }
+  }
+  @container albumMain (max-width: 510px) {
+    .table-header {
+      /* Убираем 3-ю колонку полностью, оставляем Index | Title | Duration */
+      grid-template-columns: 3fr 1fr 50px;
+      top: 60px; // Высота мобильного sticky-header
+      padding: 0 12px;
+      .col-index {
+        display: none !important;
+      }
       .col-title {
         font-size: 11px;
+      }
+    }
+  }
+  @media (max-width: 460px) {
+    .table-header {
+      grid-template-columns: 1fr 0fr;
+      .col-listeners {
+        display: none;
       }
     }
   }
