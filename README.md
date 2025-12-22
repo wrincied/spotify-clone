@@ -26,8 +26,6 @@ src/app/
 
 │   ├── guards/           # Route protection (e.g., adminGuard)
 
-│   ├── interceptors/     # Global HTTP logic
-
 │   ├── services/         # Global state/logic (AuthService, AudioService)
 
 │   └── models/           # Global interfaces and types
@@ -172,8 +170,7 @@ The backend follows RESTful principles with minimal, secure responses.
 
 {
 
-  "duration": 245.5,
-
+  "duration": 245.5
 
 }
 
@@ -232,7 +229,7 @@ ng serve
 **Backend (Node.js ESM):**
 
 ```bash
-
+cd spotify-backend
 node server.js
 
 ```
