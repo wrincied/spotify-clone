@@ -29,9 +29,9 @@
           <app-albumCard
             [id]="topAlbumResult.id"
             [artistId]="topAlbumResult.artistId"
-            [type]="'album'"
+            [type]="topAlbumResult.description === 'Artist' ? 'artist' : 'album'"
             [title]="topAlbumResult.title"
-            [description]="topAlbumResult.description"
+            [description]="topAlbumResult.description === 'Artist' ? '' : topAlbumResult.description"
             [playlistThumbnail]="topAlbumResult.cover"
             [isTopResult]="true"
             [fixedSize]="false"
@@ -63,12 +63,13 @@
         <div class="track-list">
           @for (track of filteredTracks; track track.id) {
             <app-songRow
-              [context]="'search'"
+              [context]="'search-album'"
               [song]="track"
               [class.track-disabled]="!track.url"
               [index]="
                 track.thumbnail || track.coverFromAlbum || 'assets/no-album.png'
               "
+              [context]="'search-album'"
               [currentTrack]="currentTrack$ | async"
               [isPlaying]="(isPlaying$ | async) || false"
               (playRequest)="track.url ? handlePlay(track) : null"

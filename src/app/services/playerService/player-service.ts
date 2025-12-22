@@ -16,8 +16,8 @@ export class PlayerService {
   readonly currentTime = signal<number>(0);
   readonly duration = signal<number>(0);
   readonly isBuffering = signal<boolean>(false);
-  readonly isLooping = signal<boolean>(false); // Повтор одного трека
-  readonly isShuffling = signal<boolean>(false); // <--- НОВЫЙ СИГНАЛ (Shuffle)
+  readonly isLooping = signal<boolean>(false);
+  readonly isShuffling = signal<boolean>(false);
   readonly currentCover = signal<string>('');
   readonly isExpanded = signal<boolean>(false);
   private audio = new Audio();
@@ -70,6 +70,13 @@ export class PlayerService {
     this.audio.addEventListener('waiting', () => this.isBuffering.set(true));
     this.audio.addEventListener('playing', () => this.isBuffering.set(false));
 
+    // Обработчик ошибок загрузки или воспроизведения
+    this.audio.addEventListener('error', () => {
+      console.error('Audio Element Error:', this.audio.error);
+      this.isBuffering.set(false);
+      this.isPlaying.set(false);
+    });
+
     // Логика окончания трека
     this.audio.addEventListener('ended', () => {
       if (this.isLooping()) {
@@ -94,6 +101,7 @@ export class PlayerService {
     this.audio.pause();
     this.currentTrack.set(song);
     this.currentCover.set(coverUrl || song.thumbnail || '');
+    this.isBuffering.set(true); // Показываем индикатор загрузки немедленно
 
     let fullUrl: string;
 
@@ -113,12 +121,26 @@ export class PlayerService {
 
     this.audio.src = fullUrl;
     this.audio.load();
-    this.audio.play().catch((err) => {
-      console.error('Playback Error:', err);
-      this.isPlaying.set(false);
-    });
-  }
 
+    // Убираем немедленный вызов play() и заменяем его на обработчик
+    const playWhenReady = () => {
+      this.audio.play().catch((err) => {
+        // Если запрос просто прервали (например, ты быстро кликнул другой трек)
+        // то это не ошибка базы или файла, это нормальное поведение браузера.
+        if (err.name === 'AbortError') {
+          return; // Просто выходим, не надо логировать и менять сигналы
+        }
+
+        console.error('Real Playback Error:', err);
+        this.isPlaying.set(false);
+        this.isBuffering.set(false);
+      });
+
+      this.audio.removeEventListener('canplaythrough', playWhenReady);
+    };
+
+    this.audio.addEventListener('canplaythrough', playWhenReady);
+  }
   togglePlay() {
     if (!this.currentTrack()) return;
     this.audio.paused ? this.audio.play() : this.audio.pause();

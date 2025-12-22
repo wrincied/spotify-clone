@@ -164,4 +164,16 @@ export class AdminComponent implements OnInit {
       error: (err) => this.admin.addLog(`ERROR: Delete failed`),
     });
   }
+  handleRemoveUrl(id: string) {
+    if (!confirm('Clear MP3 link for this track? The song will remain in DB.'))
+      return;
+
+    this.admin.removeSongUrl(id).subscribe({
+      next: () => {
+        this.admin.addLog(`URL CLEARED: Song ${id}`);
+        this.admin.loadAll();
+      },
+      error: (err) => this.admin.addLog(`ERROR: Clear URL failed`),
+    });
+  }
 }

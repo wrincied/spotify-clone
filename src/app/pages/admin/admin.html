@@ -140,11 +140,6 @@
             formControlName="description"
             placeholder="About this album"
           />
-          <label>Release Date</label>
-          <input
-            type="description"
-            formControlName="releaseYear"
-          />
           <button
             type="submit"
             class="btn"
@@ -321,6 +316,16 @@
                 </div>
               </div>
               <div class="item-actions">
+                @if (s.url) {
+                  <button
+                    class="btn-sm warning"
+                    (click)="handleRemoveUrl(s.id)"
+                    title="Clear MP3 URL"
+                  >
+                    UNLINK
+                  </button>
+                }
+
                 <button
                   class="btn-sm"
                   (click)="openEditModal('songs', s)"
@@ -349,6 +354,7 @@
       </div>
     </section>
   </main>
+
   @if (editingItem(); as edit) {
     <div class="admin-modal-overlay open">
       <div class="admin-modal-box">

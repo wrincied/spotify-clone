@@ -60,7 +60,7 @@
       </div>
     </div>
 
-    @if (context === 'artist' || context === 'album') {
+    @if (context.includes('album')) {
       <div class="play-count-col">
         {{ stablePlayCount | number }}
       </div>

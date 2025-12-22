@@ -66,7 +66,7 @@
             <app-songRow
               [song]="track"
               [index]="track.thumbnail || 'assets/no-album.png'"
-              [context]="'artist'"
+              [context]="'search-album'"
               [forceShowIndex]="true"
               [currentTrack]="playerService.currentTrack$ | async"
               [isPlaying]="(playerService.isPlaying$ | async) ?? false"
