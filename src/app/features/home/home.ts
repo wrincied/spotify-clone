@@ -1,0 +1,48 @@
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
+import { TopNavComponent } from '../../layout/top-nav/top-nav';
+import { Slider } from '../../shared/components/slider/slider';
+import { MusicStoreService } from '../../core/services/music-store-service/music-store'; // Убедитесь в правильности пути
+import { AlbumInterface, CategoryInterface } from '../../core/models/models';
+
+@Component({
+  selector: 'app-home',
+  standalone: true,
+  imports: [CommonModule, Slider],
+  templateUrl: './home.html',
+  styleUrls: ['./home.scss'],
+})
+export class HomeComponent implements OnInit, OnDestroy {
+  albums: AlbumInterface[] = [];
+  categories: CategoryInterface[] = [];
+  hasError = false;
+  errorMessage = '';
+  private dataSubscription?: Subscription;
+
+  constructor(
+    public musicStore: MusicStoreService,
+    private cdr: ChangeDetectorRef,
+  ) {}
+
+  ngOnInit(): void {
+    this.musicStore.loadAlbums();
+    this.dataSubscription = this.musicStore.albums$.subscribe({
+      next: (albums) => {
+        this.albums = albums;
+        this.categories = this.musicStore.currentCategories(); // Или подписка на categories$
+        this.hasError = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.hasError = true;
+        this.errorMessage = 'Ошибка синхронизации данных';
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.dataSubscription?.unsubscribe();
+  }
+}

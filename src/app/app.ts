@@ -5,20 +5,20 @@ import {
   RouterModule,
   ActivatedRoute,
 } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop'; // Essential for memory management 
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'; // Essential for memory management
 import { filter, map, Observable } from 'rxjs';
 import { User } from 'firebase/auth';
 
 // Components
-import { SpotifySidebar } from './components/spotify-sidebar/spotify-sidebar';
-import { TopNavComponent } from './components/top-nav/top-nav';
-import { PlayerComponent } from './components/player/player';
+import { SpotifySidebar } from './layout/spotify-sidebar/spotify-sidebar';
+import { TopNavComponent } from './layout/top-nav/top-nav';
+import { PlayerComponent } from './layout/player/player';
 
 // Services
-import { SpotifyService } from './services/spotifyService/spotify-service';
-import { MusicStoreService } from './services/music-store/music-store';
-import { PlayerService } from './services/playerService/player-service';
-import { AuthService } from './services/authService/auth-service';
+import { SpotifyService } from './core/services/spotify-service/spotify-service';
+import { MusicStoreService } from './core/services/music-store-service/music-store';
+import { PlayerService } from './core/services/player-service/player-service';
+import { AuthService } from './core/services/auth-service/auth-service';
 
 @Component({
   selector: 'app-root',
@@ -28,8 +28,7 @@ import { AuthService } from './services/authService/auth-service';
   styleUrls: ['./app.scss'],
 })
 export class App implements OnInit {
-  
-  // Dependency Injection: Using 'inject' is the modern Angular standard 
+  // Dependency Injection: Using 'inject' is the modern Angular standard
   private readonly spotifyService = inject(SpotifyService);
   private readonly musicStore = inject(MusicStoreService);
   private readonly authService = inject(AuthService);
@@ -56,7 +55,7 @@ export class App implements OnInit {
 
     // 1. Subscribe to search query changes.
     // 'takeUntilDestroyed()' automatically unsubscribes when the component is destroyed.
-    // This fixes the memory leak detected by Code Assist. 
+    // This fixes the memory leak detected by Code Assist.
     this.spotifyService.searchQuery$
       .pipe(takeUntilDestroyed())
       .subscribe((q) => {
@@ -110,5 +109,4 @@ export class App implements OnInit {
   goHome() {
     this.spotifyService.setSearch('');
   }
-  
 }
