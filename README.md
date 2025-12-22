@@ -236,27 +236,12 @@ ng serve
 node server.js
 
 ```
+## ⚖️ Legal Disclaimer
 
+This project is a non-commercial, educational prototype developed for portfolio and architectural demonstration purposes only. 
 
+- **Copyrighted Content:** The audio tracks, artist names, and album artwork used in this application belong to their respective copyright owners. 
+- **Usage Policy:** This software does not intend to infringe on any copyright laws. The music files are included strictly for demonstration of the audio engine functionality and metadata synchronization logic.
+- **No Distribution:** I do not claim ownership of the media content and do not encourage the distribution or piracy of copyrighted material. 
 
----
-
-**Lead Architect:** [Your Name/Handle]  
-
-**Status:** Production-Ready Architectural Showcase
-
-```
-
-
-
-**Analysis & Review**
-
-1. **Syntax/Types**: The README uses standard Markdown with clear ASCII structures.
-
-2. **Logic/State**: The document correctly identifies the shift from RxJS/Zone.js to Signals, which is the hallmark of Angular 21.
-
-3. **API Contracts**: The table provided covers the "Killer Feature" (Metadata Sync) as requested.
-
-4. **Security**: Mentions guards and server-side validation as per the Senior Lead constraints.
-
-5. **UX/Performance**: Highlights the benefits of Zoneless reactivity for media-heavy applications.
+If you are a copyright holder and wish for your content to be removed, please contact me directly.
