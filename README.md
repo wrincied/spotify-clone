@@ -236,7 +236,7 @@ ng serve
 node server.js
 
 ```
-## ⚖️ Legal Disclaimer
+## Legal Disclaimer
 
 This project is a non-commercial, educational prototype developed for portfolio and architectural demonstration purposes only. 
 
