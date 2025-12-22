@@ -1,16 +1,16 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from './pages/home/home';
-import { Login } from './pages/Auth/login/login';
-import { Song } from './pages/song/song';
-import { PlaylistComponent } from './pages/playlist/playlist';
-import { SearchComponent } from './pages/search/search';
-import { Library } from './pages/library/library';
-import { CreatePlaylist } from './pages/create-playlist/create-playlist';
-import { PageArtistComponent } from './pages/artist-page/artist-page';
-import { AdminComponent } from './pages/admin/admin'; // Предполагаемый путь к админке
-import { adminGuard } from './guards/admin/admin-guard'; // Наш созданный Guard
-import { User } from './pages/Auth/user/user';
-import { Singup } from './pages/Auth/signup/singup';
+import { HomeComponent } from './features/home/home';
+import { Login } from './features/auth/login/login';
+import { Song } from './features/song/song';
+import { PlaylistComponent } from './features/playlist/playlist';
+import { SearchComponent } from './features/search/search';
+import { Library } from './features/library/library';
+import { CreatePlaylist } from './features/create-playlist/create-playlist';
+import { PageArtistComponent } from './features/artist-page/artist-page';
+import { AdminComponent } from './features/admin/admin'; // Предполагаемый путь к админке
+import { adminGuard } from './core/guards/admin-guard'; // Наш созданный Guard
+import { User } from './features/auth/user/user';
+import { Singup } from './features/auth/signup/singup';
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'library', component: Library },
