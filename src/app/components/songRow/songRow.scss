@@ -173,7 +173,7 @@
   }
 
   /* Планшетная версия и узкие десктопы */
-  /* === 4. АДАПТАЦИЯ (Updated: Hide PlayCount First) === [cite: 2025-12-14] */
+  /* === 4. АДАПТАЦИЯ (Updated: Hide PlayCount First) ===  */
 
   /* Планшеты и средние экраны */
   @media (max-width: 1024px) {
@@ -196,7 +196,7 @@
     grid-template-columns: 40px 1fr 60px;
 
     .play-count-col {
-      display: none !important; // Прослушивания уходят первыми [cite: 2025-12-14]
+      display: none !important; // Прослушивания уходят первыми 
     }
     /* 2. Скрываем индекс в плейлистах */
     &[context='playlist'],
@@ -218,7 +218,7 @@
       grid-template-columns: 40px 1fr 60px;
 
       .listeners {
-        display: none !important; // Теперь скрывается и альбом [cite: 2025-12-14]
+        display: none !important; // Теперь скрывается и альбом 
       }
     }
   }

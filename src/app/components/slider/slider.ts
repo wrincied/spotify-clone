@@ -35,7 +35,7 @@ export class Slider implements AfterViewInit, OnChanges, OnDestroy {
   showRightBtn = false;
 
   ngAfterViewInit() {
-    // ВАЖНО: Подписываемся на скролл вне зоны Angular [cite: 2025-12-14]
+    // ВАЖНО: Подписываемся на скролл вне зоны Angular 
     // Это предотвращает лишние циклы Change Detection на каждое движение колеса
     this.zone.runOutsideAngular(() => {
       if (this.slider && this.slider.nativeElement) {

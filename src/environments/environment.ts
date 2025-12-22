@@ -1,8 +1,7 @@
 export const environment = {
   production: false,
-  // Адрес твоего живого бэкенда на Render
   apiUrl: 'http://localhost:3000/api',
-  baseUrl: 'https://spotify-backend-2nrq.onrender.com',
+  baseUrl: 'http://localhost:3000',
   firebase: {
     apiKey: 'AIzaSyAsUp-gfBXRcOWlU9UCpY8sTuDhPaQjkr0',
     authDomain: 'clone-spotify-dbe3f.firebaseapp.com',

@@ -7,7 +7,7 @@ export const ArtistsController = {
 
   getOne: (req, res) => {
     const artists = loadJson('artists.json');
-    const artist = artists.find((a) => String(a.id) === String(req.params.id)); // Приведение к строке [cite: 2025-12-14]
+    const artist = artists.find((a) => String(a.id) === String(req.params.id)); // Приведение к строке 
 
     if (!artist) {
       return res.status(404).json({ error: true, message: 'Artist not found' });
@@ -25,7 +25,7 @@ export const ArtistsController = {
     const topTracks = artistTracks.slice(0, 10).map((song) => {
       return {
         ...song,
-        // Если значения нет, генерируем от 500 тыс. до 5 млн. [cite: 2025-12-14]
+        // Если значения нет, генерируем от 500 тыс. до 5 млн. 
         playCount:
           song.playCount ||
           Math.floor(Math.random() * (5000000 - 500000 + 1)) + 500000,

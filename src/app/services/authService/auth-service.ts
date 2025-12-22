@@ -2,7 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { catchError, of, tap, finalize } from 'rxjs';
-import { environment } from '../../../environments/environment'; // Always import the base environment [cite: 2025-12-14]
+import { environment } from '../../../environments/environment'; // Always import the base environment 
 
 export interface LoginCredentials {
   username: string;
@@ -24,7 +24,7 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
 
-  // Construct API URL from environment config [cite: 2025-12-14]
+  // Construct API URL from environment config 
   private readonly API_URL = `${environment.apiUrl}/auth`;
 
   // Signals for reactive state management

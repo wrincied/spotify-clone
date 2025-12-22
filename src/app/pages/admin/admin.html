@@ -94,6 +94,15 @@
               <option [value]="c.id">{{ c.name }}</option>
             }
           </select>
+
+          <label>Assign to Album</label>
+          <select formControlName="albumId">
+            <option value="">-- Single (No Album) --</option>
+            @for (al of admin.albums(); track al.id) {
+              <option [value]="al.id">{{ al.title }}</option>
+            }
+          </select>
+
           <button
             type="submit"
             class="btn"
@@ -402,6 +411,14 @@
               formControlName="url"
               placeholder="public/music/track.mp3"
             />
+
+            <label>Album</label>
+            <select formControlName="albumId">
+              <option value="">-- Single (No Album) --</option>
+              @for (al of admin.albums(); track al.id) {
+                <option [value]="al.id">{{ al.title }}</option>
+              }
+            </select>
           }
 
           @if (edit.type === 'albums') {

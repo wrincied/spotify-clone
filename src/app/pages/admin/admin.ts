@@ -8,12 +8,6 @@ import {
 } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { AdminService } from '../../services/adminService/admin-service';
-import {
-  ArtistInterface,
-  SongInterface,
-  AlbumInterface,
-  CategoryInterface,
-} from '../../interface/models';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -73,7 +67,7 @@ export class AdminComponent implements OnInit {
       description: [''],
     });
 
-    // Универсальная форма редактирования [cite: 2025-12-14]
+    // Универсальная форма редактирования
     this.editForm = this.fb.group({
       name: ['', Validators.required],
       thumbnail: [''],
@@ -82,6 +76,8 @@ export class AdminComponent implements OnInit {
       color: ['#1db954'],
       followers: [0],
       releaseYear: [''],
+      // ДОБАВЛЕНО ПОЛЕ ДЛЯ АЛЬБОМА
+      albumId: [''],
     });
   }
 
@@ -96,6 +92,8 @@ export class AdminComponent implements OnInit {
       color: data.color || '#1db954',
       followers: data.followers || 0,
       releaseYear: data.releaseYear || '',
+      // ДОБАВЛЕНО ЗАПОЛНЕНИЕ АЛЬБОМА
+      albumId: data.albumId || '',
     });
   }
 
@@ -119,7 +117,7 @@ export class AdminComponent implements OnInit {
     const val = this.editForm.value;
     const payload: any = {};
 
-    // Маппинг полей согласно моделям данных [cite: 2025-12-14]
+    // Маппинг полей согласно моделям данных
     if (type === 'artists') {
       payload.name = val.name;
       payload.avatar = val.thumbnail;
@@ -130,7 +128,7 @@ export class AdminComponent implements OnInit {
       payload.url = val.url;
       payload.thumbnail = val.thumbnail;
       payload.artist = val.description; // SongInterface.artist
-      payload.albumId = val.albumId;
+      payload.albumId = val.albumId; // <-- Теперь это значение будет браться корректно
     } else if (type === 'albums') {
       payload.title = val.name;
       payload.cover = val.thumbnail;
@@ -164,6 +162,7 @@ export class AdminComponent implements OnInit {
       error: (err) => this.admin.addLog(`ERROR: Delete failed`),
     });
   }
+
   handleRemoveUrl(id: string) {
     if (!confirm('Clear MP3 link for this track? The song will remain in DB.'))
       return;

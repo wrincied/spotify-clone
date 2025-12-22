@@ -30,7 +30,7 @@ import { NavigationService } from '../../services/navigationService/navigation-s
   styleUrls: ['./playlist.scss'],
 })
 export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
-  // Состояние компонента [cite: 2025-12-14]
+  // Состояние компонента 
   song: SongInterface | null = null;
   album: AlbumInterface | null = null;
   gradientColor: string = 'linear-gradient(to bottom, #333, #121212)';
@@ -40,7 +40,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('albumHeaderRef') albumHeaderRef!: ElementRef;
   @Output() playRequest = new EventEmitter<void>();
 
-  // Инъекции сервисов через inject() для Angular 21 [cite: 2025-12-14]
+  // Инъекции сервисов через inject() для Angular 21
   public playerService = inject(PlayerService);
   private route = inject(ActivatedRoute);
   private api = inject(ApiService);
@@ -55,7 +55,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
   isPlayerPlaying: boolean = false;
 
   ngOnInit() {
-    // 1. Подписка на параметры URL и загрузка альбома [cite: 2025-12-14]
+    // 1. Подписка на параметры URL и загрузка альбома 
     this.subs.add(
       this.route.paramMap.subscribe((params) => {
         const id = params.get('id');
@@ -68,7 +68,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
           next: (albumData: AlbumInterface) => {
             const allSongsInStore = this.musicStore.currentSongs();
 
-            // Трансформация: превращаем ID или неполные объекты в SongInterface [cite: 2025-12-14]
+            // Трансформация: превращаем ID или неполные объекты в SongInterface 
             const enrichedSongs: SongInterface[] = albumData.songs.map(
               (albumSong: any) => {
                 const songId = albumSong.id || albumSong;
@@ -76,7 +76,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
                   (s) => String(s.id) === String(songId),
                 );
 
-                // Возвращаем полный объект из стора или создаем минимально валидный [cite: 2025-12-14]
+                // Возвращаем полный объект из стора или создаем минимально валидный 
                 if (fullSong) return fullSong;
 
                 return typeof albumSong === 'object'
@@ -92,7 +92,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
               },
             );
 
-            // Фильтруем только те песни, у которых есть название (успешно найденные) [cite: 2025-12-14]
+            // Фильтруем только те песни, у которых есть название (успешно найденные) 
             const finalSongs = enrichedSongs.filter(
               (s): s is SongInterface => !!s.title,
             );
@@ -111,7 +111,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
       }),
     );
 
-    // 2. Синхронизация статуса плеера [cite: 2025-12-14]
+    // 2. Синхронизация статуса плеера 
     this.subs.add(
       this.playerService.isPlaying$.subscribe((isPlaying) => {
         this.isPlayerPlaying = isPlaying;
@@ -119,7 +119,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
       }),
     );
 
-    // 3. Синхронизация текущего трека [cite: 2025-12-14]
+    // 3. Синхронизация текущего трека 
     this.subs.add(
       this.playerService.currentTrack$.subscribe((track) => {
         this.currentTrack = track;
@@ -129,7 +129,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /**
-   * Запуск воспроизведения. Явно приводим songs к SongInterface[] [cite: 2025-12-14]
+   * Запуск воспроизведения. Явно приводим songs к SongInterface[] 
    */
   handlePlay(song: SongInterface) {
     if (!this.album || !this.album.songs || this.album.songs.length === 0)
@@ -148,7 +148,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /**
-   * Проверка, проигрывается ли сейчас какой-либо трек из этого альбома [cite: 2025-12-14]
+   * Проверка, проигрывается ли сейчас какой-либо трек из этого альбома 
    */
   get isAlbumPlaying(): boolean {
     if (!this.album || !this.currentTrack || !this.album.songs) return false;

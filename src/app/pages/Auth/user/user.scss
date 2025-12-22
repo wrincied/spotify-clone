@@ -1,5 +1,5 @@
 .auth-page-wrapper {
-  // Фиксация на весь экран для исключения серых зон [cite: 2025-12-14]
+  // Фиксация на весь экран для исключения серых зон 
   position: fixed;
   top: 0;
   left: 0;
@@ -11,7 +11,7 @@
   justify-content: center;
   align-items: center;
 
-  // Глубокий черный с мягким радиальным градиентом [cite: 2025-12-14]
+  // Глубокий черный с мягким радиальным градиентом 
   background-color: var(--background-base, #121212);
   background: radial-gradient(
     circle at top,
@@ -46,7 +46,7 @@
   gap: 16px;
 }
 
-// Зеленая кнопка (основная) [cite: 2025-12-14]
+// Зеленая кнопка (основная) 
 .btn-primary {
   background-color: var(--essential-bright-accent, #1ed760);
   color: var(--text-black, #000000);
@@ -65,7 +65,7 @@
   }
 }
 
-// Кнопка с рамкой (вторичная) [cite: 2025-12-14]
+// Кнопка с рамкой (вторичная) 
 .btn-secondary {
   background-color: transparent;
   color: var(--text-base, #f0f0f0);

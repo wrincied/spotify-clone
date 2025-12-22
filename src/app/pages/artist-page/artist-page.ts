@@ -31,13 +31,13 @@ export class PageArtistComponent implements OnInit {
   isArtistPlaying$!: Observable<boolean>;
 
   ngOnInit() {
-    // Получаем ID артиста из параметров маршрута [cite: 2025-12-14]
+    // Получаем ID артиста из параметров маршрута 
     const artistId$ = this.route.paramMap.pipe(
       map((params) => params.get('id') as string),
       shareReplay(1),
     );
 
-    // КОМБИНИРУЕМ: Данные артиста из API + Песни и Альбомы из Store [cite: 2025-12-14]
+    // КОМБИНИРУЕМ: Данные артиста из API + Песни и Альбомы из Store 
     this.artist$ = artistId$.pipe(
       switchMap((id) =>
         combineLatest([
@@ -48,12 +48,12 @@ export class PageArtistComponent implements OnInit {
           map(([artist, allSongs, allAlbums]) => {
             if (!artist) return null;
 
-            // 1. Фильтруем песни: ищем те, где artistId совпадает с id артиста [cite: 2025-12-14]
+            // 1. Фильтруем песни: ищем те, где artistId совпадает с id артиста 
             const topTracks = allSongs.filter(
               (s) => String(s.artistId) === String(artist.id),
             );
 
-            // 2. ИСПРАВЛЕНО: Фильтруем альбомы по artistId, а не по id самого альбома [cite: 2025-12-14]
+            // 2. ИСПРАВЛЕНО: Фильтруем альбомы по artistId, а не по id самого альбома 
             const artistAlbums = allAlbums.filter(
               (al: AlbumInterface) => String(al.artistId) === String(artist.id),
             );
@@ -67,7 +67,7 @@ export class PageArtistComponent implements OnInit {
       ),
     );
 
-    // Определение статуса воспроизведения [cite: 2025-12-14]
+    // Определение статуса воспроизведения 
     this.isArtistPlaying$ = combineLatest([
       this.playerService.isPlaying$,
       this.playerService.currentTrack$,
@@ -86,17 +86,17 @@ export class PageArtistComponent implements OnInit {
 
     const currentTrack = this.playerService.currentTrack();
 
-    // Если играет текущий артист — переключаем паузу [cite: 2025-12-14]
+    // Если играет текущий артист — переключаем паузу 
     if (currentTrack && String(currentTrack.artistId) === String(artist.id)) {
       this.playerService.togglePlay();
     } else {
-      // Начинаем играть список популярных треков [cite: 2025-12-14]
+      // Начинаем играть список популярных треков 
       this.playerService.playTrackList(artist.topTracks, 0);
     }
   }
 
   /**
-   * Получение года из описания или даты альбома [cite: 2025-12-14]
+   * Получение года из описания или даты альбома 
    */
   getYear(album: AlbumInterface): string {
     const yearMatch = album.description?.match(/\d{4}/);

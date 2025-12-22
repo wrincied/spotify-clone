@@ -28,7 +28,7 @@ export class AdminService {
   private fetchData(type: string) {
     this.http.get<any>(`${this.API_URL}/${type}`, this.OPTS).subscribe({
       next: (res) => {
-        // Защищенное извлечение данных: пробуем res.data, иначе берем сам res [cite: 2025-12-14]
+        // Защищенное извлечение данных: пробуем res.data, иначе берем сам res 
         const items =
           res && res.data ? res.data : Array.isArray(res) ? res : [];
 
