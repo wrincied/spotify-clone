@@ -1,6 +1,7 @@
 import { Injectable, signal, computed, Injector, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { SongInterface } from '../../interface/models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -20,7 +21,7 @@ export class PlayerService {
   readonly currentCover = signal<string>('');
   readonly isExpanded = signal<boolean>(false);
   private audio = new Audio();
-  private readonly API_URL = 'http://localhost:3000/';
+  private readonly API_URL = environment.apiUrl;
 
   // === ПУБЛИЧНЫЕ ПОТОКИ ===
   readonly currentTrack$ = toObservable(this.currentTrack, {
@@ -95,15 +96,20 @@ export class PlayerService {
     this.currentCover.set(coverUrl || song.thumbnail || '');
 
     let fullUrl: string;
+
     if (song.url.startsWith('http')) {
+      // Если в БД уже полная ссылка (например, с Firebase Storage или S3) [cite: 2025-12-14]
       fullUrl = song.url;
     } else {
-      const cleanPath = song.url
-        .replace(/^\/+/, '')
-        .replace(/^public\//, '')
-        .replace(/^music\//, '');
-      fullUrl = `${this.API_URL}public/music/${cleanPath}`;
+      // Убираем лишние префиксы, если они есть в БД, чтобы не было дублей [cite: 2025-12-14]
+      const cleanPath = song.url.replace(/^\/+/, '');
+
+      // Используем BASE_URL вместо API_URL для статических файлов (music/images) [cite: 2025-12-14]
+      // Гарантируем наличие одного слэша между ними [cite: 2025-12-14]
+      fullUrl = `${environment.baseUrl}/${cleanPath}`;
     }
+
+    console.log('[DEBUG] Loading Audio URL:', fullUrl); // Поможет проверить в консоли [cite: 2025-12-14]
 
     this.audio.src = fullUrl;
     this.audio.load();

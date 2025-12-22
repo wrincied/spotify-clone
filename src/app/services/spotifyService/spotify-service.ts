@@ -18,6 +18,7 @@ import {
   Subject,
 } from 'rxjs';
 import { AlbumInterface, SongInterface } from '../../interface/models'; // Убедись, что путь верный
+import { environment } from '../../../environments/environment';
 
 // Эти константы пробрасываются из сборки
 declare const __firebase_config: string | undefined;
@@ -35,7 +36,7 @@ export class SpotifyService {
   private user: User | null = null;
 
   // <--- НОВОЕ ПОЛЕ: URL твоего API --->
-  private readonly API_URL = 'http://localhost:3000/api';
+  private readonly API_URL = environment.apiUrl;
 
   // ─────────────────────────────────────────────────────────────────────
   // Глобальное состояние поиска

@@ -85,7 +85,7 @@
 
   /* Анимация скрытия */
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-
+  // transform: translateX(-100%);
   /* === ЛОГИКА: Если Fullscreen на мобилке -> уводим вниз === */
   &.hidden-for-fullscreen {
     @media (max-width: 768px) {
@@ -93,7 +93,15 @@
       pointer-events: none;
     }
   }
+  @media (min-width: 1024px) {
+    // Только на больших экранах он выезжает
+    transform: translateX(0);
+  }
 
+  &.is-open {
+    // Класс, который мы вешаем скриптом при нажатии на бургер
+    transform: translateX(0);
+  }
   .spotify-sidebar-header {
     height: 72px;
     padding: 0 24px;

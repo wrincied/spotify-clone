@@ -14,6 +14,7 @@ import {
   AlbumInterface,
   CategoryInterface,
 } from '../../interface/models';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-admin',
@@ -63,7 +64,7 @@ export class AdminComponent implements OnInit {
       cover: [''],
       artistId: [''],
       description: [''],
-      releaseYear: [''], 
+      releaseYear: [''],
     });
 
     this.categoryForm = this.fb.group({
@@ -101,7 +102,7 @@ export class AdminComponent implements OnInit {
   handleCreate(type: string, form: FormGroup) {
     if (form.invalid) return;
 
-    const apiUrl = `http://localhost:3000/api/${type}`;
+    const apiUrl = `${environment.apiUrl}/${type}`;
     this.http.post(apiUrl, form.value, { withCredentials: true }).subscribe({
       next: () => {
         this.admin.addLog(`SUCCESS: Created ${type}`);
@@ -141,7 +142,7 @@ export class AdminComponent implements OnInit {
       payload.description = val.description;
     }
 
-    const apiUrl = `http://localhost:3000/api/${type}/${id}`;
+    const apiUrl = `${environment.apiUrl}/${type}/${id}`;
     this.http.put(apiUrl, payload, { withCredentials: true }).subscribe({
       next: () => {
         this.admin.addLog(`UPDATED: ${type} ${id}`);
@@ -154,7 +155,7 @@ export class AdminComponent implements OnInit {
 
   handleDelete(type: string, id: string) {
     if (!confirm('Are you sure?')) return;
-    const apiUrl = `http://localhost:3000/api/${type}/${id}`;
+    const apiUrl = `${environment.apiUrl}/${type}/${id}`;
     this.http.delete(apiUrl, { withCredentials: true }).subscribe({
       next: () => {
         this.admin.addLog(`DELETED: ${type} ${id}`);

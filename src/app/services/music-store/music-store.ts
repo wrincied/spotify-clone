@@ -6,11 +6,12 @@ import {
   CategoryInterface,
   SongInterface,
 } from '../../interface/models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class MusicStoreService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/api';
+  private API_URL = environment.apiUrl
 
   // Состояния через BehaviorSubject для стримов (совместимость с async pipe) [cite: 2025-12-14]
   private songsSubject = new BehaviorSubject<SongInterface[]>([]);
@@ -47,7 +48,9 @@ export class MusicStoreService {
    */
   loadSongs() {
     this.http
-      .get<{ error: boolean; data: any[] }>(`${this.apiUrl}/songs`)
+    
+      .get<{ error: boolean; data: any[] }>(`${this.API_URL}/songs`)
+      
       .pipe(
         map((res) =>
           (res.data || []).map(
@@ -59,6 +62,7 @@ export class MusicStoreService {
               url: s.url || '',
               thumbnail: s.thumbnail || 'assets/no-album.png',
               duration: Number(s.duration) || 0,
+              playCount: s.playCount || Math.floor(Math.random() * (5000000 - 500000 + 1)) + 500000
             }),
           ),
         ),
@@ -66,7 +70,9 @@ export class MusicStoreService {
           this._songs.set(data);
           this.songsSubject.next(data);
         }),
+        
       )
+      
       .subscribe();
   }
 
@@ -75,7 +81,7 @@ export class MusicStoreService {
    */
   loadAlbums() {
     this.http
-      .get<{ error: boolean; data: any[] }>(`${this.apiUrl}/albums`)
+      .get<{ error: boolean; data: any[] }>(`${this.API_URL}/albums`)
       .pipe(
         map((res) =>
           (res.data || []).map(
@@ -101,7 +107,7 @@ export class MusicStoreService {
   loadCategories() {
     this.http
       .get<{ error: boolean; data: CategoryInterface[] }>(
-        `${this.apiUrl}/categories`,
+        `${this.API_URL}/categories`,
       )
       .pipe(
         map((res) => res.data || []),

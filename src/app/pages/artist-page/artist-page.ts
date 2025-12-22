@@ -102,4 +102,11 @@ export class PageArtistComponent implements OnInit {
     const yearMatch = album.description?.match(/\d{4}/);
     return yearMatch ? yearMatch[0] : '2024';
   }
+  getAlbumByTrack(
+    track: SongInterface,
+    albums: AlbumInterface[],
+  ): AlbumInterface | undefined {
+    if (!track.albumId || !albums) return undefined;
+    return albums.find((a) => String(a.id) === String(track.albumId));
+  }
 }

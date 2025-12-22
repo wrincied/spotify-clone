@@ -7,6 +7,7 @@ export interface SongInterface {
   duration: number;
   url: string;
   albumId?: string; // ID альбома, если применимо
+  playCount: number;
 }
 
 export interface PlayerState {
