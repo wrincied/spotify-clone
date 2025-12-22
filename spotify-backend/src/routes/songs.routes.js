@@ -4,18 +4,16 @@ import { adminAuth } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
-// Публичный доступ
 router.get('/', SongsController.getAll);
 
-// --- МИГРАЦИЯ (Временно открытый доступ) ---
-// Мы ставим это ПЕРЕД маршрутами с :id, чтобы express не подумал, что "assign-album" это id
+// Важно: этот роут ДОЛЖЕН быть перед /:id
 router.post('/assign-album', SongsController.assignAlbum);
-
-// Только для администратора
+// router.post('/sync-metadata', SongsController.syncMetadata);
+router.patch('/:id', SongsController.update);
 router.post('/', adminAuth, SongsController.create);
 router.put('/:id', adminAuth, SongsController.update);
 router.post('/songs/seed', SongsController.seedPlayCounts);
-// router. <--- Эту ошибку я убрал
 router.delete('/:id', adminAuth, SongsController.delete);
 router.patch('/:id/remove-url', adminAuth, SongsController.removeUrl);
+
 export default router;

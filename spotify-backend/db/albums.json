@@ -35,7 +35,19 @@
     "description": "The Weeknd",
     "releaseYear": "2025",
     "songs": [
-      "92c5ce109f32e089"
+      "92c5ce109f32e089",
+      "91631604b8d4c285"
     ]
+  },
+  {
+    "id": "349d1041aee39438",
+    "songs": [
+      "364206e7a4a6e50a"
+    ],
+    "title": "Cry",
+    "cover": "https://i.scdn.co/image/ab67616d00001e028324db1ae37be249aed887e7",
+    "artistId": "cc8d358490f688ed",
+    "description": "Cigarettes After Sex",
+    "releaseYear": "2019"
   }
 ]
