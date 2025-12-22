@@ -2,11 +2,12 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private http = inject(HttpClient);
-  private readonly API_URL = 'http://localhost:3000/api';
+  private readonly API_URL = environment.apiUrl;
   private readonly OPTS = { withCredentials: true };
 
   // Signals для данных

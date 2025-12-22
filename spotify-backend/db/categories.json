@@ -1,0 +1,44 @@
+[
+  {
+    "id": "2d801e0bdb229643",
+    "name": "Pop",
+    "color": "#148a08",
+    "description": "Today's biggest hits and mainstream tracks.",
+    "songs": []
+  },
+  {
+    "id": "f631627b8d99fb49",
+    "name": "Hip-Hop",
+    "color": "#bc2677",
+    "description": "Modern rap and rhythmic urban music.",
+    "songs": []
+  },
+  {
+    "id": "28abc4331a0b3993",
+    "name": "Rock",
+    "color": "#e1132f",
+    "description": "Essential classic and contemporary rock anthems.",
+    "songs": []
+  },
+  {
+    "id": "702e7774a663b0b7",
+    "name": "Workout",
+    "color": "#535353",
+    "description": "High-energy music for exercise and sports.",
+    "songs": []
+  },
+  {
+    "id": "704d6dce2bb5de72",
+    "name": "Chill",
+    "color": "#af4f04",
+    "description": "Relaxing and ambient music for winding down.",
+    "songs": []
+  },
+  {
+    "id": "73e2c2b3ec0458ab",
+    "name": "Indie",
+    "color": "#ba5d07",
+    "description": "Independent artists and alternative sounds.",
+    "songs": []
+  }
+]
