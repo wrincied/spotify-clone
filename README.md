@@ -174,7 +174,6 @@ The backend follows RESTful principles with minimal, secure responses.
 
   "duration": 245.5,
 
-  "bitrate": "320kbps"
 
 }
 
@@ -188,7 +187,7 @@ The backend follows RESTful principles with minimal, secure responses.
 
   "status": "success",
 
-  "updatedFields": ["duration", "bitrate"]
+  "updatedFields": ["duration"]
 
 }
 
