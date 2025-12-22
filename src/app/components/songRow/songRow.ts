@@ -47,7 +47,7 @@ export class SongRow implements OnInit {
    * Однако, для чистоты DOM:
    */
   get shouldShowIndexCol(): boolean {
-    return true; // Рендерим всегда, скрываем через CSS (лучше для адаптива) [cite: 2025-12-14]
+    return true; // Рендерим всегда, скрываем через CSS (лучше для адаптива) 
   }
 
   /**

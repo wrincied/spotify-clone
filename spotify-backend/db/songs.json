@@ -185,5 +185,17 @@
     "duration": 0,
     "description": "pyrokinesis",
     "albumId": "50570ce85ebefea3"
+  },
+  {
+    "id": "92c5ce109f32e089",
+    "title": "Niagara Falls",
+    "url": "public/music/The-Weeknd-Niagara-Falls.mp3",
+    "thumbnail": "https://i.scdn.co/image/ab67616d00001e02982320da137d0de34410df61",
+    "artistId": "a42d5307c9077836",
+    "categoryId": "",
+    "duration": 0,
+    "artist": "The Weeknd",
+    "albumId": "53d3764ba89ad9d0",
+    "description": "The Weeknd"
   }
 ]

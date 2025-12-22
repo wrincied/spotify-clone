@@ -8,7 +8,7 @@ export class NavigationService {
   private router = inject(Router);
 
   /**
-   * Универсальный метод навигации с обработкой ошибок [cite: 2025-12-14]
+   * Универсальный метод навигации с обработкой ошибок 
    */
   private internalNavigate(path: any[]) {
     return this.router.navigate(path)

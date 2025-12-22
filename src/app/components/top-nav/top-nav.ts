@@ -20,7 +20,7 @@ export class TopNavComponent implements OnInit {
 
   query = '';
 
-  // Реактивное отслеживание текущего URL [cite: 2025-12-14]
+  // Реактивное отслеживание текущего URL 
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
@@ -29,7 +29,7 @@ export class TopNavComponent implements OnInit {
     { initialValue: this.router.url },
   );
 
-  // Сигнал для управления видимостью истории на мобилках [cite: 2025-12-14]
+  // Сигнал для управления видимостью истории на мобилках 
   readonly showMobileHistory = computed(() => {
     const url = this.currentUrl();
     return (

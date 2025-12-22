@@ -26,5 +26,16 @@
     ],
     "releaseDate": "2025",
     "releaseYear": "2025"
+  },
+  {
+    "id": "53d3764ba89ad9d0",
+    "title": "Hurry Up Tommorow",
+    "cover": "https://i.scdn.co/image/ab67616d00001e02982320da137d0de34410df61",
+    "artistId": "a42d5307c9077836",
+    "description": "The Weeknd",
+    "releaseYear": "2025",
+    "songs": [
+      "92c5ce109f32e089"
+    ]
   }
 ]

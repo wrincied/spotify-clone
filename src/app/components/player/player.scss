@@ -12,13 +12,13 @@
   color: var(--text-base);
   position: relative; // База для позиционирования полоски прогресса
   z-index: 1000;
-  overflow: hidden; // Гарантирует, что полоска не вылезет за скругления [cite: 2025-12-14]
+  overflow: hidden; // Гарантирует, что полоска не вылезет за скругления 
   transition:
     background-color 0.2s ease,
     opacity 0.2s ease,
     transform 0.3s ease;
 
-  /* === ЗЕЛЕНАЯ ПОЛОСКА (MINI PROGRESS) === [cite: 2025-12-14] */
+  /* === ЗЕЛЕНАЯ ПОЛОСКА (MINI PROGRESS) === */
   .mini-progress-bar {
     display: none; // По умолчанию скрыта на десктопе
     position: absolute;
@@ -45,7 +45,7 @@
     pointer-events: none;
     transform: translateY(
       20px
-    ); // Небольшой сдвиг для мягкого исчезновения [cite: 2025-12-14]
+    ); // Небольшой сдвиг для мягкого исчезновения 
   }
 
   input[type='range'] {

@@ -53,10 +53,10 @@ export const AuthController = {
       // 5. Установка HttpOnly куки
       res.cookie('admin_token', token, {
         httpOnly: true,
-        // Изменяем на 'none', чтобы разрешить передачу между разными доменами [cite: 2025-12-14]
+        // Изменяем на 'none', чтобы разрешить передачу между разными доменами
         sameSite: 'none',
         maxAge: 86400000,
-        // Обязательно true, так как sameSite: 'none' работает ТОЛЬКО с HTTPS [cite: 2025-12-14]
+        // Обязательно true, так как sameSite: 'none' работает ТОЛЬКО с HTTPS 
         secure: true,
         path: '/',
       });

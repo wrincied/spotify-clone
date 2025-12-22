@@ -200,7 +200,7 @@
 /* СЕТКА ДЛЯ АЛЬБОМОВ */
 .albums-grid {
   display: grid;
-  /* Адаптивная ширина колонок [cite: 2025-12-14] */
+  /* Адаптивная ширина колонок  */
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 24px;
 

@@ -1,6 +1,6 @@
 import express from 'express';
 import { AuthController } from '../controllers/auth.controller.js';
-// Добавляем отсутствующий импорт [cite: 2025-12-14]
+// Добавляем отсутствующий импорт 
 // Убедитесь, что имя файла совпадает с тем, что в папке middleware
 import { adminAuth } from '../middleware/auth.middleware.js';
 

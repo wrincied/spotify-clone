@@ -1,5 +1,5 @@
 .spotify__albumCard {
-  /* Переменные для быстрой правки [cite: 2025-12-14] */
+  /* Переменные для быстрой правки  */
   --card-bg: #181818;
   --card-bg-hover: #282828;
   --text-main: #ffffff;
@@ -13,7 +13,7 @@
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  isolation: isolate; // Изолируем z-index кнопки [cite: 2025-12-14]
+  isolation: isolate; // Изолируем z-index кнопки 
 
   &:hover {
     background-color: var(--card-bg-hover);
@@ -74,7 +74,7 @@
       font-size: 14px;
       color: var(--text-sub);
       line-height: 1.4;
-      /* Ограничение в 2 строки [cite: 2025-12-14] */
+      /* Ограничение в 2 строки  */
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
@@ -86,7 +86,7 @@
   .play-button-overlay {
     position: absolute;
     right: 16px;
-    bottom: 85px; // Позиционируем над текстом [cite: 2025-12-14]
+    bottom: 85px; // Позиционируем над текстом 
     opacity: 0;
     transform: translateY(8px);
     transition: all 0.3s cubic-bezier(0.3, 0, 0, 1);
@@ -171,14 +171,14 @@
   }
 }
 
-/* --- АДАПТИВ (Mobile) [cite: 2025-12-14] --- */
+/* --- АДАПТИВ (Mobile)  --- */
 @media (max-width: 768px) {
   .spotify__albumCard {
     padding: 12px;
 
     .play-button-overlay {
       display: none;
-    } // На мобилках нет ховера [cite: 2025-12-14]
+    } // На мобилках нет ховера 
 
     .spotify__albumCard_text {
       .title {

@@ -81,7 +81,7 @@
       display: none;
     }
 
-    /* Видимо на мобилках только по условию [cite: 2025-12-14] */
+    /* Видимо на мобилках только по условию  */
     &.mobile-visible {
       @media (max-width: 768px) {
         display: flex;

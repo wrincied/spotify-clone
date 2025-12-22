@@ -11,7 +11,7 @@ const router = express.Router();
 router.get('/', CategoriesController.getAll);
 
 /**
- * ЗАЩИЩЕННЫЕ МАРШРУТЫ (ADMIN ONLY) [cite: 2025-12-14]
+ * ЗАЩИЩЕННЫЕ МАРШРУТЫ (ADMIN ONLY) 
  * Требуют наличия валидной HttpOnly куки admin_token
  */
 router.post('/', adminAuth, CategoriesController.create);

@@ -106,18 +106,18 @@ export class PlayerService {
     let fullUrl: string;
 
     if (song.url.startsWith('http')) {
-      // Если в БД уже полная ссылка (например, с Firebase Storage или S3) [cite: 2025-12-14]
+      // Если в БД уже полная ссылка (например, с Firebase Storage или S3) 
       fullUrl = song.url;
     } else {
-      // Убираем лишние префиксы, если они есть в БД, чтобы не было дублей [cite: 2025-12-14]
+      // Убираем лишние префиксы, если они есть в БД, чтобы не было дублей 
       const cleanPath = song.url.replace(/^\/+/, '');
 
-      // Используем BASE_URL вместо API_URL для статических файлов (music/images) [cite: 2025-12-14]
-      // Гарантируем наличие одного слэша между ними [cite: 2025-12-14]
+      // Используем BASE_URL вместо API_URL для статических файлов (music/images) 
+      // Гарантируем наличие одного слэша между ними 
       fullUrl = `${environment.baseUrl}/${cleanPath}`;
     }
 
-    console.log('[DEBUG] Loading Audio URL:', fullUrl); // Поможет проверить в консоли [cite: 2025-12-14]
+    console.log('[DEBUG] Loading Audio URL:', fullUrl); // Поможет проверить в консоли 
 
     this.audio.src = fullUrl;
     this.audio.load();

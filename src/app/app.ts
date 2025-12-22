@@ -5,7 +5,7 @@ import {
   RouterModule,
   ActivatedRoute,
 } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop'; // Essential for memory management [cite: 2025-12-14]
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'; // Essential for memory management 
 import { filter, map, Observable } from 'rxjs';
 import { User } from 'firebase/auth';
 
@@ -28,7 +28,8 @@ import { AuthService } from './services/authService/auth-service';
   styleUrls: ['./app.scss'],
 })
 export class App implements OnInit {
-  // Dependency Injection: Using 'inject' is the modern Angular standard [cite: 2025-12-14]
+  
+  // Dependency Injection: Using 'inject' is the modern Angular standard 
   private readonly spotifyService = inject(SpotifyService);
   private readonly musicStore = inject(MusicStoreService);
   private readonly authService = inject(AuthService);
@@ -55,7 +56,7 @@ export class App implements OnInit {
 
     // 1. Subscribe to search query changes.
     // 'takeUntilDestroyed()' automatically unsubscribes when the component is destroyed.
-    // This fixes the memory leak detected by Code Assist. [cite: 2025-12-14]
+    // This fixes the memory leak detected by Code Assist. 
     this.spotifyService.searchQuery$
       .pipe(takeUntilDestroyed())
       .subscribe((q) => {
@@ -109,4 +110,5 @@ export class App implements OnInit {
   goHome() {
     this.spotifyService.setSearch('');
   }
+  
 }

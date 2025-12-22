@@ -14,7 +14,7 @@ export class MusicStoreService {
   private http = inject(HttpClient);
   private API_URL = environment.apiUrl;
 
-  // Состояния через BehaviorSubject для стримов (совместимость с async pipe) [cite: 2025-12-14]
+  // Состояния через BehaviorSubject для стримов (совместимость с async pipe) 
   private songsSubject = new BehaviorSubject<SongInterface[]>([]);
   public songs$ = this.songsSubject.asObservable();
 
@@ -26,12 +26,12 @@ export class MusicStoreService {
 
   private artistsSubject = new BehaviorSubject<any[]>([]);
   public artists$ = this.artistsSubject.asObservable();
-  // Сигналы для синхронного доступа (Angular 21 стандарты) [cite: 2025-12-14]
+  // Сигналы для синхронного доступа (Angular 21 стандарты) 
   private _songs = signal<SongInterface[]>([]);
   private _albums = signal<AlbumInterface[]>([]);
   private _categories = signal<CategoryInterface[]>([]);
   private _artists = signal<any[]>([]);
-  // Публичные геттеры (теперь это сигналы) [cite: 2025-12-14]
+  // Публичные геттеры (теперь это сигналы)
   public currentSongs = computed(() => this._songs());
   public currentAlbums = computed(() => this._albums());
   public currentCategories = computed(() => this._categories());
@@ -102,7 +102,7 @@ export class MusicStoreService {
   }
 
   /**
-   * Загрузка альбомов с защитой от пустых полей [cite: 2025-12-14]
+   * Загрузка альбомов с защитой от пустых полей 
    */
   loadAlbums() {
     this.http
@@ -116,7 +116,7 @@ export class MusicStoreService {
               title: a.title || 'Untitled Album',
               description: a.description || 'No description',
               cover: a.cover || a.thumbnail || 'assets/no-album.png',
-              songs: Array.isArray(a.songs) ? a.songs : [], // В БД это массив ID [cite: 2025-12-18]
+              songs: Array.isArray(a.songs) ? a.songs : [], 
               artistId: a.artistId || '',
             }),
           ),

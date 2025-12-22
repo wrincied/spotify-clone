@@ -6,7 +6,7 @@ import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  // Используем централизованный URL из конфига [cite: 2025-12-14]
+  // Используем централизованный URL из конфига 
   private readonly apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
@@ -34,8 +34,8 @@ export class ApiService {
   getArtistById(id: string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/artists/${id}`).pipe(
       map((res) => {
-        console.log('Backend Response:', res); // Проверь это в консоли браузера! [cite: 2025-12-14]
-        return res.data; // Возвращаем именно содержимое data [cite: 2025-12-14]
+        console.log('Backend Response:', res); // Проверь это в консоли браузера! 
+        return res.data; // Возвращаем именно содержимое data 
       }),
     );
   }
