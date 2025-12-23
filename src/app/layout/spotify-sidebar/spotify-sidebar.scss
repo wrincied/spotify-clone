@@ -12,7 +12,7 @@
   position: relative;
   transition: width 0.3s cubic-bezier(0.3, 0, 0, 1);
   overflow: hidden; /* prevents content spill during resize */
-  
+
   /* --- RESIZING STATE --- */
   &.is-resizing {
     transition: none; /* Kill transition to make dragging responsive */
@@ -29,12 +29,13 @@
     .spotify-sidebar-header {
       padding: 0;
       justify-content: center;
+      position: relative; /* Critical for absolute positioning of the button */
     }
 
     .logo-wrapper {
       width: 100%;
       height: 100%;
-      justify-content: center;
+      justify-content: center; /* Flex centering */
 
       /* Smooth fade/scale animation for the logo */
       opacity: 1;
@@ -59,15 +60,25 @@
       }
     }
 
-    /* Toggle Button Logic: positioning it for the collapsed view */
+    /* === FIXED TOGGLE BUTTON POSITIONING === */
+    /* Instead of guessing the center with top/left 50%, we fill the container */
     .toggle-btn {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scaleX(-1); /* Flip icon */
+      top: 0;
+      left: 0;
+      width: 72px !important; /* Принудительно ширина хедера */
+      height: 72px !important; /* Принудительно высота хедера */
+      margin: 0;
+      padding: 0; /* ВАЖНО: Убираем браузерные отступы */
+
+      border-radius: 0; /* Убираем скругление, чтобы занимать весь квадрат */
+
+      transform: scaleX(-1);
+
       opacity: 0;
       pointer-events: none;
       z-index: 10;
+      /* Icon is centered by 'display: flex' in the base class below */
     }
 
     /* Hover Effect: Hide logo, show expand button */
@@ -79,11 +90,13 @@
       .toggle-btn {
         opacity: 1;
         pointer-events: auto;
+        /* Keep the flip, just ensure it stays visible */
+        transform: scaleX(-1);
       }
     }
   }
 
-  /* --- MOBILE OVERRIDES --- */
+  /* --- MOBILE HOST OVERRIDES --- */
   /* Resetting desktop constraints for the bottom nav layout */
   @media (max-width: 768px) {
     width: 100% !important;
@@ -160,7 +173,7 @@
     }
   }
 
-  /* Collapse/Expand Button */
+  /* Collapse/Expand Button (Base Styles) */
   .toggle-btn {
     width: 32px;
     height: 32px;
@@ -169,9 +182,12 @@
     color: var(--text-subdued);
     border-radius: 50%;
     cursor: pointer;
+      
+    /* Flexbox here ensures the SVG is centered even when we stretch the button in collapsed mode */
     display: flex;
     align-items: center;
     justify-content: center;
+
     transition: all 0.2s ease;
 
     svg {
@@ -180,12 +196,11 @@
     }
 
     &:hover {
-      background-color: var(--background-elevated-base);
       color: var(--text-base);
     }
   }
 
-  /* Only show toggle button on hover (Desktop) to keep UI clean */
+  /* Only show toggle button on hover (Desktop Expanded Mode) */
   :host:not(.collapsed-host) .toggle-btn {
     opacity: 0;
     transform: translateX(-10px);
