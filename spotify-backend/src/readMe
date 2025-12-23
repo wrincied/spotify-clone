@@ -1,0 +1,35 @@
+'```
+spotify-backend/
+├── db/                         # Local JSON database storage (Mock DB)
+│   ├── albums.json             # Data for albums
+│   ├── artists.json            # Data for artists
+│   ├── categories.json         # Data for music categories/genres
+│   ├── songs.json              # Data for tracks
+│   └── users.json              # User authentication data
+├── public/                     # Static files served by Express
+│   ├── music/                  # Storage for audio files
+│   └── logo.png                # Application branding/assets
+├── src/                        # Main application source code
+│   ├── controllers/            # Request handlers (logic for processing data)
+│   │   ├── albums.controller.js
+│   │   ├── artists.controller.js
+│   │   ├── auth.controller.js
+│   │   ├── categories.controller.js
+│   │   └── songs.controller.js
+│   ├── middleware/             # Custom functions (interceptors)
+│   │   ├── auth.middleware.js  # JWT verification and protection
+│   │   ├── error.js            # Global error handling logic
+│   │   └── logger.js           # Request logging (IP, method, URL)
+│   ├── routes/                 # API endpoint definitions (maps URLs to controllers)
+│   │   ├── albums.routes.js
+│   │   ├── artists.routes.js
+│   │   ├── auth.routes.js
+│   │   ├── categories.routes.js
+│   │   └── songs.routes.js
+│   └── utils/                  # Helper functions
+│       └── db.js               # Database connection/file reading utility
+├── .env                        # Environment variables (Port, Secrets, URLs)
+├── .gitignore                  # Specifies files to ignore in Git
+├── package.json                # Project metadata, dependencies, and scripts
+├── package-lock.json           # Locked versions of dependencies
+└── server.js                   # Entry point (Starts the Express server)'
