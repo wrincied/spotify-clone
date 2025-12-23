@@ -1,125 +1,99 @@
 /* app.component.scss */
 
-html,
-body {
-  overflow: hidden;
-  box-sizing: border-box;
-  background-color: var(--background-base);
-  color: var(--text-base);
-  height: 100vh;
+/* Глобальный сброс для гарантии отсутствия скролла на body */
+:host {
+  display: block;
+  height: 100dvh; /* Dynamic viewport height для мобилок */
   width: 100vw;
-  margin: 0;
+  overflow: hidden;
 }
 
-.spotify-app {
-  width: 100%;
-  height: 100vh;
+.spotify-app-container {
   display: flex;
-  overflow: hidden;
+  flex-direction: column; /* Вертикальный стек: (Контент) сверху, (Плеер) снизу */
+  height: 100%;
+  width: 100%;
   background-color: black;
+  overflow: hidden;
 
-  /* --- DESKTOP LAYOUT (Row) --- */
-  flex-direction: row;
+  /* ========================================= */
+  /* 1. LAYOUT BODY (Сайдбар + Контент)        */
+  /* ========================================= */
+  .layout-body {
+    display: flex;
+    flex-direction: row; /* На десктопе они рядом */
+    flex: 1; /* Занимает всё свободное место (высота экрана - плеер) */
+    overflow: hidden; /* Важно! Чтобы скролл был только внутри scrollable-area */
+    min-height: 0; /* CSS Hack для вложенных флексов */
 
-  /* --- MOBILE LAYOUT (Column Reverse) --- */
-  @media (max-width: 768px) {
-    flex-direction: column-reverse;
+    /* MOBILE: Меняем направление, если нужно */
+    @media (max-width: 768px) {
+      flex-direction: column-reverse; /* На мобилках меню снизу? Или как ты хотел */
+    }
   }
 
-  /* ========================================= */
-  /* 1. SIDEBAR                                */
-  /* ========================================= */
-  app-spotify-sidebar {
-    /* DESKTOP & TABLET */
-    /* ВАЖНО: Ширина определяется самим компонентом (sidebar.scss) */
-    /* Мы здесь ставим auto, чтобы flex-контейнер не навязывал ширину */
-    width: auto;
+  /* Сайдбар не сжимается */
+  .sidebar-wrapper {
     flex-shrink: 0;
+    width: auto;
     z-index: 200;
 
-    /* ВАЖНО: Убираем min-width, иначе он не сможет свернуться до 72px */
-
-    /* MOBILE */
     @media (max-width: 768px) {
-      width: 100% !important;
-      height: 60px;
-      flex: 0 0 60px;
+      width: 100%;
+      height: auto; /* Высота определяется контентом или фикс */
+      flex: 0 0 auto;
+    }
+  }
+
+  /* Главный контент */
+  .main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background-base);
+    border-radius: 8px 8px 0 0; /* Закругление как в Spotify */
+    margin: 8px 8px 0 0; /* Отступы для визуального отделения */
+    overflow: hidden;
+    position: relative;
+
+    @media (max-width: 768px) {
+      margin: 0;
+      border-radius: 0;
+    }
+  }
+
+  /* Область скролла */
+  .scrollable-area {
+    flex: 1; /* Растягивается на остаток высоты внутри main-content */
+    overflow-y: auto; /* Скролл только здесь! */
+    overflow-x: hidden;
+    margin-top: 70px;
+    /* Красивый скроллбар (опционально) */
+    &::-webkit-scrollbar {
+      width: 12px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: hsla(0, 0%, 100%, 0.3);
     }
   }
 
   /* ========================================= */
   /* 2. PLAYER WRAPPER                         */
   /* ========================================= */
-  .spotify-app__player {
-    position: fixed;
-    bottom: 0;
-    left: 0;
+  .player-wrapper {
+    /* Больше никакого position: fixed! */
+    flex: 0 0 auto; /* Не сжиматься, не растягиваться, брать высоту контента */
     width: 100%;
     z-index: 1000;
-    max-height: 80px;
-    height: 100%;
+    background-color: black; /* Фон под плеером */
+    border-top: 1px solid #282828; /* Разделитель */
+    height: 90px;
 
     @media (max-width: 768px) {
-      position: relative;
-      bottom: auto;
-      left: auto;
-      max-height: 56px;
-      flex: 0 0 56px;
-      background-color: var(--background-highlight);
-      border-bottom: 1px solid #282828;
-      z-index: 150;
-    }
-  }
-
-  /* ========================================= */
-  /* 3. MAIN CONTENT                           */
-  /* ========================================= */
-  .spotify-main {
-    /* DESKTOP FIX */
-    /* ВАЖНО: Не задаем жесткую ширину (80%), используем flex: 1 */
-    /* Это заставит контент занять всё место, оставшееся от сайдбара */
-    flex: 1;
-    width: auto;
-    min-width: 0; /* CSS Hack: позволяет контенту сжиматься, если нужно */
-    height: 100%;
-
-    background-color: var(--background-base);
-    position: relative;
-    overflow: hidden;
-    border-radius: 8px 0 0 0;
-    padding: 0;
-    box-sizing: border-box;
-    position: relative;
-
-    @media (max-width: 1024px) {
-      margin-left: 0;
-      border-radius: 0;
-    }
-
-    @media (max-width: 768px) {
-      flex: 1;
-      height: auto;
-      padding-bottom: 0;
-    }
-  }
-
-  /* ========================================= */
-  /* 4. SCROLL AREA                            */
-  /* ========================================= */
-  .spotify-content-scroll {
-    position: absolute;
-    top: var(--top-nav-height);
-    left: 0;
-    right: 0;
-    bottom: 0;
-    overflow-y: auto;
-    box-sizing: border-box;
-
-    &.has-player {
-      bottom: var(--player-height);
-      @media (max-width: 768px) {
-        bottom: 0;
-      }
+      height: 64px; /* Высота плеера на мобилке + отступы */
+      /* Убери border-top, если на мобилке он не нужен или мешает */
+      background-color: transparent;
+      /* Или настрой цвет, чтобы он не сливался */
     }
   }
 }
