@@ -70,7 +70,7 @@
               [forceShowIndex]="true"
               [currentTrack]="playerService.currentTrack$ | async"
               [isPlaying]="(playerService.isPlaying$ | async) ?? false"
-              (playRequest)="playerService.playTrackList(artist.topTracks, i)"
+              (playRequest)="onTrackPlayRequest(artist.topTracks, i)"
             ></app-songRow>
           } @empty {
             <div class="empty-state">No tracks available</div>

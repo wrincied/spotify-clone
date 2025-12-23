@@ -40,7 +40,6 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('albumHeaderRef') albumHeaderRef!: ElementRef;
   @Output() playRequest = new EventEmitter<void>();
 
-  // Инъекции сервисов через inject() для Angular 21
   public playerService = inject(PlayerService);
   private route = inject(ActivatedRoute);
   private api = inject(ApiService);
@@ -55,7 +54,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
   isPlayerPlaying: boolean = false;
 
   ngOnInit() {
-    // 1. Подписка на параметры URL и загрузка альбома
+    // 1. Загрузка данных (без изменений, твой код был ок)
     this.subs.add(
       this.route.paramMap.subscribe((params) => {
         const id = params.get('id');
@@ -68,7 +67,6 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
           next: (albumData: AlbumInterface) => {
             const allSongsInStore = this.musicStore.currentSongs();
 
-            // Трансформация: превращаем ID или неполные объекты в SongInterface
             const enrichedSongs: SongInterface[] = albumData.songs.map(
               (albumSong: any) => {
                 const songId = albumSong.id || albumSong;
@@ -76,7 +74,6 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
                   (s) => String(s.id) === String(songId),
                 );
 
-                // Возвращаем полный объект из стора или создаем минимально валидный
                 if (fullSong) return fullSong;
 
                 return typeof albumSong === 'object'
@@ -92,7 +89,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
               },
             );
 
-            // Фильтруем только те песни, у которых есть название (успешно найденные)
+            // Фильтруем пустые
             const finalSongs = enrichedSongs.filter(
               (s): s is SongInterface => !!s.title,
             );
@@ -111,7 +108,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
       }),
     );
 
-    // 2. Синхронизация статуса плеера
+    // 2. Синхронизация статуса
     this.subs.add(
       this.playerService.isPlaying$.subscribe((isPlaying) => {
         this.isPlayerPlaying = isPlaying;
@@ -119,7 +116,7 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
       }),
     );
 
-    // 3. Синхронизация текущего трека
+    // 3. Синхронизация трека
     this.subs.add(
       this.playerService.currentTrack$.subscribe((track) => {
         this.currentTrack = track;
@@ -129,35 +126,56 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   /**
-   * Запуск воспроизведения. Явно приводим songs к SongInterface[]
+   * Логика "Большой Кнопки" Play/Pause для альбома.
+   * Учитывает валидацию URL.
    */
-  handlePlay(song: SongInterface) {
+  togglePlayAlbum() {
     if (!this.album || !this.album.songs || this.album.songs.length === 0)
       return;
 
-    const songsList = this.album.songs as SongInterface[];
-    const trackIndex = songsList.findIndex(
-      (s) => String(s.id) === String(song.id),
-    );
+    // Если альбом уже играет — просто ставим паузу
+    if (this.isAlbumPlaying) {
+      this.playerService.togglePlay();
+      return;
+    }
 
-    this.playerService.playTrackList(
-      songsList,
-      trackIndex >= 0 ? trackIndex : 0,
-      this.album.cover || '',
-    );
+    // Иначе запускаем воспроизведение с первого ДОСТУПНОГО трека
+    const songsList = this.album.songs as SongInterface[];
+    const started = this.playerService.playWithValidation(songsList, 0);
+
+    if (!started) {
+      alert('No playable tracks found in this album.');
+    }
   }
 
   /**
-   * Проверка, проигрывается ли сейчас какой-либо трек из этого альбома
+   * Клик по конкретной строке песни.
+   * Делегирует проверку и запуск Сервису.
+   */
+  onTrackPlayRequest(allTracks: SongInterface[], index: number) {
+    const started = this.playerService.playWithValidation(allTracks, index);
+
+    if (!started) {
+      alert(
+        "That Song doesn't have a URL, choose another one. Hint: with active duration",
+      );
+    }
+  }
+
+  /**
+   * Проверка, играет ли сейчас этот альбом
    */
   get isAlbumPlaying(): boolean {
     if (!this.album || !this.currentTrack || !this.album.songs) return false;
 
     const songsList = this.album.songs as SongInterface[];
+
+    // Проверяем, находится ли текущий трек в списке этого альбома
     const isTrackInAlbum = songsList.some(
       (s) => String(s.id) === String(this.currentTrack?.id),
     );
 
+    // Возвращаем true только если трек из альбома И плеер активен
     return isTrackInAlbum && this.isPlayerPlaying;
   }
 
@@ -168,6 +186,8 @@ export class PlaylistComponent implements OnInit, OnDestroy, AfterViewInit {
       this.nav.goToArtist(idToNavigate);
     }
   }
+
+  // ... (Остальные методы: setDominantColor, initObserver, ngOnDestroy без изменений)
 
   private setDominantColor(imageUrl: string) {
     const fac = new FastAverageColor();
