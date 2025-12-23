@@ -1,4 +1,4 @@
-'```
+```
 spotify-backend/
 ├── db/                         # Local JSON database storage (Mock DB)
 │   ├── albums.json             # Data for albums
