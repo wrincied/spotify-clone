@@ -12,7 +12,7 @@ import { User } from 'firebase/auth';
 import { SpotifySidebar } from './layout/spotify-sidebar/spotify-sidebar';
 import { TopNavComponent } from './layout/top-nav/top-nav';
 import { PlayerComponent } from './layout/player/player';
-
+import { CookieConsent } from './features/cookie/cookie-consent';
 // Services
 import { SpotifyService } from './core/services/spotify-service/spotify-service';
 import { MusicStoreService } from './core/services/music-store-service/music-store';
@@ -22,7 +22,7 @@ import { AuthService } from './core/services/auth-service/auth-service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [SpotifySidebar, TopNavComponent, RouterModule, PlayerComponent],
+  imports: [SpotifySidebar, TopNavComponent, RouterModule, PlayerComponent,CookieConsent],
   templateUrl: './app.html',
   styleUrls: ['./app.scss'],
 })
