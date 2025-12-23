@@ -1,54 +1,76 @@
-/* --- HOST CONFIGURATION --- */
+/* ========================================================================
+   HOST CONFIGURATION
+   ======================================================================== */
 :host {
+  /* Angular hosts are inline by default. We need block to respect height. */
   display: block;
   height: 100%;
+
+  /* Default Desktop Background (Solid Black/Dark) */
   background-color: var(--background-dark);
+
   position: relative;
   transition: width 0.3s cubic-bezier(0.3, 0, 0, 1);
-
+  overflow: hidden; /* prevents content spill during resize */
+  
+  /* --- RESIZING STATE --- */
   &.is-resizing {
-    transition: none;
+    transition: none; /* Kill transition to make dragging responsive */
     cursor: col-resize;
     user-select: none;
   }
 
+  /* --- COLLAPSED STATE (DESKTOP ONLY) --- */
   &.collapsed-host {
     width: 72px;
     min-width: 72px;
 
+    /* Center alignment for icons when collapsed */
     .spotify-sidebar-header {
       padding: 0;
       justify-content: center;
-      position: relative;
     }
 
     .logo-wrapper {
       width: 100%;
       height: 100%;
-      display: flex;
-      align-items: center;
       justify-content: center;
+
+      /* Smooth fade/scale animation for the logo */
       opacity: 1;
       transform: scale(1);
       transition:
         opacity 0.2s ease,
         transform 0.2s ease;
+
       img {
-        display: block;
         margin: 0;
       }
     }
 
+    /* Hide text labels on desktop when collapsed */
+    .spotify-sidebar-item a {
+      justify-content: center;
+      padding: 0;
+      gap: 0;
+
+      span {
+        display: none;
+      }
+    }
+
+    /* Toggle Button Logic: positioning it for the collapsed view */
     .toggle-btn {
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%) scaleX(-1);
+      transform: translate(-50%, -50%) scaleX(-1); /* Flip icon */
       opacity: 0;
       pointer-events: none;
       z-index: 10;
     }
 
+    /* Hover Effect: Hide logo, show expand button */
     .spotify-sidebar-header:hover {
       .logo-wrapper {
         opacity: 0;
@@ -59,23 +81,40 @@
         pointer-events: auto;
       }
     }
-
-    .spotify-sidebar-item a {
-      justify-content: center;
-      padding: 0;
-      gap: 0;
-    }
   }
 
+  /* --- MOBILE OVERRIDES --- */
+  /* Resetting desktop constraints for the bottom nav layout */
   @media (max-width: 768px) {
     width: 100% !important;
     min-width: 0;
-    height: 60px;
+    height: auto; /* Height is driven by content (the nav bar) */
     z-index: 200;
+
+    /* CRITICAL: Must be transparent so the inner gradient/blur works against the body bg */
+    background-color: transparent;
+
+    /* Ignore 'collapsed' logic on mobile - we always need labels there */
+    &.collapsed-host {
+      width: 100%;
+
+      .spotify-sidebar-item a span {
+        display: block !important;
+        font-size: 10px;
+        margin-top: 4px;
+      }
+
+      .spotify-sidebar-item a {
+        padding: 0;
+        gap: 4px;
+      }
+    }
   }
 }
 
-/* --- ОБЩИЕ СТИЛИ --- */
+/* ========================================================================
+   INTERNAL STRUCTURE
+   ======================================================================== */
 .spotify-sidebar {
   height: 100%;
   display: flex;
@@ -83,25 +122,26 @@
   overflow: hidden;
   width: 100%;
 
-  /* Анимация скрытия */
+  /* Smooth slide animation (used for hiding sidebar in fullscreen modes) */
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  // transform: translateX(-100%);
-  /* === ЛОГИКА: Если Fullscreen на мобилке -> уводим вниз === */
+
   &.hidden-for-fullscreen {
     @media (max-width: 768px) {
-      transform: translateY(100%);
+      transform: translateY(100%); /* Slide down off-screen */
       pointer-events: none;
     }
   }
+
+  /* Reset transform for larger screens */
   @media (min-width: 1024px) {
-    // Только на больших экранах он выезжает
     transform: translateX(0);
   }
 
   &.is-open {
-    // Класс, который мы вешаем скриптом при нажатии на бургер
     transform: translateX(0);
   }
+
+  /* --- DESKTOP HEADER --- */
   .spotify-sidebar-header {
     height: 72px;
     padding: 0 24px;
@@ -120,6 +160,7 @@
     }
   }
 
+  /* Collapse/Expand Button */
   .toggle-btn {
     width: 32px;
     height: 32px;
@@ -132,26 +173,29 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+
     svg {
       width: 20px;
       height: 20px;
     }
+
     &:hover {
       background-color: var(--background-elevated-base);
       color: var(--text-base);
     }
   }
 
+  /* Only show toggle button on hover (Desktop) to keep UI clean */
   :host:not(.collapsed-host) .toggle-btn {
     opacity: 0;
     transform: translateX(-10px);
   }
-
   :host:not(.collapsed-host) .spotify-sidebar-header:hover .toggle-btn {
     opacity: 1;
     transform: translateX(0);
   }
 
+  /* --- DESKTOP NAVIGATION --- */
   .spotify-sidebar-nav {
     display: flex;
     flex-direction: column;
@@ -161,8 +205,9 @@
 
   .spotify-sidebar-item {
     margin-bottom: 8px;
+
     &.mobile-only {
-      display: none;
+      display: none; /* Hide Search in sidebar on Desktop */
     }
 
     a {
@@ -180,10 +225,12 @@
       transition:
         background-color 0.2s,
         color 0.2s;
+
       &:hover {
         color: var(--text-base);
         background-color: var(--background-elevated-base);
       }
+
       svg {
         min-width: 24px;
         flex-shrink: 0;
@@ -191,6 +238,7 @@
     }
   }
 
+  /* --- RESIZER HANDLE --- */
   .resizer-handle {
     position: absolute;
     top: 0;
@@ -201,56 +249,102 @@
     z-index: 10;
     background: transparent;
     transition: background-color 0.2s;
+
     &:hover {
       background-color: hsla(0, 0%, 100%, 0.3);
     }
+    /* Visual feedback when actively dragging */
     :host.is-resizing & {
       background-color: hsla(0, 0%, 100%, 0.5);
     }
   }
 
-  /* MOBILE NAVIGATION */
+  /* ========================================================================
+     MOBILE STYLE OVERRIDES (GLASSMORPHISM & BOTTOM NAV)
+     ======================================================================== */
   @media (max-width: 768px) {
+    /* Cleanup desktop elements */
     .resizer-handle {
       display: none;
     }
+    .spotify-sidebar-header {
+      display: none;
+    }
+
     position: relative;
     width: 100%;
     height: 100%;
     flex-direction: row;
-    border-top: 1px solid var(--background-elevated-highlight);
-    background: rgba(0, 0, 0, 0.95);
     padding: 0;
 
-    .spotify-sidebar-header {
-      display: none;
-    }
+    /* Remove solid background to allow see-through effect */
+    background: transparent;
+
+    /* Subtle separator line */
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+
     .spotify-sidebar-nav {
       flex-direction: row;
       justify-content: space-around;
       align-items: center;
       padding: 0;
+      height: 64px; /* Optimal tap target height */
+
+      /* --- THE GLASS EFFECT --- */
+      /* Gradient creates depth: lighter at top, darker at bottom */
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.7) 0%,
+        rgba(0, 0, 0, 0.95) 100%
+      );
+      /* Blur everything behind the nav bar */
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%); /* iOS Safari support */
     }
+
     .spotify-sidebar-item {
       margin: 0;
       flex: 1;
       height: 100%;
+
       &.mobile-only {
         display: block;
       }
+
+      /* Edge case: Hide text on very small screens (like watches) */
+      @media (max-width: 320px) {
+        span {
+          display: none !important;
+        }
+      }
+
       a {
         height: 100%;
         flex-direction: column;
         justify-content: center;
         padding: 0;
         gap: 4px;
-        span {
-          display: none;
+
+        /* Using semi-transparent white for icons */
+        color: rgba(255, 255, 255, 0.7);
+
+        &:hover,
+        &:active {
+          background-color: transparent; /* No blocky hover bg on mobile */
+          color: white; /* Brighten up on tap */
         }
+
+        span {
+          font-size: 10px;
+          font-weight: 400;
+          letter-spacing: 0.2px;
+          display: block; /* Force display on mobile */
+        }
+
         svg {
-          width: 26px;
-          height: 26px;
-          color: var(--text-base);
+          width: 24px;
+          height: 24px;
+          color: inherit;
         }
       }
     }

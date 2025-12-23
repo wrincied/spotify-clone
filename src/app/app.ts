@@ -8,7 +8,6 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'; // Essential for memory management
 import { filter, map, Observable } from 'rxjs';
 import { User } from 'firebase/auth';
-
 // Components
 import { SpotifySidebar } from './layout/spotify-sidebar/spotify-sidebar';
 import { TopNavComponent } from './layout/top-nav/top-nav';

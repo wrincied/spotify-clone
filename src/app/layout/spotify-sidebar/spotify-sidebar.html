@@ -1,4 +1,7 @@
-<div class="spotify-sidebar" [class.hidden-for-fullscreen]="playerService.isExpanded()">
+<div
+  class="spotify-sidebar"
+  [class.hidden-for-fullscreen]="playerService.isExpanded()"
+>
   <div class="spotify-sidebar-header">
     <div
       class="logo-wrapper"
@@ -61,7 +64,7 @@
             d="M12.5 3.247a1 1 0 0 0-1 0L4 8.5V20h5v-6h6v6h5V8.5l-7.5-5.253z"
           />
         </svg>
-        @if (!layoutService.isSidebarCollapsed()) {
+        @if (!layoutService.isSidebarCollapsed() || layoutService.isMobile()) {
           <span>Home</span>
         }
       </a>
@@ -101,7 +104,7 @@
             d="M3 22a1 1 0 0 1-1-1V3a1 1 0 0 1 2 0v18a1 1 0 0 1-1 1zM15.5 2.134A1 1 0 0 0 14 3v18a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6.464a1 1 0 0 0-.5-.866l-6-3.464zM9 2a1 1 0 0 0-1 1v18a1 1 0 1 0 2 0V3a1 1 0 0 0-1-1z"
           />
         </svg>
-        @if (!layoutService.isSidebarCollapsed()) {
+        @if (!layoutService.isSidebarCollapsed() || layoutService.isMobile()) {
           <span>Your Library</span>
         }
       </a>
@@ -125,8 +128,8 @@
             d="M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2s10 4.477 10 10zm-1.5 0a8.5 8.5 0 1 0-17 0 8.5 8.5 0 0 0 17 0z"
           />
         </svg>
-        @if (!layoutService.isSidebarCollapsed()) {
-          <span>Create Playlist</span>
+        @if (!layoutService.isSidebarCollapsed() || layoutService.isMobile()) {
+          <span>Home</span>
         }
       </a>
     </div>
