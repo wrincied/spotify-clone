@@ -35,7 +35,7 @@
         class="title"
         appFitText
         [minFontSize]="16"
-        [maxFontSize]="32"
+        [maxFontSize]="16"
       >
         {{ title }}
       </p>
@@ -54,12 +54,10 @@
           <div class="entity-badge">
             <span class="chip">{{ type || 'album' | titlecase }}</span>
           </div>
-
         } @else if (getYear(); as year) {
           <div class="album-meta">
             {{ year }} • {{ type || 'album' | titlecase }}
           </div>
-
         } @else {
           <div class="album-meta">
             {{ type || 'album' | titlecase }}

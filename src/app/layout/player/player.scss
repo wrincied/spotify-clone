@@ -1,4 +1,9 @@
 /* ГЛАВНЫЙ КОНТЕЙНЕР ПЛЕЕРА */
+:host {
+  display: block; /* Обязательно! */
+  width: 100%;
+  height: 100%; /* Заполняем 90px родителя */
+}
 .player-container {
   width: 100%;
   height: 100%;
@@ -12,7 +17,7 @@
   color: var(--text-base);
   position: relative; // База для позиционирования полоски прогресса
   z-index: 1000;
-  overflow: hidden; // Гарантирует, что полоска не вылезет за скругления 
+  overflow: hidden; // Гарантирует, что полоска не вылезет за скругления
   transition:
     background-color 0.2s ease,
     opacity 0.2s ease,
@@ -43,9 +48,7 @@
   &.hidden-player {
     opacity: 0;
     pointer-events: none;
-    transform: translateY(
-      20px
-    ); // Небольшой сдвиг для мягкого исчезновения 
+    transform: translateY(20px); // Небольшой сдвиг для мягкого исчезновения
   }
 
   input[type='range'] {

@@ -1,24 +1,21 @@
 @if (isNoLayout) {
   <router-outlet />
 } @else {
-  <div class="spotify-app">
-    <app-spotify-sidebar />
+  <div class="spotify-app-container">
+    <div class="layout-body">
+      <app-spotify-sidebar class="sidebar-wrapper" />
 
-    @if (playerService.isVisible()) {
-      <div class="spotify-app__player">
-        <app-player></app-player>
-      </div>
-    }
-
-    <div class="spotify-main">
-      <app-top-nav />
-
-      <div
-        class="spotify-content-scroll"
-        [class.has-player]="playerService.isVisible()"
-      >
-        <router-outlet />
-      </div>
+      <main class="main-content">
+        <app-top-nav />
+        <div class="scrollable-area">
+          <router-outlet />
+        </div>
+        @if (playerService.isVisible()) {
+          <div class="player-wrapper">
+            <app-player></app-player>
+          </div>
+        }
+      </main>
     </div>
   </div>
 }
