@@ -241,4 +241,27 @@ export class PlayerService {
   toggleShuffle() {
     this.isShuffling.update((v) => !v);
   }
+  playWithValidation(allTracks: SongInterface[], index: number): boolean {
+    const selectedTrack = allTracks[index];
+
+    // 1. Если это клик по конкретной песне, и она пустая — сразу возвращаем false для алерта
+    if (!selectedTrack?.url) {
+      return false;
+    }
+
+    // 2. Формируем "чистую" очередь
+    const cleanList = allTracks.filter((t) => !!t.url);
+
+    // 3. Находим позицию выбранного трека в чистом списке
+    const newIndex = cleanList.findIndex(
+      (t) => String(t.id) === String(selectedTrack.id),
+    );
+
+    if (newIndex !== -1) {
+      this.playTrackList(cleanList, newIndex);
+      return true;
+    }
+
+    return false;
+  }
 }
