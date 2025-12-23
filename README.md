@@ -17,7 +17,8 @@ By leveraging **Angular Signals**, the application achieves near-zero CPU overhe
 The project follows a **Domain-Driven Design (DDD)** inspired structure, ensuring strict separation of concerns and preventing the "Big Ball of Mud" anti-pattern.
 
 
-
+## Backend: 
+https://github.com/wrincied/spotify-backend
 ```text
 
 src/app/
