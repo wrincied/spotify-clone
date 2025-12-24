@@ -39,7 +39,7 @@ src/app/
 
 │   └── directives/       # Reusable DOM behaviors
 
-├── layout/               # App Shell (The "Frame")
+├── layout/               # App Shell 
 
 │   ├── sidebar/          # Navigation shell
 
@@ -151,7 +151,6 @@ The backend follows RESTful principles with minimal, secure responses.
 
 | Method | Endpoint | Description | Auth Required |
 
-| :--- | :--- | :--- | :--- |
 
 | `GET` | `/api/songs` | Retrieve all tracks | No |
 
