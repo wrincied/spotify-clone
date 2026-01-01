@@ -1,30 +1,33 @@
 <div class="spotify__home-container__playlist-container">
-    @if (hasError) {
-        <div class="fatal-error"
-            >Ошибка загрузки: {{ errorMessage }}</div
-        >
-    }
-    @if (albums.length > 0) {
-        <div class="playlist_card_collections">
-            <h4>For You</h4>
+  @if (hasError) {
+    <div class="fatal-error">Ошибка загрузки: {{ errorMessage }}</div>
+  }
+  @if (albums.length > 0) {
+    <div class="playlist_card_collections">
+      <h4>For You</h4>
 
-            <app-slider
-                [category]="categories"
-                name="focus_section"
-            >
-            </app-slider>
-        </div>
+      <app-slider
+        [category]="categories"
+        name="focus_section"
+      >
+      </app-slider>
+    </div>
 
-        <div class="playlist_card_collections">
-            <h4>Spotify Playlist</h4>
+    <div class="playlist_card_collections">
+      <h4>Spotify Playlist</h4>
 
-            <app-slider
-                [album]="albums"
-                name="spotify_section"
-            >
-            </app-slider>
-        </div>
-    } @else {
-        <div class="loading-placeholder">Loading…</div>
-    }
+      <app-slider
+        [album]="albums"
+        name="spotify_section"
+      >
+      </app-slider>
+    </div>
+  } @else {
+    <div
+      class="loading-placeholder"
+      style="padding-top: 15px"
+    >
+      Please wait, till Server wake up. This may take up to 60 seconds.
+    </div>
+  }
 </div>

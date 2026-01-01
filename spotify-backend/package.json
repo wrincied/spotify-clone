@@ -20,6 +20,13 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.3",
-    "music-metadata": "^11.10.3"
+    "mongoose": "^9.0.2",
+    "multer": "^2.0.2",
+    "music-metadata": "^11.10.3",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/mongoose": "^5.11.96",
+    "@types/multer": "^2.0.0"
   }
 }
