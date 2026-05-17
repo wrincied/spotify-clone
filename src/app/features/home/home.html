@@ -29,5 +29,17 @@
     >
       Please wait, till Server wake up. This may take up to 60 seconds.
     </div>
+    <div class="status-indicator">
+      Server Status:
+      <span [ngClass]="serverStatus">
+        {{
+          serverStatus === 'suspended'
+            ? 'Sleep'
+            : serverStatus === 'starting'
+              ? 'Starting...'
+              : 'Active'
+        }}
+      </span>
+    </div>
   }
 </div>

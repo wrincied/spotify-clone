@@ -45,6 +45,7 @@ Thumbs.db
 backend/public/music/*.mp3
 backend/public/music/*.wav
 backend/public/images/ # Если есть загрузка картинок
+spotify-backend/
 
 # Локальная база данных (JSON), чтобы локальные тесты не ломали данные на сервере/у других
 backend/db/*.json
