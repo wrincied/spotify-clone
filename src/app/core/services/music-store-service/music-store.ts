@@ -1,5 +1,5 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import {
   AlbumInterface,
@@ -145,4 +145,12 @@ export class MusicStoreService {
       )
       .subscribe();
   }
+  getRenderStatus(serviceId: string, apiKey: string) {
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${apiKey}`,
+    'Accept': 'application/json'
+  });
+
+  return this.http.get(`https://api.render.com/v1/services/${serviceId}`, { headers });
+}
 }
