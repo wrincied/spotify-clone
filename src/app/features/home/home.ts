@@ -18,6 +18,8 @@ export class HomeComponent implements OnInit, OnDestroy {
   categories: CategoryInterface[] = [];
   hasError = false;
   errorMessage = '';
+  serverStatus: string = 'checking';
+  isServerAwake = false;
   private dataSubscription?: Subscription;
 
   constructor(
@@ -44,5 +46,18 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.dataSubscription?.unsubscribe();
+  }
+  checkApiStatus() {
+    this.musicStore
+      .getRenderStatus('srv-xxxxxxxxxxxx', 'rnd_xxxxxxxxxxxx')
+      .subscribe({
+        next: (res: any) => {
+          this.serverStatus = res.status;
+          if (res.status === 'live') {
+            this.isServerAwake = true;
+          }
+          this.cdr.detectChanges();
+        },
+      });
   }
 }
