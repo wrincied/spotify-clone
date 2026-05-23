@@ -55,3 +55,5 @@ backend/db/*.json
 # --- Firebase ---
 .firebase/
 src/environments/environment.ts
+
+src/environments/environment.production.ts
