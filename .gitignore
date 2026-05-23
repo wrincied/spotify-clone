@@ -54,3 +54,4 @@ backend/db/*.json
 
 # --- Firebase ---
 .firebase/
+src/environments/environment.ts
