@@ -31,7 +31,7 @@ firebase-debug.log*
 .env.*.local
 backend/.env
 src/environments/environment.ts # Если там хранятся секретные ключи (для продакшена лучше инжектить при сборке)
-
+src/environments/prodiction.environment.ts
 # --- IDE & System (Настройки редактора и системы) ---
 .idea/
 .vscode/
